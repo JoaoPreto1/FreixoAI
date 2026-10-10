@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seda & Património Manuelino — Freixo AI</title>
+  <meta name="description" content="Conheça a arte secular da seda viva e os mais de 40 portais manuelinos de Freixo de Espada à Cinta. Um património histórico e artesanal único em Portugal.">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              100: '#E6EFE9',
+              600: '#315843',
+              700: '#234332',
+              800: '#182E22',
+              900: '#122419',
+            },
+            parchment: {
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#EBE4DA',
+              300: '#DDD4C7',
+              800: '#3D3830',
+              900: '#24211D',
+            },
+            terracotta: '#B65737',
+            gold: '#DFBA71',
+            olive: '#7E9283'
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            editorial: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            monument: ['"Cinzel"', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- CSS Editorial -->
+  <link rel="stylesheet" href="assets/css/editorial.css">
+</head>
+<body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain">
+
+  <!-- Navbar -->
+  <div id="navbar-mount"></div>
+
+  <!-- Hero Editorial de Património -->
+  <header class="relative min-h-[60vh] flex items-center justify-center bg-pine-900 text-parchment-100 overflow-hidden">
+    <div class="absolute inset-0 z-0">
+      <img src="assets/images/seda-loom.png" 
+           alt="Tear tradicional de seda em Freixo" 
+           class="w-full h-full object-cover opacity-60 scale-105" />
+      <div class="absolute inset-0 bg-gradient-to-t from-pine-900 via-pine-900/60 to-black/40"></div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center space-y-4">
+      <span class="editorial-badge bg-gold text-pine-900 font-bold border-none text-[10px]">
+        TRADIÇÃO VIVA & ARQUITETURA QUINHENTISTA
+      </span>
+      <h1 class="font-display text-4xl sm:text-6xl font-bold text-[#FAF8F5] leading-tight">
+        A Arte da Seda & Os Portais Manuelinos
+      </h1>
+      <p class="font-sans text-base sm:text-lg text-parchment-200 max-w-2xl mx-auto font-light leading-relaxed">
+        Onde o bater rítmico dos teares de madeira ecoa há séculos e mais de 40 portais de granito contam histórias da época de ouro dos Descobrimentos.
+      </p>
+    </div>
+  </header>
+
+  <!-- ÁREA PRINCIPAL -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-grow space-y-24">
+    
+    <!-- SECÇÃO 1: O CICLO INTEGRAL DA SEDA -->
+    <section class="space-y-12">
+      <div class="max-w-3xl">
+        <span class="editorial-badge bg-pine-800 text-gold mb-3">O Ciclo do Bombyx Mori</span>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-pine-900">
+          O Último Fio Vivo da Península Ibérica
+        </h2>
+        <p class="drop-cap text-base text-parchment-800 mt-4 leading-relaxed font-sans">
+          Freixo de Espada à Cinta é o único município de Portugal onde a manufatura de seda se mantém como uma atividade artesanal contínua e autêntica. Todo o processo é realizado localmente: desde o cultivo de amoreiras e a criação dos bichos-da-seda na primavera, até à fiação manual em panelas de água quente e tecelagem em teares de madeira seculares.
+        </p>
+      </div>
+
+      <!-- Etapas do Ciclo da Seda (Grelha 4 Passos) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <div class="bg-parchment-50 p-6 rounded-2xl border border-pine-800/10 shadow hover:shadow-md transition-shadow space-y-3">
+          <div class="w-10 h-10 rounded-full bg-pine-800 text-gold flex items-center justify-center font-bold text-sm">
+            01
+          </div>
+          <h3 class="font-display text-lg font-bold text-pine-900">A Criação das Larvas</h3>
+          <p class="text-xs text-parchment-800 leading-relaxed font-sans">
+            Em maio, os ovos eclodem. Durante cerca de 35 dias, as lagartas alimentam-se exclusivamente de folhas tenras de amoreira branca até tecerem o casulo perfeito.
+          </p>
+        </div>
+
+        <div class="bg-parchment-50 p-6 rounded-2xl border border-pine-800/10 shadow hover:shadow-md transition-shadow space-y-3">
+          <div class="w-10 h-10 rounded-full bg-pine-800 text-gold flex items-center justify-center font-bold text-sm">
+            02
+          </div>
+          <h3 class="font-display text-lg font-bold text-pine-900">A Tiragem do Fio</h3>
+          <p class="text-xs text-parchment-800 leading-relaxed font-sans">
+            Os casulos são imersos em caldeirões de água a ferver para dissolver a sericina. A artesã reúne os filamentos microscópicos formando o fio mestre com extrema delicadeza.
+          </p>
+        </div>
+
+        <div class="bg-parchment-50 p-6 rounded-2xl border border-pine-800/10 shadow hover:shadow-md transition-shadow space-y-3">
+          <div class="w-10 h-10 rounded-full bg-pine-800 text-gold flex items-center justify-center font-bold text-sm">
+            03
+          </div>
+          <h3 class="font-display text-lg font-bold text-pine-900">Dobragem & Torção</h3>
+          <p class="text-xs text-parchment-800 leading-relaxed font-sans">
+            Com recurso ao sarilho e à roda de fiar, o fio de seda ganha corpo e resistência. É lavado com sabão suave natural antes de ser preparado nas meadas.
+          </p>
+        </div>
+
+        <div class="bg-parchment-50 p-6 rounded-2xl border border-pine-800/10 shadow hover:shadow-md transition-shadow space-y-3">
+          <div class="w-10 h-10 rounded-full bg-pine-800 text-gold flex items-center justify-center font-bold text-sm">
+            04
+          </div>
+          <h3 class="font-display text-lg font-bold text-pine-900">O Tear Tradicional</h3>
+          <p class="text-xs text-parchment-800 leading-relaxed font-sans">
+            No tear manual de madeira, a tecedeira entrelaça a teia e a trama ao compasso dos pedais e da lançadeira, dando forma a gravatas, xailes e panos de requinte real.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Destaque do Museu da Seda -->
+      <div class="p-8 rounded-3xl bg-pine-800 text-parchment-50 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+        <div class="space-y-2">
+          <span class="text-xs text-gold uppercase tracking-widest font-bold">Visitas ao Museu da Seda e do Território</span>
+          <h4 class="font-display text-2xl font-bold">Assiste ao vivo ao trabalho das tecedeiras</h4>
+          <p class="text-xs text-parchment-200 max-w-xl">
+            Largo do Convento de S. Francisco • Terça a Domingo • Peças exclusivas disponíveis para aquisição na loja de artesanato.
+          </p>
+        </div>
+        <button class="px-6 py-3 rounded-full bg-gold text-pine-900 font-bold text-xs uppercase tracking-wider hover:bg-[#cfa85e] transition-colors whitespace-nowrap" onclick="window.dispatchEvent(new CustomEvent('freixo:openAiChat', {detail: {prompt: 'Gostava de visitar o Museu da Seda. Como posso agendar ou ver horários?'}}))">
+          Perguntar Horários à IA
+        </button>
+      </div>
+    </section>
+
+    <!-- SECÇÃO 2: OS 42 PORTAIS MANUELINOS -->
+    <section id="portais" class="space-y-12 pt-8 border-t border-pine-800/15">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        
+        <div class="lg:col-span-6 space-y-6">
+          <span class="editorial-badge bg-terracotta text-white border-none">Séculos XV e XVI</span>
+          <h2 class="font-display text-3xl sm:text-4xl font-bold text-pine-900 leading-tight">
+            A Maior Concentração de Portais Manuelinos do Interior
+          </h2>
+          <p class="text-base text-parchment-800 leading-relaxed font-sans">
+            Com 42 vãos manuelinos catalogados, o centro histórico de Freixo de Espada à Cinta constitui um verdadeiro repositório a céu aberto do estilo arquitetónico que marcou a época de ouro das Descobertas marítimas de D. Manuel I.
+          </p>
+          <p class="text-sm text-parchment-800 leading-relaxed font-sans">
+            Longe da costa marítima, o granito duro de Trás-os-Montes foi esculpido com temas oceânicos: cordame de caravelas, nós de marinheiro, esferas armilares, botões de flor e motivos heráldicos, patrocinados por fidalgos e comerciantes abastados que floresceram na raia.
+          </p>
+
+          <div class="pt-2">
+            <a href="explorar.html?view=all" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-pine-800 hover:text-terracotta transition-colors btn-editorial-arrow">
+              <span>Localizar os Portais no Mapa Interativo</span>
+              <span class="arrow-icon">→</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6">
+          <div class="rounded-3xl overflow-hidden shadow-2xl border border-pine-800/15 bg-pine-900">
+            <img src="assets/images/manueline-portal.png" 
+                 alt="Detalhe de Portal Manuelino em Granito" 
+                 class="w-full h-96 object-cover" />
+            <div class="p-6 bg-parchment-50 text-pine-900 space-y-2">
+              <h4 class="font-display font-bold text-lg">Pormenores Esculpidos em Cantaria de Granito</h4>
+              <p class="text-xs text-parchment-800 leading-relaxed">
+                Repara nos arcos contracurvados em quilha de navio, nas colunas torsas e nas esferas armilares gravadas no tímpano das portas da Rua do Ouro e Rua do Castelo.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECÇÃO 3: LENDAS & MEMÓRIA -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-pine-800/15">
+      
+      <!-- Lenda do Nome -->
+      <div class="bg-parchment-50 p-8 rounded-3xl border border-pine-800/10 shadow-md space-y-4">
+        <span class="editorial-badge bg-white text-pine-900">Lenda Secular</span>
+        <h3 class="font-display text-2xl font-bold text-pine-900">A Lenda do Freixo e da Espada</h3>
+        <p class="text-sm text-parchment-800 leading-relaxed font-sans">
+          Reza a tradição oral que um fidalgo cavaleiro (identificado por muitos como o nobre Feijão ou o próprio rei D. Dinis), exausto após combates contra invasores raianos, amarrou o seu cavalo e descansou encostado a um freixo frondoso. Antes de adormecer, retirou a sua espada da cintura e atou-a ao tronco da árvore.
+        </p>
+        <p class="text-xs text-olive italic">
+          Ao acordar revigorado e encontrar as suas armas intocadas, batizou aquele lugar abençoado como Freixo de Espada à Cinta.
+        </p>
+      </div>
+
+      <!-- Guerra Junqueiro -->
+      <div class="bg-parchment-50 p-8 rounded-3xl border border-pine-800/10 shadow-md space-y-4">
+        <span class="editorial-badge bg-white text-pine-900">Voz dos Simples</span>
+        <h3 class="font-display text-2xl font-bold text-pine-900">Guerra Junqueiro (1850–1923)</h3>
+        <p class="text-sm text-parchment-800 leading-relaxed font-sans">
+          Nascido neste concelho num solar de pedra, Abílio Manuel Guerra Junqueiro foi um dos maiores poetas e prosadores da literatura portuguesa do século XIX. A sua poesia refletiu sempre a dignidade e a dureza da vida camponesa transmontana.
+        </p>
+        <div class="p-4 rounded-xl bg-pine-100/60 border border-pine-800/10">
+          <p class="text-xs italic text-pine-900">
+            "A montanha é o altar onde a alma se ajoelha perante a majestade do infinito."
+          </p>
+          <span class="text-[10px] font-bold text-terracotta uppercase block mt-1">— Das Memórias do Poeta em Freixo</span>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Rodapé -->
+  <div id="footer-mount"></div>
+
+  <!-- Chat Widget -->
+  <div id="ai-chat-mount"></div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { freixoApp } from './js/app.js';
+    document.addEventListener('DOMContentLoaded', async () => {
+      await freixoApp.init('patrimonio');
+    });
+  </script>
+</body>
+</html>

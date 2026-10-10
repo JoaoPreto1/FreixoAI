@@ -1,0 +1,20 @@
+{
+  "name": "freixo-ai-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Frontend editorial e inteligente para o Freixo AI - Freixo de Espada à Cinta",
+  "main": "js/app.js",
+  "scripts": {
+    "start": "npx -y serve . -l 3000",
+    "dev": "npx -y serve . -l 3000"
+  },
+  "keywords": [
+    "freixo-de-espada-a-cinta",
+    "ai",
+    "tourism",
+    "douro",
+    "editorial-frontend"
+  ],
+  "author": "Freixo AI Team",
+  "license": "ISC"
+}

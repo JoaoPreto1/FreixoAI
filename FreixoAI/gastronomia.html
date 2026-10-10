@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gastronomia & Vinhos — Freixo AI</title>
+  <meta name="description" content="Descubra a gastronomia autêntica de Freixo de Espada à Cinta: vinhos Montes Ermos D.O.C. Douro, sopas de tomate, posta mirandesa e amêndoas cobertas.">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              100: '#E6EFE9',
+              600: '#315843',
+              700: '#234332',
+              800: '#182E22',
+              900: '#122419',
+            },
+            parchment: {
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#EBE4DA',
+              300: '#DDD4C7',
+              800: '#3D3830',
+              900: '#24211D',
+            },
+            terracotta: '#B65737',
+            gold: '#DFBA71',
+            olive: '#7E9283'
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            editorial: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            monument: ['"Cinzel"', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- CSS Editorial -->
+  <link rel="stylesheet" href="assets/css/editorial.css">
+</head>
+<body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain">
+
+  <!-- Navbar -->
+  <div id="navbar-mount"></div>
+
+  <!-- Hero Editorial Gastronomia -->
+  <header class="relative min-h-[60vh] flex items-center justify-center bg-pine-900 text-parchment-100 overflow-hidden">
+    <div class="absolute inset-0 z-0">
+      <img src="assets/images/douro-wine.png" 
+           alt="Vinhos e gastronomia de Freixo de Espada à Cinta" 
+           class="w-full h-full object-cover opacity-60 scale-105" />
+      <div class="absolute inset-0 bg-gradient-to-t from-pine-900 via-pine-900/60 to-black/40"></div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center space-y-4">
+      <span class="editorial-badge bg-gold text-pine-900 font-bold border-none text-[10px]">
+        SABORES DE TRÁS-OS-MONTES & DOURO SUPERIOR
+      </span>
+      <h1 class="font-display text-4xl sm:text-6xl font-bold text-[#FAF8F5] leading-tight">
+        A Mesa dos Montes Ermos
+      </h1>
+      <p class="font-sans text-base sm:text-lg text-parchment-200 max-w-2xl mx-auto font-light leading-relaxed">
+        Uma celebração da terra duriense: azeites prensados a frio, carnes nobres de pasto, sopas aromáticas e os prestigiados néctares da Adega Cooperativa.
+      </p>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-grow space-y-20">
+    
+    <!-- SECÇÃO 1: PRATOS TRADICIONAIS -->
+    <section class="space-y-10">
+      <div class="max-w-2xl">
+        <span class="editorial-badge bg-pine-800 text-gold mb-2">Tradição de Conforto</span>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-pine-900">
+          Receitas com Alma Transmontana
+        </h2>
+        <p class="text-sm text-parchment-800 mt-2 font-sans">
+          Cada prato reflete a sabedoria das gentes do campo, com ingredientes puros e sabor genuíno.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="dishes-grid">
+        <!-- Renderizado por JS via mockGastronomy -->
+      </div>
+    </section>
+
+    <!-- SECÇÃO 2: OS VINHOS MONTES ERMOS (D.O.C. DOURO) -->
+    <section class="p-8 sm:p-12 rounded-3xl bg-pine-900 text-parchment-100 shadow-2xl relative overflow-hidden editorial-grain">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        
+        <div class="lg:col-span-6 space-y-5">
+          <span class="editorial-badge bg-pine-800 text-gold border-pine-700">D.O.C. Douro Superior</span>
+          <h2 class="font-display text-3xl sm:text-4xl font-bold text-[#FAF8F5] leading-tight">
+            Vinhos Montes Ermos: A Expressão Pura do Xisto
+          </h2>
+          <p class="text-sm text-parchment-300 leading-relaxed font-sans">
+            Produzidos pela histórica Adega Cooperativa de Freixo de Espada à Cinta, os vinhos Montes Ermos beneficiam de um microclima ímpar: verões quentes e secos temperados pela brisa do rio Douro e solos xistosos que conferem uma mineralidade inconfundível.
+          </p>
+          <p class="text-xs text-parchment-300 font-sans">
+            Castas emblemáticas: <strong class="text-gold">Touriga Nacional, Touriga Franca, Códega do Larinho e Rabigato</strong>.
+          </p>
+
+          <div class="pt-2">
+            <button class="px-6 py-3 rounded-full bg-gold hover:bg-[#cfa85e] text-pine-900 font-bold text-xs uppercase tracking-wider transition-all" onclick="window.dispatchEvent(new CustomEvent('freixo:openAiChat', {detail: {prompt: 'Onde posso fazer uma prova de vinhos Montes Ermos em Freixo?'}}))">
+              Perguntar sobre Provas de Vinho à IA
+            </button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4" id="wines-grid">
+          <!-- Renderizado por JS -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECÇÃO 3: ONDE COMER (RESTAURANTES RECOMENDADOS) -->
+    <section class="space-y-10 pt-4">
+      <div class="max-w-2xl">
+        <span class="editorial-badge bg-pine-800 text-gold mb-2">Hospitalidade Local</span>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-pine-900">
+          Onde Comer em Freixo de Espada à Cinta
+        </h2>
+        <p class="text-sm text-parchment-800 mt-2 font-sans">
+          Restaurantes e tascas onde a generosidade transmontana e o calor da lareira nunca faltam.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="restaurants-grid">
+        <!-- Renderizado por JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rodapé -->
+  <div id="footer-mount"></div>
+
+  <!-- Chat Widget -->
+  <div id="ai-chat-mount"></div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { freixoApp } from './js/app.js';
+    import { poiService } from './js/services/poiService.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await freixoApp.init('gastronomia');
+
+      const data = await poiService.getGastronomy();
+
+      // Renderizar Pratos
+      const dishesGrid = document.getElementById('dishes-grid');
+      if (dishesGrid && data.dishes) {
+        dishesGrid.innerHTML = data.dishes.map(d => `
+          <div class="bg-parchment-50 p-7 rounded-2xl border border-pine-800/10 shadow hover:shadow-lg transition-all space-y-3">
+            <span class="editorial-badge bg-white text-terracotta text-[10px]">${d.category}</span>
+            <h3 class="font-display text-2xl font-bold text-pine-900">${d.title}</h3>
+            <p class="text-xs text-parchment-800 leading-relaxed font-sans">${d.description}</p>
+            <div class="pt-3 border-t border-pine-800/10 flex items-center justify-between text-xs">
+              <span class="text-olive font-medium">Harmonização:</span>
+              <span class="font-bold text-pine-800">${d.pairing}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Renderizar Vinhos
+      const winesGrid = document.getElementById('wines-grid');
+      if (winesGrid && data.wines) {
+        winesGrid.innerHTML = data.wines.map(w => `
+          <div class="bg-pine-800/90 p-5 rounded-2xl border border-pine-700 space-y-2.5 flex flex-col justify-between">
+            <div>
+              <span class="text-[10px] text-gold uppercase tracking-wider font-mono block">${w.alcohol}</span>
+              <h4 class="font-display font-bold text-base text-[#FAF8F5] leading-snug mt-1">${w.name}</h4>
+              <p class="text-[11px] text-[#DDD4C7] mt-1.5 leading-relaxed">${w.tastingNotes}</p>
+            </div>
+            <div class="pt-2 border-t border-pine-700/60 text-[10px] text-gold">
+              Castas: ${w.grapes}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Renderizar Restaurantes
+      const restGrid = document.getElementById('restaurants-grid');
+      if (restGrid && data.restaurants) {
+        restGrid.innerHTML = data.restaurants.map(r => `
+          <div class="bg-parchment-50 p-6 rounded-2xl border border-pine-800/10 shadow hover:shadow-lg transition-all flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-gold font-bold">★ ${r.rating}</span>
+                <span class="text-xs text-olive font-mono">${r.priceRange}</span>
+              </div>
+              <h4 class="font-display font-bold text-lg text-pine-900">${r.name}</h4>
+              <p class="text-xs text-olive mt-1">📍 ${r.location}</p>
+              <p class="text-xs text-parchment-800 mt-2 font-medium">Especialidades: ${r.specialty}</p>
+            </div>
+
+            <div class="pt-3 border-t border-pine-800/10 flex items-center justify-between text-xs">
+              <span class="text-pine-900 font-mono text-[11px]">📞 ${r.phone}</span>
+              <button class="text-terracotta font-bold text-xs hover:underline" onclick="window.dispatchEvent(new CustomEvent('freixo:openAiChat', {detail: {prompt: 'Como posso reservar ou chegar ao ${r.name} em Freixo?'}}))">
+                Perguntar à IA →
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    });
+  </script>
+</body>
+</html>

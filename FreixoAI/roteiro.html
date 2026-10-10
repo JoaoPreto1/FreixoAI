@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roteiro Inteligente com IA — Freixo AI</title>
+  <meta name="description" content="Gera o teu itinerário personalizado em Freixo de Espada à Cinta com o motor de inteligência artificial: património, natureza, gastronomia e ritmo à tua escolha.">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              100: '#E6EFE9',
+              600: '#315843',
+              700: '#234332',
+              800: '#182E22',
+              900: '#122419',
+            },
+            parchment: {
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#EBE4DA',
+              300: '#DDD4C7',
+              800: '#3D3830',
+              900: '#24211D',
+            },
+            terracotta: '#B65737',
+            gold: '#DFBA71',
+            olive: '#7E9283'
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            editorial: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            monument: ['"Cinzel"', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- CSS Editorial -->
+  <link rel="stylesheet" href="assets/css/editorial.css">
+</head>
+<body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain">
+
+  <!-- Navbar -->
+  <div id="navbar-mount"></div>
+
+  <!-- Cabeçalho da Secção Roteiro -->
+  <section class="bg-pine-900 text-parchment-100 py-14 px-4 sm:px-6 lg:px-8 border-b border-pine-800">
+    <div class="max-w-7xl mx-auto">
+      <div class="max-w-3xl space-y-3">
+        <div class="flex items-center gap-2">
+          <span class="editorial-badge bg-pine-800 text-gold border-pine-700">Inteligência Artificial Generativa</span>
+          <span class="text-xs text-emerald-400 font-mono flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Algoritmo Ativo
+          </span>
+        </div>
+
+        <h1 class="font-display text-3xl sm:text-5xl font-bold text-[#FAF8F5] leading-tight">
+          O Teu Guia Inteligente & Planeador de Roteiro
+        </h1>
+        <p class="text-sm sm:text-base text-parchment-300 font-sans leading-relaxed">
+          Configura a duração da estadia, o ritmo e as tuas preferências. A inteligência artificial calcula o itinerário diário ideal para que aproveites cada momento sem pressas entre os monumentos e as escarpas do Douro.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ÁREA DO GERADOR DE ROTEIROS INTELIGENTES -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow w-full space-y-16">
+    
+    <!-- Componente Principal do Planeador -->
+    <div id="itinerary-planner-container">
+      <!-- Injetado por ItineraryPlanner.js -->
+    </div>
+
+    <!-- SECÇÃO DE ROTEIROS PRÉ-DEFINIDOS DE AUTOR -->
+    <div class="pt-10 border-t border-pine-800/15">
+      <div class="mb-8">
+        <span class="editorial-badge bg-white text-pine-800 mb-2">Curadoria Local</span>
+        <h2 class="font-display text-2xl sm:text-3xl font-bold text-pine-900">
+          Ou Escolhe um dos Roteiros de Autor Pré-Configurados
+        </h2>
+        <p class="text-xs sm:text-sm text-parchment-800 mt-1 max-w-xl">
+          Roteiros temáticos desenhados por historiadores e guias locais de Freixo de Espada à Cinta.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="curated-routes-grid">
+        <!-- Renderizado dinamicamente por JS -->
+      </div>
+    </div>
+
+    <!-- CAIXA DE PROMPTS PARA O ASSISTENTE DE IA -->
+    <div class="bg-parchment-50 p-8 rounded-3xl border border-pine-800/10 shadow-lg space-y-6">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-pine-800 text-gold flex items-center justify-center font-bold text-lg">
+          ✨
+        </div>
+        <div>
+          <h3 class="font-display text-xl font-bold text-pine-900">Perguntas Diretas ao Freixo AI</h3>
+          <p class="text-xs text-olive">Clica em qualquer pergunta para iniciar uma conversa imediata no assistente.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <button class="quick-ask-card text-left p-4 rounded-xl bg-white border border-pine-800/10 hover:border-terracotta hover:shadow-md transition-all group" data-prompt="Onde posso ver as artesãs da seda a tecer em Freixo?">
+          <span class="text-xs font-semibold text-pine-900 group-hover:text-terracotta transition-colors block">
+            🌿 "Onde posso ver as artesãs a tecer seda viva?"
+          </span>
+          <span class="text-[11px] text-olive mt-1 block">Saber horários e localização do museu →</span>
+        </button>
+
+        <button class="quick-ask-card text-left p-4 rounded-xl bg-white border border-pine-800/10 hover:border-terracotta hover:shadow-md transition-all group" data-prompt="Qual o melhor miradouro para ver os grifos no Douro Internacional?">
+          <span class="text-xs font-semibold text-pine-900 group-hover:text-terracotta transition-colors block">
+            🦅 "Qual o melhor miradouro para ver os grifos?"
+          </span>
+          <span class="text-[11px] text-olive mt-1 block">Dicas de acesso ao Penedo Durão →</span>
+        </button>
+
+        <button class="quick-ask-card text-left p-4 rounded-xl bg-white border border-pine-800/10 hover:border-terracotta hover:shadow-md transition-all group" data-prompt="Que vinhos e pratos típicos devo provar hoje em Freixo?">
+          <span class="text-xs font-semibold text-pine-900 group-hover:text-terracotta transition-colors block">
+            🍷 "Que vinhos e pratos típicos devo provar?"
+          </span>
+          <span class="text-[11px] text-olive mt-1 block">Recomendações gastronómicas locais →</span>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Rodapé -->
+  <div id="footer-mount"></div>
+
+  <!-- Chat Widget -->
+  <div id="ai-chat-mount"></div>
+
+  <!-- Scripts da Página -->
+  <script type="module">
+    import { freixoApp } from './js/app.js';
+    import { poiService } from './js/services/poiService.js';
+    import { ItineraryPlanner } from './js/components/ItineraryPlanner.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await freixoApp.init('roteiro');
+
+      // Inicializar Planeador
+      const planner = new ItineraryPlanner('itinerary-planner-container');
+      planner.init();
+
+      // Renderizar Roteiros de Autor Curados
+      const routesGrid = document.getElementById('curated-routes-grid');
+      if (routesGrid) {
+        const routes = await poiService.getAllRoutes();
+        routesGrid.innerHTML = routes.map(route => `
+          <div class="bg-parchment-50 rounded-2xl overflow-hidden border border-pine-800/10 hover:border-pine-800/30 transition-all duration-300 shadow hover:shadow-lg flex flex-col justify-between">
+            <div class="relative h-44 bg-pine-900 overflow-hidden">
+              <img src="${route.heroImage}" alt="${route.title}" class="w-full h-full object-cover" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+              <div class="absolute top-3 left-3">
+                <span class="editorial-badge bg-white/90 text-pine-900 text-[10px]">${route.category}</span>
+              </div>
+              <div class="absolute bottom-3 left-3 right-3 text-white">
+                <span class="text-[11px] font-mono opacity-90">⏱️ ${route.duration} • 📏 ${route.distance}</span>
+                <h4 class="font-display font-bold text-base leading-tight mt-0.5">${route.title}</h4>
+              </div>
+            </div>
+
+            <div class="p-5 flex flex-col justify-between flex-grow space-y-4">
+              <p class="text-xs text-parchment-800 leading-relaxed">${route.description}</p>
+              
+              <div class="pt-3 border-t border-pine-800/10 flex items-center justify-between">
+                <span class="text-[11px] text-olive font-medium">Dificuldade: ${route.difficulty}</span>
+                <button class="load-curated-btn text-xs font-bold text-terracotta hover:underline" data-route-id="${route.id}">
+                  Ver Paragens →
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        // Ouvintes de clique nos roteiros
+        routesGrid.querySelectorAll('.load-curated-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const routeId = btn.dataset.routeId;
+            const target = routes.find(r => r.id === routeId);
+            if (target) {
+              window.dispatchEvent(new CustomEvent('freixo:openAiChat', {
+                detail: { prompt: `Podes guiar-me e detalhar as paragens do roteiro "${target.title}"?` }
+              }));
+            }
+          });
+        });
+      }
+
+      // Ouvintes dos cards de prompt rápido
+      document.querySelectorAll('.quick-ask-card').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const prompt = btn.dataset.prompt;
+          window.dispatchEvent(new CustomEvent('freixo:openAiChat', { detail: { prompt } }));
+        });
+      });
+    });
+  </script>
+</body>
+</html>

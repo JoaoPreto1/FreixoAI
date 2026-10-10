@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Freixo AI — Onde o Douro Abraça a Tradição</title>
+  <meta name="description" content="Descubra os encantos, património da seda, portais manuelinos e arribas do Douro Internacional em Freixo de Espada à Cinta com o seu assistente inteligente.">
+  
+  <!-- Tailwind CSS CDN com Configuração Customizada -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              100: '#E6EFE9',
+              600: '#315843',
+              700: '#234332',
+              800: '#182E22',
+              900: '#122419',
+            },
+            parchment: {
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#EBE4DA',
+              300: '#DDD4C7',
+              800: '#3D3830',
+              900: '#24211D',
+            },
+            terracotta: '#B65737',
+            gold: '#DFBA71',
+            olive: '#7E9283'
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            editorial: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            monument: ['"Cinzel"', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet CSS & JS para Cartografia Interativa -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- CSS Editorial Personalizado -->
+  <link rel="stylesheet" href="assets/css/editorial.css">
+</head>
+<body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain selection:bg-terracotta selection:text-white">
+
+  <!-- Ponto de Montagem da Barra de Navegação -->
+  <div id="navbar-mount"></div>
+
+  <!-- HERO SECTION EDITORIAL -->
+  <header class="relative min-h-[92vh] flex items-center justify-center overflow-hidden bg-pine-900">
+    <!-- Imagem de Fundo Panorâmica -->
+    <div class="absolute inset-0 z-0">
+      <img src="assets/images/hero-douro.png" 
+           alt="Canhão do Douro Internacional em Freixo de Espada à Cinta" 
+           class="w-full h-full object-cover object-center scale-105 animate-fade-in opacity-85 transition-transform duration-1000" />
+      <div class="absolute inset-0 bg-gradient-to-t from-pine-900 via-pine-900/40 to-black/30"></div>
+    </div>
+
+    <!-- Conteúdo Central Hero -->
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center flex flex-col items-center">
+      
+      <!-- Badges de Cabeçalho -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#FAF8F5] text-[11px] uppercase tracking-[0.2em] font-medium mb-6 animate-fade-in">
+        <span class="w-1.5 h-1.5 rounded-full bg-gold animate-ping"></span>
+        <span>41°05'32'' N • 6°48'28'' W • Parque Natural do Douro Internacional</span>
+      </div>
+
+      <!-- Título de Grande Impacto Editorial -->
+      <h1 class="font-display text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-[#FAF8F5] leading-[1.08] max-w-4xl mb-6 shadow-sm drop-shadow-md">
+        Onde o Douro abraça a tradição.
+      </h1>
+
+      <!-- Subtítulo Poético -->
+      <p class="font-sans text-base sm:text-lg md:text-xl text-parchment-200 max-w-2xl font-light leading-relaxed mb-10 drop-shadow">
+        Descubra a arte viva da seda, a monumentalidade dos portais manuelinos e os miradouros arrebatadores de Freixo de Espada à Cinta com o seu assistente inteligente.
+      </p>
+
+      <!-- Botões de Ação Hero -->
+      <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+        <a href="roteiro.html" 
+           class="w-full sm:w-auto px-8 py-4 rounded-full bg-gold hover:bg-[#cfa85e] text-pine-900 font-bold text-xs uppercase tracking-widest transition-all shadow-xl hover:scale-105 flex items-center justify-center gap-2 group">
+          <span>Criar Roteiro com IA</span>
+          <span class="group-hover:translate-x-1 transition-transform">→</span>
+        </a>
+
+        <a href="explorar.html" 
+           class="w-full sm:w-auto px-8 py-4 rounded-full bg-white/15 hover:bg-white/25 text-[#FAF8F5] font-semibold text-xs uppercase tracking-widest backdrop-blur-md border border-white/25 transition-all flex items-center justify-center gap-2">
+          <span>Explorar no Mapa</span>
+          <span>🗺️</span>
+        </a>
+      </div>
+
+      <!-- Indicador de Scroll Suave -->
+      <a href="#narrativa" class="mt-16 text-xs text-parchment-300 flex flex-col items-center gap-2 hover:text-[#FAF8F5] transition-colors group">
+        <span class="uppercase tracking-widest text-[10px]">Descobrir Mais</span>
+        <span class="animate-bounce text-sm">↓</span>
+      </a>
+
+    </div>
+  </header>
+
+  <!-- SECÇÃO DE NARRATIVA EDITORIAL -->
+  <section id="narrativa" class="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+      
+      <div class="lg:col-span-7 space-y-6">
+        <div class="inline-flex items-center gap-2">
+          <span class="w-8 h-px bg-terracotta"></span>
+          <span class="text-xs uppercase tracking-[0.2em] font-bold text-terracotta">Património & Identidade</span>
+        </div>
+
+        <h2 class="font-display text-3xl sm:text-5xl font-bold text-pine-900 leading-tight">
+          Terra que tece seda e guarda memórias antigas.
+        </h2>
+
+        <p class="drop-cap text-base sm:text-lg text-parchment-900 leading-relaxed font-sans">
+          Em pleno Parque Natural do Douro Internacional, Freixo de Espada à Cinta preserva uma identidade cultural singular. É o único recanto da Península Ibérica onde a seda continua a ser produzida artesanalmente, desde a criação cuidadosa do bicho-da-seda à tecelagem paciente em velhos teares de madeira.
+        </p>
+
+        <p class="text-sm sm:text-base text-parchment-800 leading-relaxed font-sans">
+          Caminhar pelas suas ruas medievais é deparar-se a cada esquina com mais de quatro dezenas de portais manuelinos lavrados na pedra, enquanto nos céus imensos as asas silenciosas dos grifos vigiam o canhão monumental do rio Douro.
+        </p>
+
+        <div class="pt-4 flex flex-wrap items-center gap-4">
+          <a href="patrimonio.html" class="inline-flex items-center gap-2 text-xs uppercase font-bold tracking-widest text-pine-800 hover:text-terracotta transition-colors btn-editorial-arrow">
+            <span>Conhecer a Rota da Seda e História</span>
+            <span class="arrow-icon">→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Painel Visual de Métricas Editoriais -->
+      <div class="lg:col-span-5 bg-parchment-50 p-8 rounded-3xl border border-pine-800/10 shadow-xl space-y-6">
+        <h3 class="font-display text-xl font-bold text-pine-900 border-b border-pine-800/10 pb-4">
+          Singularidades do Concelho
+        </h3>
+
+        <div class="grid grid-cols-2 gap-6">
+          <div class="border-l-2 border-terracotta pl-4">
+            <span class="font-display text-3xl font-bold text-pine-800">42</span>
+            <p class="text-xs text-olive font-medium mt-1">Portais Manuelinos catalogados no centro histórico</p>
+          </div>
+
+          <div class="border-l-2 border-gold pl-4">
+            <span class="font-display text-3xl font-bold text-pine-800">100%</span>
+            <p class="text-xs text-olive font-medium mt-1">Seda artesanal produzida em ciclo integral vivo</p>
+          </div>
+
+          <div class="border-l-2 border-pine-600 pl-4">
+            <span class="font-display text-3xl font-bold text-pine-800">550m</span>
+            <p class="text-xs text-olive font-medium mt-1">Altitude vertiginosa sobre o canhão no Penedo Durão</p>
+          </div>
+
+          <div class="border-l-2 border-terracotta pl-4">
+            <span class="font-display text-3xl font-bold text-pine-800">1152</span>
+            <p class="text-xs text-olive font-medium mt-1">Ano do primeiro foral outorgado por D. Afonso Henriques</p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-pine-800/10 bg-pine-100/50 p-4 rounded-2xl">
+          <p class="text-xs text-pine-800 italic">
+            "Nasci num berço de rocha e fragas, onde a terra sabe a vinho e a honra tem o peso das montanhas."
+          </p>
+          <span class="text-[10px] uppercase tracking-wider font-bold text-pine-900 block mt-2">— Guerra Junqueiro, Poeta de Freixo (1850–1923)</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECÇÃO DE LUGARES IMPERDÍVEIS & MAPA PREVIEW -->
+  <section class="py-20 bg-parchment-200/60 border-y border-pine-800/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Cabeçalho de Secção -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div>
+          <span class="editorial-badge bg-white text-pine-800 mb-2.5">Exploração Geográfica</span>
+          <h2 class="font-display text-3xl sm:text-4xl font-bold text-pine-900">
+            Lugares & Roteiros Imperdíveis
+          </h2>
+          <p class="text-sm text-parchment-800 mt-2 max-w-xl font-sans">
+            Dos miradouros sobre o Douro aos recantos onde o tear ainda canta. Clica em qualquer lugar para ver detalhes e áudio-guias.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a href="explorar.html" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-pine-800 text-parchment-50 text-xs font-semibold tracking-wider uppercase hover:bg-pine-700 transition-all shadow">
+            <span>Ver Todos no Mapa Completo</span>
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Grelha de Cartões POI em Destaque -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="home-pois-grid">
+        <!-- Renderizado dinamicamente por JS -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECÇÃO IMERSIVA: A SEDA E OS PORTAIS (DUAL EDITORIAL COMPOSITION) -->
+  <section class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+      
+      <!-- Bloco 1: A Tradição da Seda -->
+      <div class="bg-parchment-50 rounded-3xl overflow-hidden border border-pine-800/10 shadow-lg flex flex-col justify-between group">
+        <div class="relative h-72 sm:h-80 overflow-hidden bg-pine-900">
+          <img src="assets/images/seda-loom.png" 
+               alt="Tecelagem tradicional de seda em Freixo" 
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+          <div class="absolute bottom-4 left-6 right-6 text-white">
+            <span class="editorial-badge bg-gold text-pine-900 font-bold border-none text-[10px] mb-1">TRADIÇÃO ÚNICA</span>
+            <h3 class="font-display text-2xl font-bold leading-tight">O Milagre do Fio de Seda</h3>
+          </div>
+        </div>
+
+        <div class="p-6 sm:p-8 flex flex-col justify-between flex-grow space-y-4">
+          <p class="text-sm text-parchment-800 leading-relaxed font-sans">
+            No Museu da Seda e do Território, as artesãs dão vida diária ao fio dourado. O visitante pode testemunhar as etapas da criação das lagartas, a cozedura dos casulos e o entrelaçar minucioso dos fios nos teares manuais.
+          </p>
+
+          <div class="pt-4 border-t border-pine-800/10 flex items-center justify-between">
+            <span class="text-xs text-olive font-medium">Demonstrações ao Vivo • Ter a Dom</span>
+            <button class="text-xs font-bold text-terracotta hover:underline" onclick="window.dispatchEvent(new CustomEvent('freixo:openAiChat', {detail: {prompt: 'Fala-me sobre a tradição da seda viva no museu de Freixo'}}))">
+              Perguntar à IA ✨
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 2: Os Portais Manuelinos -->
+      <div class="bg-parchment-50 rounded-3xl overflow-hidden border border-pine-800/10 shadow-lg flex flex-col justify-between group">
+        <div class="relative h-72 sm:h-80 overflow-hidden bg-pine-900">
+          <img src="assets/images/manueline-portal.png" 
+               alt="Portal Manuelino em Freixo de Espada à Cinta" 
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+          <div class="absolute bottom-4 left-6 right-6 text-white">
+            <span class="editorial-badge bg-white text-pine-900 font-bold border-none text-[10px] mb-1">ARQUITETURA HISTÓRICA</span>
+            <h3 class="font-display text-2xl font-bold leading-tight">Mais de 40 Portais Quinhentistas</h3>
+          </div>
+        </div>
+
+        <div class="p-6 sm:p-8 flex flex-col justify-between flex-grow space-y-4">
+          <p class="text-sm text-parchment-800 leading-relaxed font-sans">
+            Com mais de 40 portas e janelas de cantaria manuelina espalhadas pelo traçado urbano, Freixo é um museu ao ar livre. Cordas, nós náuticos, esferas e botões esculpidos em granito celebram a era de ouro de D. Manuel I.
+          </p>
+
+          <div class="pt-4 border-t border-pine-800/10 flex items-center justify-between">
+            <span class="text-xs text-olive font-medium">Circuito Pedestre • Gratuito</span>
+            <a href="patrimonio.html#portais" class="text-xs font-bold text-pine-900 hover:text-terracotta transition-colors">
+              Ver Guia de Portais →
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECÇÃO DE DESTAQUE GASTRONÓMICO & VINHOS -->
+  <section class="py-20 bg-pine-900 text-parchment-100 editorial-grain">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <div class="lg:col-span-5 space-y-6">
+          <span class="editorial-badge bg-pine-800 text-gold border-pine-700">Sabores Autênticos</span>
+          <h2 class="font-display text-3xl sm:text-4xl font-bold text-[#FAF8F5] leading-tight">
+            Vinhos Montes Ermos, Sopas de Tomate e Posta Tradicional
+          </h2>
+          <p class="text-sm text-parchment-300 leading-relaxed font-sans">
+            A gastronomia raiana combina a generosidade da carne transmontana com os aromas mediterrânicos dos vales do Douro Superior. Prova os vinhos premiados da Adega Cooperativa e as famosas amêndoas cobertas feitas à mão.
+          </p>
+
+          <div class="pt-2">
+            <a href="gastronomia.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gold hover:bg-[#cfab60] text-pine-900 font-bold text-xs uppercase tracking-wider transition-all shadow-md">
+              <span>Explorar Restaurantes & Vinhos</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="bg-pine-800/80 p-5 rounded-2xl border border-pine-700/60 space-y-3">
+            <div class="h-40 rounded-xl overflow-hidden">
+              <img src="assets/images/douro-wine.png" alt="Vinhos de Freixo" class="w-full h-full object-cover" />
+            </div>
+            <h4 class="font-display font-bold text-base text-[#FAF8F5]">Montes Ermos Grande Reserva</h4>
+            <p class="text-xs text-parchment-300">Vinho D.O.C. Douro com notas florais e de esteva, estruturado em xisto duriense.</p>
+          </div>
+
+          <div class="bg-pine-800/80 p-5 rounded-2xl border border-pine-700/60 space-y-3">
+            <div class="h-40 rounded-xl overflow-hidden bg-pine-900">
+              <img src="assets/images/congida-beach.png" alt="Praia da Congida" class="w-full h-full object-cover" />
+            </div>
+            <h4 class="font-display font-bold text-base text-[#FAF8F5]">Peixes do Rio & Gastronomia na Congida</h4>
+            <p class="text-xs text-parchment-300">Almoço panorâmico na esplanada sobre o Douro na tranquilidade da praia fluvial.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- SECÇÃO DE CHAMADA PARA O ASSISTENTE DE IA -->
+  <section class="py-24 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="bg-parchment-50 p-8 sm:p-14 rounded-3xl border border-pine-800/15 shadow-2xl relative overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-40 h-40 bg-gold/15 rounded-full blur-3xl pointer-events-none"></div>
+
+      <span class="editorial-badge bg-pine-800 text-gold mb-4">Inteligência Artificial & Turismo</span>
+      <h2 class="font-display text-3xl sm:text-5xl font-bold text-pine-900 mb-4 leading-tight">
+        Planeia a tua estadia perfeita com o Freixo AI
+      </h2>
+      <p class="text-sm sm:text-base text-parchment-800 max-w-2xl mx-auto mb-8 font-sans leading-relaxed">
+        Queres saber o que fazer em 2 dias, os melhores horários para ver os grifos no Penedo Durão ou como fazer o percurso da seda? O nosso assistente inteligente responde em tempo real.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="roteiro.html" class="w-full sm:w-auto px-8 py-4 rounded-full bg-pine-800 hover:bg-pine-700 text-[#FAF8F5] text-xs font-bold uppercase tracking-widest transition-all shadow-lg hover:scale-105">
+          Gerador de Roteiro Inteligente →
+        </a>
+        <button class="w-full sm:w-auto px-8 py-4 rounded-full bg-white hover:bg-parchment-100 text-pine-900 border border-pine-800/20 text-xs font-bold uppercase tracking-widest transition-all" onclick="window.dispatchEvent(new CustomEvent('freixo:openAiChat'))">
+          Fazer uma Pergunta Agora ✨
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ponto de Montagem do Rodapé -->
+  <div id="footer-mount"></div>
+
+  <!-- Ponto de Montagem do Chat Widget -->
+  <div id="ai-chat-mount"></div>
+
+  <!-- Scripts da Aplicação -->
+  <script type="module">
+    import { freixoApp } from './js/app.js';
+    import { poiService } from './js/services/poiService.js';
+    import { createPoiCard } from './js/components/PoiCardComponent.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await freixoApp.init('index');
+
+      // Carregar os 4 POIs principais na página inicial
+      const grid = document.getElementById('home-pois-grid');
+      if (grid) {
+        const pois = await poiService.getAllPois();
+        const topPois = pois.slice(0, 4);
+        topPois.forEach(poi => {
+          const card = createPoiCard(poi);
+          grid.appendChild(card);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

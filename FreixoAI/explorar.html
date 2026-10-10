@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explorar & Mapa Interativo — Freixo AI</title>
+  <meta name="description" content="Explore todos os pontos de interesse de Freixo de Espada à Cinta no mapa interativo: miradouros, museu da seda, castelo e praia fluvial da Congida.">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              100: '#E6EFE9',
+              600: '#315843',
+              700: '#234332',
+              800: '#182E22',
+              900: '#122419',
+            },
+            parchment: {
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#EBE4DA',
+              300: '#DDD4C7',
+              800: '#3D3830',
+              900: '#24211D',
+            },
+            terracotta: '#B65737',
+            gold: '#DFBA71',
+            olive: '#7E9283'
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            editorial: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            monument: ['"Cinzel"', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- CSS Editorial -->
+  <link rel="stylesheet" href="assets/css/editorial.css">
+</head>
+<body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain">
+
+  <!-- Navbar -->
+  <div id="navbar-mount"></div>
+
+  <!-- Cabeçalho de Exploração -->
+  <section class="bg-pine-900 text-parchment-100 py-12 px-4 sm:px-6 lg:px-8 border-b border-pine-800">
+    <div class="max-w-7xl mx-auto">
+      <div class="max-w-3xl space-y-3">
+        <span class="editorial-badge bg-pine-800 text-gold border-pine-700">Cartografia & Património</span>
+        <h1 class="font-display text-3xl sm:text-5xl font-bold text-[#FAF8F5] leading-tight">
+          Exploração e Lugares de Freixo
+        </h1>
+        <p class="text-sm sm:text-base text-parchment-300 font-sans">
+          Navegue pelo mapa dos vales raianos, descubra as coordenadas exatas dos miradouros sobre o Douro e filtre por categoria ou favoritos.
+        </p>
+      </div>
+
+      <!-- Barra de Filtros e Pesquisa -->
+      <div class="mt-8 pt-6 border-t border-pine-800/80 flex flex-col md:flex-row items-center justify-between gap-4">
+        
+        <!-- Input de Pesquisa -->
+        <div class="relative w-full md:w-96">
+          <input type="text" 
+                 id="search-input" 
+                 placeholder="Pesquisar por nome, seda, grifos..." 
+                 class="w-full pl-10 pr-4 py-3 rounded-full bg-pine-800/90 text-sm text-[#FAF8F5] placeholder:text-parchment-300/70 border border-pine-700 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold" />
+          <span class="absolute left-3.5 top-3.5 text-parchment-300 text-sm">🔍</span>
+          <button id="clear-search-btn" class="hidden absolute right-3.5 top-3.5 text-xs text-parchment-300 hover:text-white">✕</button>
+        </div>
+
+        <!-- Botão Ver Apenas Favoritos -->
+        <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+          <button id="filter-favs-btn" 
+                  class="px-4 py-2.5 rounded-full border border-pine-700 text-xs font-semibold text-parchment-200 hover:text-white hover:border-gold transition-all flex items-center gap-2">
+            <span>❤️</span>
+            <span id="favs-btn-label">Apenas Favoritos</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Pílulas de Categoria -->
+      <div class="mt-4 flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar text-xs" id="category-pills">
+        <!-- Renderizado por JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ÁREA PRINCIPAL: MAPA + GRELHA DE RESULTADOS -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+    
+    <!-- Mapa Interativo Superior -->
+    <div class="mb-10 rounded-2xl overflow-hidden border border-pine-800/15 shadow-xl bg-parchment-200">
+      <div class="p-3 bg-parchment-50 border-b border-pine-800/10 flex items-center justify-between text-xs text-pine-900 font-medium">
+        <span class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Mapa Interativo de Freixo de Espada à Cinta & Arribas do Douro</span>
+        </span>
+        <span class="text-olive text-[11px] hidden sm:inline">Clica num marcador para ver o ponto e fotos</span>
+      </div>
+      <div id="freixo-map-container" class="h-80 sm:h-96 w-full z-10"></div>
+    </div>
+
+    <!-- Indicador de Resultados -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="text-xs text-parchment-800 font-medium">
+        A mostrar <span id="results-count" class="font-bold text-pine-900">0</span> lugares encontrados
+      </div>
+
+      <div class="text-xs text-olive font-mono">
+        Coordenadas: 41.0922° N, 6.8078° W
+      </div>
+    </div>
+
+    <!-- Grelha de Cartões de POI -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="pois-grid">
+      <!-- Renderizado por JS -->
+    </div>
+
+    <!-- Estado Vazio (Sem resultados) -->
+    <div id="no-results-state" class="hidden text-center py-16 px-4 bg-parchment-50 rounded-2xl border border-pine-800/10 my-6">
+      <div class="text-4xl mb-3">🧭</div>
+      <h3 class="font-display text-xl font-bold text-pine-900">Nenhum lugar encontrado</h3>
+      <p class="text-xs text-parchment-800 mt-1 max-w-sm mx-auto">
+        Não encontrámos nenhum ponto que corresponda à tua pesquisa ou filtro. Tenta uma nova pesquisa ou limpa os filtros.
+      </p>
+      <button id="reset-filters-btn" class="mt-4 px-4 py-2 rounded-full bg-pine-800 text-white text-xs font-semibold hover:bg-pine-700 transition-colors">
+        Limpar Filtros
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Rodapé -->
+  <div id="footer-mount"></div>
+
+  <!-- Chat Widget -->
+  <div id="ai-chat-mount"></div>
+
+  <!-- Script da Página -->
+  <script type="module">
+    import { freixoApp } from './js/app.js';
+    import { poiService } from './js/services/poiService.js';
+    import { storageService } from './js/services/storageService.js';
+    import { createPoiCard } from './js/components/PoiCardComponent.js';
+    import { FreixoMap } from './js/components/MapComponent.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await freixoApp.init('explorar');
+
+      let allPois = await poiService.getAllPois();
+      let activeCategory = 'all';
+      let activeQuery = '';
+      let showOnlyFavs = false;
+
+      // Verificar parâmetro na URL (?view=favorites)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('view') === 'favorites') {
+        showOnlyFavs = true;
+      }
+
+      // Inicializar Mapa
+      const freixoMap = new FreixoMap('freixo-map-container');
+      freixoMap.init(allPois);
+
+      // Renderizar Pílulas de Categoria
+      const pillsContainer = document.getElementById('category-pills');
+      const categories = poiService.getCategories();
+      
+      const renderPills = () => {
+        pillsContainer.innerHTML = categories.map(cat => {
+          const isActive = activeCategory === cat.id && !showOnlyFavs;
+          return `
+            <button class="category-pill flex-shrink-0 px-3.5 py-1.5 rounded-full transition-all text-xs font-medium ${
+              isActive 
+                ? 'bg-gold text-pine-900 font-bold shadow' 
+                : 'bg-pine-800 text-parchment-200 hover:text-white hover:bg-pine-700'
+            }" data-cat="${cat.id}">
+              ${cat.label}
+            </button>
+          `;
+        }).join('');
+
+        pillsContainer.querySelectorAll('.category-pill').forEach(btn => {
+          btn.addEventListener('click', () => {
+            activeCategory = btn.dataset.cat;
+            showOnlyFavs = false;
+            updateFavsBtnState();
+            applyFilters();
+            renderPills();
+          });
+        });
+      };
+      renderPills();
+
+      // Botão Favoritos Toggle
+      const favsBtn = document.getElementById('filter-favs-btn');
+      const updateFavsBtnState = () => {
+        if (showOnlyFavs) {
+          favsBtn.classList.add('bg-terracotta', 'text-white', 'border-terracotta');
+          favsBtn.classList.remove('text-parchment-200', 'border-pine-700');
+        } else {
+          favsBtn.classList.remove('bg-terracotta', 'text-white', 'border-terracotta');
+          favsBtn.classList.add('text-parchment-200', 'border-pine-700');
+        }
+      };
+      updateFavsBtnState();
+
+      if (favsBtn) {
+        favsBtn.addEventListener('click', () => {
+          showOnlyFavs = !showOnlyFavs;
+          updateFavsBtnState();
+          renderPills();
+          applyFilters();
+        });
+      }
+
+      // Campo de Pesquisa
+      const searchInput = document.getElementById('search-input');
+      const clearSearchBtn = document.getElementById('clear-search-btn');
+
+      searchInput.addEventListener('input', (e) => {
+        activeQuery = e.target.value;
+        if (activeQuery) clearSearchBtn.classList.remove('hidden');
+        else clearSearchBtn.classList.add('hidden');
+        applyFilters();
+      });
+
+      clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        activeQuery = '';
+        clearSearchBtn.classList.add('hidden');
+        applyFilters();
+      });
+
+      // Função de Filtragem e Renderização
+      const grid = document.getElementById('pois-grid');
+      const countEl = document.getElementById('results-count');
+      const noResults = document.getElementById('no-results-state');
+
+      const applyFilters = () => {
+        let filtered = [...allPois];
+
+        // Filtro por Categoria
+        if (activeCategory !== 'all') {
+          filtered = filtered.filter(p => p.category === activeCategory);
+        }
+
+        // Filtro por Favoritos
+        if (showOnlyFavs) {
+          const favIds = storageService.getFavorites();
+          filtered = filtered.filter(p => favIds.includes(p.id));
+        }
+
+        // Filtro por Pesquisa Textual
+        if (activeQuery.trim()) {
+          const q = activeQuery.toLowerCase().trim();
+          filtered = filtered.filter(p => 
+            p.title.toLowerCase().includes(q) ||
+            p.shortDescription.toLowerCase().includes(q) ||
+            p.location.toLowerCase().includes(q) ||
+            p.highlights?.some(h => h.toLowerCase().includes(q))
+          );
+        }
+
+        // Atualizar Contagem
+        countEl.textContent = filtered.length;
+
+        // Renderizar Grelha
+        grid.innerHTML = '';
+        if (filtered.length === 0) {
+          noResults.classList.remove('hidden');
+        } else {
+          noResults.classList.add('hidden');
+          filtered.forEach(poi => {
+            const card = createPoiCard(poi, () => {
+              freixoMap.focusPoi(poi.id);
+            });
+            grid.appendChild(card);
+          });
+        }
+
+        // Atualizar Marcadores no Mapa
+        freixoMap.renderMarkers(filtered);
+      };
+
+      // Inicializar
+      applyFilters();
+
+      // Botão Reset
+      document.getElementById('reset-filters-btn')?.addEventListener('click', () => {
+        activeCategory = 'all';
+        activeQuery = '';
+        showOnlyFavs = false;
+        searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+        updateFavsBtnState();
+        renderPills();
+        applyFilters();
+      });
+
+      // Atualizar se favoritos mudarem noutro componente
+      window.addEventListener('freixo:favoritesUpdated', () => {
+        if (showOnlyFavs) applyFilters();
+      });
+    });
+  </script>
+</body>
+</html>
