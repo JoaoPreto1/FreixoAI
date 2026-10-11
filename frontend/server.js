@@ -34,7 +34,6 @@ const server = http.createServer((req, res) => {
   if (reqPath === '/env.js') {
     const publicConfig = {
       PUBLIC_API_URL: process.env.PUBLIC_API_URL || 'http://localhost:5000/api',
-      PUBLIC_FASTAPI_URL: process.env.PUBLIC_FASTAPI_URL || 'http://127.0.0.1:8000',
       NODE_ENV: process.env.NODE_ENV || 'development'
     };
     res.writeHead(200, {

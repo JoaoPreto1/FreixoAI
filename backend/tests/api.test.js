@@ -30,7 +30,7 @@ test.after(async () => {
 // ==============================================================================
 // 1. GET /api/health
 // ==============================================================================
-test('GET /api/health — Deve responder com status 200 e estrutura de saúde', async () => {
+test('GET /api/health — Deve responder com status 200 e estrutura de saúde detalhada', async () => {
   const res = await fetch(`${baseUrl}/api/health`);
   assert.equal(res.status, 200);
 
@@ -40,8 +40,20 @@ test('GET /api/health — Deve responder com status 200 e estrutura de saúde', 
   assert.equal(json.service, 'freixo-ai-backend');
   assert.ok(json.timestamp);
   assert.ok(json.integrations);
+  
+  // Verificação inequívoca do Supabase
   assert.ok('supabase' in json.integrations);
+  assert.ok(typeof json.integrations.supabase.status === 'string');
+  assert.ok(typeof json.integrations.supabase.connected === 'boolean');
+  assert.ok('rag_tables' in json.integrations.supabase);
+  assert.ok('tourist_tables' in json.integrations.supabase);
+  assert.ok('active_source' in json.integrations.supabase);
+
+  // Verificação inequívoca do FastAPI
   assert.ok('fastapi' in json.integrations);
+  assert.ok(typeof json.integrations.fastapi.online === 'boolean');
+  assert.ok(Array.isArray(json.integrations.fastapi.models));
+  assert.ok(json.integrations.fastapi.url);
 });
 
 // ==============================================================================

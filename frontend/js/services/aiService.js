@@ -19,8 +19,8 @@ class AiService {
 
     const cleanPrompt = prompt.trim();
 
-    // 1. TENTATIVA PRIMÁRIA: Gateway Node.js Express (conforme Requisito 7)
-    // O backend Node.js é o intermediário que faz proxy e orquestra com o FastAPI
+    // 1. TENTATIVA PRIMÁRIA: Gateway Node.js Express (Porta 5000)
+    // O backend Node.js é o único ponto de entrada que orquestra com o FastAPI com segurança
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.CHAT}`;
       const payload = {
@@ -32,7 +32,7 @@ class AiService {
       const result = await apiService.request(url, {
         method: 'POST',
         body: JSON.stringify(payload)
-      }, 3000);
+      }, 25000); // 25s para acomodar o tempo de inferência do modelo Ollama (qwen3:4b + bge-m3)
 
       if (result && (result.answer || result.reply)) {
         return {
@@ -45,41 +45,24 @@ class AiService {
           timestamp: new Date().toISOString()
         };
       }
-    } catch {
-      // Backend Node.js offline ou rota não implementada
-    }
-
-    // 2. TENTATIVA SECUNDÁRIA: Chamada direta ao microserviço Python FastAPI
-    try {
-      const url = `${API_CONFIG.FASTAPI_AI.BASE_URL}${API_CONFIG.FASTAPI_AI.ENDPOINTS.CHAT}`;
-      const payload = {
-        question: cleanPrompt,
-        language: "pt"
-      };
-
-      const result = await apiService.request(url, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      }, 4000);
-
-      if (result && result.answer) {
+    } catch (err) {
+      // Se o backend Node.js devolveu erro estruturado de serviço indisponível (HTTP 503)
+      if (err.status === 503) {
         return {
-          reply: result.answer,
-          source: 'fastapi_direto',
-          isConfirmed: true,
+          reply: 'O microserviço de inteligência artificial (FastAPI/Ollama) encontra-se temporariamente indisponível. Por favor, verifica se os serviços de IA estão em execução ou tenta novamente dentro de momentos.',
+          source: 'backend_node',
+          isConfirmed: false,
           isDemo: false,
-          grounded: Boolean(result.grounded),
-          sources: result.sources || [],
+          isError: true,
           timestamp: new Date().toISOString()
         };
       }
-    } catch {
-      // FastAPI offline ou Ollama/Supabase não configurado
+      console.warn('[AiService] Gateway Node.js indisponível:', err.message);
     }
 
-    // 3. FALLBACK DE DEMONSTRAÇÃO LOCAL RIGOROSO (Requisito 8)
-    // Simula uma breve latência natural de raciocínio (350ms)
-    await new Promise(resolve => setTimeout(resolve, 350));
+    // 2. FALLBACK DE DEMONSTRAÇÃO LOCAL RIGOROSO
+    // Utilizado apenas se o backend estiver totalmente inacessível
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const lower = cleanPrompt.toLowerCase();
 

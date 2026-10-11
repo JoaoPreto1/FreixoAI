@@ -46,8 +46,10 @@ export const API_CONFIG = {
   // Estado verificado em tempo real das ligações
   STATE: {
     nodeConnected: false,
+    supabaseConnected: false,
+    supabaseStatus: null,
     fastApiConnected: false,
     lastChecked: null,
-    activeMode: 'demonstracao_local' // 'node_gateway' | 'fastapi_direto' | 'demonstracao_local'
+    activeMode: 'demonstracao_local' // 'node_gateway' | 'demonstracao_local'
   }
 };

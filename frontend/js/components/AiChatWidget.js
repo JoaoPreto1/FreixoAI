@@ -61,11 +61,11 @@ Podes perguntar-me sobre a **arte da seda**, os **miradouros do Douro**, o **cir
   }
 
   getHeaderBadgeText() {
-    if (API_CONFIG.STATE.nodeConnected) {
-      return { label: 'Online • Gateway Node.js', dotColor: 'bg-emerald-400' };
+    if (API_CONFIG.STATE.nodeConnected && API_CONFIG.STATE.fastApiConnected) {
+      return { label: 'Online • IA & Backend Ativos', dotColor: 'bg-emerald-400' };
     }
-    if (API_CONFIG.STATE.fastApiConnected) {
-      return { label: 'Online • FastAPI IA', dotColor: 'bg-emerald-400' };
+    if (API_CONFIG.STATE.nodeConnected) {
+      return { label: 'Online • Gateway Node.js (IA em espera)', dotColor: 'bg-emerald-400' };
     }
     return { label: 'Demonstração Local • Backend Offline', dotColor: 'bg-amber-400' };
   }
@@ -75,11 +75,11 @@ Podes perguntar-me sobre a **arte da seda**, os **miradouros do Douro**, o **cir
     const dotEl = document.getElementById('ai-status-dot');
     if (!badgeEl || !dotEl) return;
 
-    if (state.nodeConnected) {
-      badgeEl.textContent = 'Online • Gateway Node.js';
+    if (state.nodeConnected && state.fastApiConnected) {
+      badgeEl.textContent = 'Online • IA & Backend Ativos';
       dotEl.className = 'w-2 h-2 rounded-full bg-emerald-400';
-    } else if (state.fastApiConnected) {
-      badgeEl.textContent = 'Online • FastAPI IA';
+    } else if (state.nodeConnected) {
+      badgeEl.textContent = 'Online • Gateway Node.js (IA em espera)';
       dotEl.className = 'w-2 h-2 rounded-full bg-emerald-400';
     } else {
       badgeEl.textContent = 'Demonstração Local • Backend Offline';
@@ -345,9 +345,16 @@ Podes perguntar-me sobre a **arte da seda**, os **miradouros do Douro**, o **cir
               </div>
             ` : ''}
 
+            ${!isUser && m.isError ? `
+              <div class="mt-2 pt-2 border-t border-rose-300/50 text-[10px] text-rose-800 font-sans flex items-center gap-1">
+                <span>⚠️</span>
+                <span>Serviço de IA temporariamente indisponível</span>
+              </div>
+            ` : ''}
+
             ${!isUser && m.sources && m.sources.length ? `
               <div class="mt-2 pt-2 border-t border-[#182E22]/10 text-[10px] text-emerald-800 font-sans">
-                <span class="font-bold">Fontes verificadas:</span> ${m.sources.join(', ')}
+                <span class="font-bold">Fontes documentadas:</span> ${this.formatSources(m.sources)}
               </div>
             ` : ''}
           </div>
@@ -355,6 +362,16 @@ Podes perguntar-me sobre a **arte da seda**, os **miradouros do Douro**, o **cir
         </div>
       `;
     }).join('');
+  }
+
+  formatSources(sources) {
+    if (!Array.isArray(sources) || sources.length === 0) return '';
+    return sources.map(s => {
+      if (typeof s === 'string') return s;
+      const title = s.title || s.name || `Documento ${s.id || ''}`;
+      const institution = s.institution ? ` (${s.institution})` : '';
+      return `${title}${institution}`;
+    }).join('; ');
   }
 
   formatMarkdown(text) {
