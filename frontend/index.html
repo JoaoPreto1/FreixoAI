@@ -46,6 +46,9 @@
   <!-- Favicon SVG Editorial -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
 
+  <!-- Variáveis de Ambiente Públicas -->
+  <script src="env.js"></script>
+
   <!-- CSS Editorial Personalizado -->
   <link rel="stylesheet" href="assets/css/editorial.css">
 </head>
@@ -352,15 +355,34 @@
     document.addEventListener('DOMContentLoaded', async () => {
       await freixoApp.init('index');
 
-      // Carregar os 4 POIs principais na página inicial
+      // Carregar os 4 POIs principais na página inicial com estado de carregamento
       const grid = document.getElementById('home-pois-grid');
       if (grid) {
-        const pois = await poiService.getAllPois();
-        const topPois = pois.slice(0, 4);
-        topPois.forEach(poi => {
-          const card = createPoiCard(poi);
-          grid.appendChild(card);
-        });
+        grid.innerHTML = Array(4).fill(0).map(() => `
+          <div class="rounded-2xl overflow-hidden bg-parchment-50 border border-pine-800/10 shadow animate-pulse flex flex-col h-80">
+            <div class="h-48 bg-pine-800/20"></div>
+            <div class="p-4 space-y-2">
+              <div class="h-4 bg-pine-800/15 rounded w-2/3"></div>
+              <div class="h-3 bg-pine-800/10 rounded w-1/2"></div>
+            </div>
+          </div>
+        `).join('');
+
+        try {
+          const pois = await poiService.getAllPois();
+          grid.innerHTML = '';
+          const topPois = pois.slice(0, 4);
+          topPois.forEach(poi => {
+            const card = createPoiCard(poi);
+            grid.appendChild(card);
+          });
+        } catch (err) {
+          grid.innerHTML = `
+            <div class="col-span-full p-4 rounded-xl bg-amber-50 text-amber-900 text-xs border border-amber-200">
+              Erro ao carregar locais em destaque: ${err.message}
+            </div>
+          `;
+        }
       }
     });
   </script>

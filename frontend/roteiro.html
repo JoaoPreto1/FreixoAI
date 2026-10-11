@@ -46,6 +46,9 @@
   <!-- Favicon SVG Editorial -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
 
+  <!-- Variáveis de Ambiente Públicas -->
+  <script src="env.js"></script>
+
   <!-- CSS Editorial -->
   <link rel="stylesheet" href="assets/css/editorial.css">
 </head>
@@ -158,49 +161,71 @@
       const planner = new ItineraryPlanner('itinerary-planner-container');
       planner.init();
 
-      // Renderizar Roteiros de Autor Curados
+      // Renderizar Roteiros de Autor Curados (GET /api/trails)
       const routesGrid = document.getElementById('curated-routes-grid');
       if (routesGrid) {
-        const routes = await poiService.getAllRoutes();
-        routesGrid.innerHTML = routes.map(route => `
-          <div class="bg-parchment-50 rounded-2xl overflow-hidden border border-pine-800/10 hover:border-pine-800/30 transition-all duration-300 shadow hover:shadow-lg flex flex-col justify-between">
-            <div class="relative h-44 bg-pine-900 overflow-hidden">
-              <img src="${route.heroImage}" alt="${route.title}" class="w-full h-full object-cover" />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-              <div class="absolute top-3 left-3">
-                <span class="editorial-badge bg-white/90 text-pine-900 text-[10px]">${route.category}</span>
-              </div>
-              <div class="absolute bottom-3 left-3 right-3 text-white">
-                <span class="text-[11px] font-mono opacity-90">⏱️ ${route.duration} • 📏 ${route.distance}</span>
-                <h4 class="font-display font-bold text-base leading-tight mt-0.5">${route.title}</h4>
-              </div>
-            </div>
-
-            <div class="p-5 flex flex-col justify-between flex-grow space-y-4">
-              <p class="text-xs text-parchment-800 leading-relaxed">${route.description}</p>
-              
-              <div class="pt-3 border-t border-pine-800/10 flex items-center justify-between">
-                <span class="text-[11px] text-olive font-medium">Dificuldade: ${route.difficulty}</span>
-                <button class="load-curated-btn text-xs font-bold text-terracotta hover:underline" data-route-id="${route.id}">
-                  Ver Paragens →
-                </button>
-              </div>
-            </div>
+        routesGrid.innerHTML = `
+          <div class="col-span-full text-center py-6 text-xs text-olive animate-pulse">
+            A carregar percursos através da API Node.js...
           </div>
-        `).join('');
+        `;
 
-        // Ouvintes de clique nos roteiros
-        routesGrid.querySelectorAll('.load-curated-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const routeId = btn.dataset.routeId;
-            const target = routes.find(r => r.id === routeId);
-            if (target) {
-              window.dispatchEvent(new CustomEvent('freixo:openAiChat', {
-                detail: { prompt: `Podes guiar-me e detalhar as paragens do roteiro "${target.title}"?` }
-              }));
-            }
+        try {
+          const routes = await poiService.getAllRoutes();
+          routesGrid.innerHTML = routes.map(route => {
+            const isApi = route._provenance === 'api_node';
+            return `
+              <div class="bg-parchment-50 rounded-2xl overflow-hidden border border-pine-800/10 hover:border-pine-800/30 transition-all duration-300 shadow hover:shadow-lg flex flex-col justify-between">
+                <div class="relative h-44 bg-pine-900 overflow-hidden">
+                  <img src="${route.heroImage}" alt="${route.title}" class="w-full h-full object-cover" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                  <div class="absolute top-3 left-3 flex items-center gap-1.5">
+                    <span class="editorial-badge bg-white/90 text-pine-900 text-[10px]">${route.category}</span>
+                    <span class="text-[9px] font-semibold px-2 py-0.5 rounded-full ${
+                      isApi ? 'bg-emerald-950/80 text-emerald-300' : 'bg-amber-950/80 text-amber-300'
+                    }">
+                      ${isApi ? '✓ API Node.js' : 'Demonstração'}
+                    </span>
+                  </div>
+                  <div class="absolute bottom-3 left-3 right-3 text-white">
+                    <span class="text-[11px] font-mono opacity-90">⏱️ ${route.duration} • 📏 ${route.distance}</span>
+                    <h4 class="font-display font-bold text-base leading-tight mt-0.5">${route.title}</h4>
+                  </div>
+                </div>
+
+                <div class="p-5 flex flex-col justify-between flex-grow space-y-4">
+                  <p class="text-xs text-parchment-800 leading-relaxed font-sans">${route.description}</p>
+                  
+                  <div class="pt-3 border-t border-pine-800/10 flex items-center justify-between">
+                    <span class="text-[11px] text-olive font-medium">Dificuldade: ${route.difficulty}</span>
+                    <button class="load-curated-btn text-xs font-bold text-terracotta hover:underline" data-route-id="${route.id}">
+                      Ver Paragens →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          // Ouvintes de clique nos roteiros
+          routesGrid.querySelectorAll('.load-curated-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const routeId = btn.dataset.routeId;
+              const target = routes.find(r => r.id === routeId);
+              if (target) {
+                window.dispatchEvent(new CustomEvent('freixo:openAiChat', {
+                  detail: { prompt: `Podes guiar-me e detalhar as paragens do roteiro "${target.title}"?` }
+                }));
+              }
+            });
           });
-        });
+        } catch (err) {
+          routesGrid.innerHTML = `
+            <div class="col-span-full p-4 rounded-xl bg-amber-50 text-amber-900 text-xs border border-amber-200">
+              Não foi possível carregar os percursos da API: ${err.message}
+            </div>
+          `;
+        }
       }
 
       // Ouvintes dos cards de prompt rápido

@@ -46,6 +46,9 @@
   <!-- Favicon SVG Editorial -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
 
+  <!-- Variáveis de Ambiente Públicas -->
+  <script src="env.js"></script>
+
   <!-- CSS Editorial -->
   <link rel="stylesheet" href="assets/css/editorial.css">
 </head>
@@ -224,6 +227,46 @@
 
     </section>
 
+    <!-- SECÇÃO 4: FREGUESIAS E DIVISÃO TERRITORIAL (Ligado a GET /api/freguesias) -->
+    <section class="space-y-8 pt-8 border-t border-pine-800/15">
+      <div class="max-w-3xl">
+        <span class="editorial-badge bg-pine-800 text-gold mb-3">Território & Comunidades</span>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-pine-900">
+          As Quatro Freguesias do Concelho
+        </h2>
+        <p class="text-sm text-parchment-800 mt-2 font-sans leading-relaxed">
+          O concelho organiza-se em quatro freguesias históricas que combinam a monumentalidade raiana, o planalto mirandês-duriense e os socalcos de amendoeiras.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="freguesias-grid">
+        <!-- Renderizado dinamicamente por JS a partir de GET /api/freguesias -->
+        <div class="col-span-full text-center py-8 text-xs text-olive animate-pulse">
+          A carregar freguesias através da API Node.js...
+        </div>
+      </div>
+    </section>
+
+    <!-- SECÇÃO 5: AGENDA DE EVENTOS E TRADIÇÕES (Ligado a GET /api/events) -->
+    <section class="space-y-8 pt-8 border-t border-pine-800/15">
+      <div class="max-w-3xl">
+        <span class="editorial-badge bg-white text-pine-900 mb-3">Ciclo Cultural Anual</span>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-pine-900">
+          Festividades, Feiras & Tradições
+        </h2>
+        <p class="text-sm text-parchment-800 mt-2 font-sans leading-relaxed">
+          Momentos altos do calendário tradicional em Freixo de Espada à Cinta, desde as amendoeiras floridas no inverno até à festa da seda e das colheitas de verão.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="events-grid">
+        <!-- Renderizado dinamicamente por JS a partir de GET /api/events -->
+        <div class="col-span-full text-center py-8 text-xs text-olive animate-pulse">
+          A carregar eventos através da API Node.js...
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Rodapé -->
@@ -235,8 +278,94 @@
   <!-- Scripts -->
   <script type="module">
     import { freixoApp } from './js/app.js';
+    import { poiService } from './js/services/poiService.js';
+
     document.addEventListener('DOMContentLoaded', async () => {
       await freixoApp.init('patrimonio');
+
+      // 1. Carregar e renderizar Freguesias (GET /api/freguesias)
+      const freguesiasGrid = document.getElementById('freguesias-grid');
+      if (freguesiasGrid) {
+        try {
+          const freguesias = await poiService.getFreguesias();
+          freguesiasGrid.innerHTML = freguesias.map(f => {
+            const isApi = f._provenance === 'api_node';
+            return `
+              <div class="bg-parchment-50 p-6 rounded-2xl border border-pine-800/10 shadow hover:shadow-md transition-all flex flex-col justify-between space-y-4">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="editorial-badge bg-[#FAF8F5] text-pine-900 text-[10px]">
+                      Sede: ${f.headquarters || 'Concelho'}
+                    </span>
+                    <span class="text-[9px] font-semibold px-2 py-0.5 rounded-full ${
+                      isApi ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
+                    }">
+                      ${isApi ? '✓ API Node.js' : 'Demonstração'}
+                    </span>
+                  </div>
+                  <h3 class="font-display font-bold text-xl text-pine-900">${f.name}</h3>
+                  <p class="text-xs text-parchment-800 leading-relaxed mt-2 font-sans">${f.description || ''}</p>
+                </div>
+
+                <div class="pt-3 border-t border-pine-800/10 flex items-center justify-between text-xs text-olive">
+                  <span>📏 <strong>${f.area_km2 || '—'}</strong> km²</span>
+                  <span>👥 <strong>${f.population_census_2021 || '—'}</strong> hab. (Censos 2021)</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } catch (err) {
+          freguesiasGrid.innerHTML = `
+            <div class="col-span-full p-4 rounded-xl bg-amber-50 text-amber-900 text-xs border border-amber-200">
+              Não foi possível carregar as freguesias da API: ${err.message}
+            </div>
+          `;
+        }
+      }
+
+      // 2. Carregar e renderizar Eventos (GET /api/events)
+      const eventsGrid = document.getElementById('events-grid');
+      if (eventsGrid) {
+        try {
+          const events = await poiService.getEvents();
+          eventsGrid.innerHTML = events.map(e => {
+            const isApi = e._provenance === 'api_node';
+            return `
+              <div class="bg-parchment-50 rounded-2xl overflow-hidden border border-pine-800/10 shadow hover:shadow-md transition-all flex flex-col justify-between">
+                <div class="relative h-40 bg-pine-900 overflow-hidden">
+                  <img src="${e.image}" alt="${e.title}" class="w-full h-full object-cover" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                  <div class="absolute top-3 left-3">
+                    <span class="editorial-badge bg-white/90 text-pine-900 text-[10px]">${e.category || 'Tradição'}</span>
+                  </div>
+                  <div class="absolute bottom-2 left-3 right-3 text-white">
+                    <span class="text-[10px] font-mono opacity-90">📅 ${e.periodicity || e.start_date || 'Anual'}</span>
+                    <h4 class="font-display font-bold text-base leading-tight mt-0.5">${e.title}</h4>
+                  </div>
+                </div>
+
+                <div class="p-5 flex flex-col justify-between flex-grow space-y-3">
+                  <p class="text-xs text-parchment-800 leading-relaxed font-sans">${e.description}</p>
+                  <div class="pt-2 border-t border-pine-800/10 flex items-center justify-between text-[11px] text-olive">
+                    <span>📍 ${e.location || 'Freixo'}</span>
+                    <span class="text-[9px] font-semibold px-2 py-0.5 rounded-full ${
+                      isApi ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                    }">
+                      ${isApi ? '✓ API Node.js' : 'Demonstração'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } catch (err) {
+          eventsGrid.innerHTML = `
+            <div class="col-span-full p-4 rounded-xl bg-amber-50 text-amber-900 text-xs border border-amber-200">
+              Não foi possível carregar os eventos da API: ${err.message}
+            </div>
+          `;
+        }
+      }
     });
   </script>
 </body>

@@ -34,11 +34,19 @@ export function createPoiCard(poi, onCardClick = null) {
         <span class="editorial-badge bg-[#FAF8F5]/90 text-[#182E22] shadow-sm">
           ${poi.categoryLabel}
         </span>
-        ${isPending ? `
-          <span class="text-[9px] font-medium bg-amber-900/80 text-amber-200 px-2 py-0.5 rounded-full backdrop-blur-sm">
-            Validação de Percurso Pendente
+        ${poi.is_demo ? `
+          <span class="text-[9px] font-medium bg-amber-900/85 text-amber-200 px-2 py-0.5 rounded-full backdrop-blur-sm border border-amber-500/30">
+            Registo de Teste (Demonstração)
           </span>
-        ` : ''}
+        ` : (poi._provenance === 'api_node' ? `
+          <span class="text-[9px] font-medium bg-emerald-950/85 text-emerald-300 px-2 py-0.5 rounded-full backdrop-blur-sm border border-emerald-500/30">
+            ✓ API Node.js
+          </span>
+        ` : `
+          <span class="text-[9px] font-medium bg-amber-950/80 text-amber-300 px-2 py-0.5 rounded-full backdrop-blur-sm">
+            Demonstração Local
+          </span>
+        `)}
       </div>
 
       <!-- Botão Favorito Flutuante -->

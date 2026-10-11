@@ -1,7 +1,3 @@
-/**
- * FREIXO AI — Configuração Centralizada de Ambiente
- * Validação rigorosa e carregamento de variáveis de ambiente.
- */
 
 import dotenv from 'dotenv';
 import path from 'path';

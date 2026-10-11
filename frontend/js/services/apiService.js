@@ -27,7 +27,19 @@ class ApiService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        let errorDetail = '';
+        try {
+          const errJson = await response.json();
+          errorDetail = errJson.error?.message || errJson.message || errJson.detail || '';
+        } catch {
+          // Resposta não-JSON
+        }
+        const message = errorDetail 
+          ? `HTTP ${response.status}: ${errorDetail}` 
+          : `HTTP ${response.status}: ${response.statusText}`;
+        const err = new Error(message);
+        err.status = response.status;
+        throw err;
       }
 
       return await response.json();
@@ -39,12 +51,13 @@ class ApiService {
 
   /**
    * Avalia a conectividade real dos serviços de backend (Node.js e FastAPI)
-   * Sem falsos positivos: se o serviço não responder com 200 OK, é marcado como offline
+   * Sem falsos positivos: reflete fielmente o estado real da infraestrutura
    */
   async checkHealth() {
     const status = {
       nodeApi: false,
       fastApi: false,
+      details: {},
       timestamp: new Date().toISOString()
     };
 
@@ -53,23 +66,33 @@ class ApiService {
       const res = await this.request(
         `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.HEALTH}`,
         { method: 'GET' },
-        2000
+        2500
       );
       status.nodeApi = Boolean(res && (res.status === 'ok' || res.healthy === true));
-    } catch {
+      status.details.node = res;
+      // Se o Node.js já reporta que o FastAPI está online internamente
+      if (res?.integrations?.fastapi?.online) {
+        status.fastApi = true;
+      }
+    } catch (err) {
       status.nodeApi = false;
+      status.details.nodeError = err.message;
     }
 
-    // 2. Testar se o serviço Python / FastAPI está operacional
-    try {
-      const res = await this.request(
-        `${API_CONFIG.FASTAPI_AI.BASE_URL}${API_CONFIG.FASTAPI_AI.ENDPOINTS.HEALTH}`,
-        { method: 'GET' },
-        2000
-      );
-      status.fastApi = Boolean(res && (res.status === 'ok' || res.status === 'healthy'));
-    } catch {
-      status.fastApi = false;
+    // 2. Se o FastAPI ainda não foi confirmado pelo gateway, testar endpoint direto
+    if (!status.fastApi) {
+      try {
+        const res = await this.request(
+          `${API_CONFIG.FASTAPI_AI.BASE_URL}${API_CONFIG.FASTAPI_AI.ENDPOINTS.HEALTH}`,
+          { method: 'GET' },
+          2500
+        );
+        status.fastApi = Boolean(res && (res.status === 'ok' || res.status === 'healthy'));
+        status.details.fastApi = res;
+      } catch (err) {
+        status.fastApi = false;
+        status.details.fastApiError = err.message;
+      }
     }
 
     // Determinar modo ativo com base nas respostas reais
@@ -85,7 +108,7 @@ class ApiService {
     API_CONFIG.STATE.fastApiConnected = status.fastApi;
     API_CONFIG.STATE.lastChecked = status.timestamp;
 
-    // Disparar evento para que a interface reflita o estado real
+    // Disparar evento para que todos os componentes da interface atualizem o seu estado
     window.dispatchEvent(
       new CustomEvent('freixo:apiStateChanged', { detail: { ...API_CONFIG.STATE } })
     );

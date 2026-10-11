@@ -1,13 +1,10 @@
 /**
- * FREIXO AI — Configuração de Integração de APIs
- * Arquitetura de microserviços:
- * - Backend Node.js / Express (porta 5000): Gateway de aplicação, rotas de POIs, favoritos e proxy de IA
- * - Serviço Python / FastAPI (porta 8000): RAG, embeddings locais e LLM
- *
- * RIGOR ARQUITETURAL:
- * O estado de cada serviço é aferido dinamicamente por verificações de integridade (health checks).
- * Sem rotas ativas no backend, a aplicação opera em modo de demonstração local estritamente identificado.
+ * FREIXO AI — Configuração Central de Integração de APIs
+ * Utiliza variáveis de ambiente públicas resolvidas por env.js.
+ * Todas as chaves secretas residem estritamente no backend.
  */
+
+import { FRONTEND_ENV } from './env.js';
 
 export const API_CONFIG = {
   // Ativa o fallback automático para dados de demonstração locais quando as APIs não respondem
@@ -15,25 +12,30 @@ export const API_CONFIG = {
 
   // Endpoints da API Node.js / Express (Gateway Principal)
   NODE_API: {
-    BASE_URL: 'http://localhost:5000/api',
-    TIMEOUT_MS: 3500,
+    BASE_URL: FRONTEND_ENV.PUBLIC_API_URL,
+    TIMEOUT_MS: 4000,
     ENDPOINTS: {
       HEALTH: '/health',
-      POIS: '/pois',
-      POI_DETAIL: (id) => `/pois/${id}`,
-      ROUTES: '/routes',
+      PLACES: '/places',
+      POIS: '/places', // Rota canónica de locais
+      PLACE_DETAIL: (slugOrId) => `/places/${slugOrId}`,
+      POI_DETAIL: (id) => `/places/${id}`,
+      FREGUESIAS: '/freguesias',
+      TRAILS: '/trails',
+      ROUTES: '/trails',
+      EVENTS: '/events',
       GASTRONOMY: '/gastronomy',
       HERITAGE: '/heritage',
       FAVORITES: '/favorites',
-      CHAT: '/chat', // Gateway Node.js que encaminha para o FastAPI
+      CHAT: '/chat', // Gateway Node.js que orquestra com o FastAPI
       ITINERARY: '/itinerary/generate'
     }
   },
 
-  // Endpoints Diretos do Serviço Python / FastAPI (Recuperação e IA)
+  // Endpoints do Microserviço Python / FastAPI (Acesso de contingência ou direto)
   FASTAPI_AI: {
-    BASE_URL: 'http://localhost:8000',
-    TIMEOUT_MS: 8000,
+    BASE_URL: FRONTEND_ENV.PUBLIC_FASTAPI_URL,
+    TIMEOUT_MS: 15000,
     ENDPOINTS: {
       HEALTH: '/health',
       CHAT: '/chat',

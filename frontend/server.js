@@ -30,6 +30,21 @@ const server = http.createServer((req, res) => {
     return res.end();
   }
 
+  // Fornecer variáveis de ambiente públicas dinâmicas ao frontend
+  if (reqPath === '/env.js') {
+    const publicConfig = {
+      PUBLIC_API_URL: process.env.PUBLIC_API_URL || 'http://localhost:5000/api',
+      PUBLIC_FASTAPI_URL: process.env.PUBLIC_FASTAPI_URL || 'http://127.0.0.1:8000',
+      NODE_ENV: process.env.NODE_ENV || 'development'
+    };
+    res.writeHead(200, {
+      'Content-Type': 'application/javascript; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      'Access-Control-Allow-Origin': '*'
+    });
+    return res.end(`window.__ENV__ = Object.freeze(${JSON.stringify(publicConfig)});`);
+  }
+
   const filePath = path.join(__dirname, reqPath);
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
