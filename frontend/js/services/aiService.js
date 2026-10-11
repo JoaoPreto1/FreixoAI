@@ -1,6 +1,7 @@
 /**
  * FREIXO AI — Serviço de Inteligência Artificial
- * Comunica com o microserviço Python / FastAPI e fornece fallback inteligente
+ * Comunica preferencialmente com o gateway Node.js (que encaminha para o FastAPI)
+ * Fornece fallback transparente e rigoroso para conhecimento local demonstrativo
  */
 
 import { apiService } from './apiService.js';
@@ -18,41 +19,71 @@ class AiService {
 
     const cleanPrompt = prompt.trim();
 
-    // 1. Tentar comunicar com o serviço Python / FastAPI
+    // 1. TENTATIVA PRIMÁRIA: Gateway Node.js Express (conforme Requisito 7)
+    // O backend Node.js é o intermediário que faz proxy e orquestra com o FastAPI
     try {
-      const url = `${API_CONFIG.FASTAPI_AI.BASE_URL}${API_CONFIG.FASTAPI_AI.ENDPOINTS.CHAT}`;
+      const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.CHAT}`;
       const payload = {
-        message: cleanPrompt,
-        history: conversationHistory,
-        context: {
-          location: "Freixo de Espada à Cinta",
-          region: "Douro Internacional / Trás-os-Montes"
-        }
+        question: cleanPrompt,
+        language: "pt",
+        history: conversationHistory
       };
 
       const result = await apiService.request(url, {
         method: 'POST',
         body: JSON.stringify(payload)
-      }, 2500);
+      }, 3000);
 
-      if (result && result.reply) {
+      if (result && (result.answer || result.reply)) {
         return {
-          reply: result.reply,
-          source: 'fastapi',
+          reply: result.answer || result.reply,
+          source: 'backend_node',
+          isConfirmed: true,
+          isDemo: false,
+          grounded: Boolean(result.grounded),
+          sources: result.sources || [],
           timestamp: new Date().toISOString()
         };
       }
     } catch {
-      // Falhou a chamada à FastAPI, continua para o motor local
+      // Backend Node.js offline ou rota não implementada
     }
 
-    // 2. Fallback Inteligente baseado na Base de Conhecimento Local
-    // Simular uma breve latência natural de raciocínio da IA (450ms)
-    await new Promise(resolve => setTimeout(resolve, 450));
+    // 2. TENTATIVA SECUNDÁRIA: Chamada direta ao microserviço Python FastAPI
+    try {
+      const url = `${API_CONFIG.FASTAPI_AI.BASE_URL}${API_CONFIG.FASTAPI_AI.ENDPOINTS.CHAT}`;
+      const payload = {
+        question: cleanPrompt,
+        language: "pt"
+      };
+
+      const result = await apiService.request(url, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      }, 4000);
+
+      if (result && result.answer) {
+        return {
+          reply: result.answer,
+          source: 'fastapi_direto',
+          isConfirmed: true,
+          isDemo: false,
+          grounded: Boolean(result.grounded),
+          sources: result.sources || [],
+          timestamp: new Date().toISOString()
+        };
+      }
+    } catch {
+      // FastAPI offline ou Ollama/Supabase não configurado
+    }
+
+    // 3. FALLBACK DE DEMONSTRAÇÃO LOCAL RIGOROSO (Requisito 8)
+    // Simula uma breve latência natural de raciocínio (350ms)
+    await new Promise(resolve => setTimeout(resolve, 350));
 
     const lower = cleanPrompt.toLowerCase();
 
-    // Procurar correspondência na base de conhecimento
+    // Procurar correspondência de tópicos na base documental local
     let matchedItem = null;
     let highestScore = 0;
 
@@ -67,26 +98,32 @@ class AiService {
     if (matchedItem && highestScore > 0) {
       return {
         reply: matchedItem.response,
-        source: 'local-knowledge',
+        source: 'demonstracao_local',
+        isConfirmed: false,
+        isDemo: true,
+        disclaimer: "Resposta em modo de demonstração local. O serviço de IA (FastAPI/Ollama) encontra-se temporariamente offline.",
         timestamp: new Date().toISOString()
       };
     }
 
-    // Resposta contextual genérica amigável com recomendações de tópicos
+    // Resposta de acolhimento e sugestão temática
     return {
       reply: `Olá! Sou o **Freixo AI**, o teu guia inteligente para Freixo de Espada à Cinta.
 
-Posso ajudar-te a planear a tua visita ou esclarecer curiosidades sobre a vila raiana! 
+*(Nota: O assistente está a funcionar em modo de demonstração local enquanto o backend estiver offline).*
 
-Podes perguntar-me sobre:
-• **A Arte Viva da Seda:** Onde ver as artesãs a fiar nos teares ancestrais;
-• **Miradouro do Penedo Durão:** Onde avistar grifos e o canhão do Douro;
-• **Os Mais de 40 Portais Manuelinos:** O circuito histórico no coração da vila;
-• **Praia Fluvial da Congida:** Banhar-te no Douro ou fazer passeios de barco;
-• **Gastronomia & Vinhos:** Onde comer a autêntica Posta e saborear os vinhos Montes Ermos.
+Posso apresentar-te informações e sugestões sobre:
+• **A Arte Viva da Seda:** Onde ver o ciclo secular e as tecedeiras no Museu da Seda;
+• **Miradouros do Douro:** Penedo Durão, Colado e observação do voo dos grifos;
+• **Os Mais de 40 Portais Manuelinos:** O circuito arquitetónico no centro histórico;
+• **Praia Fluvial da Congida:** Banhar-te na albufeira de Saucelle ou fazer passeios fluviais;
+• **Gastronomia & Vinhos:** Posta, sopas de tomate e vinhos Montes Ermos D.O.C. Douro.
 
-Como posso enriquecer a tua estadia hoje?`,
-      source: 'local-fallback',
+Como te posso ajudar hoje?`,
+      source: 'demonstracao_fallback',
+      isConfirmed: false,
+      isDemo: true,
+      disclaimer: "Modo de demonstração local ativo.",
       timestamp: new Date().toISOString()
     };
   }
@@ -95,9 +132,9 @@ Como posso enriquecer a tua estadia hoje?`,
    * Gera um itinerário inteligente com base em preferências
    */
   async generateItinerary(params = {}) {
-    // 1. Tentar API FastAPI se disponível
+    // 1. Tentar gateway Node.js
     try {
-      const url = `${API_CONFIG.FASTAPI_AI.BASE_URL}${API_CONFIG.FASTAPI_AI.ENDPOINTS.GENERATE_ITINERARY}`;
+      const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.ITINERARY}`;
       const result = await apiService.request(url, {
         method: 'POST',
         body: JSON.stringify(params)
@@ -106,20 +143,22 @@ Como posso enriquecer a tua estadia hoje?`,
       if (result && result.days) {
         return {
           ...result,
-          source: 'fastapi'
+          source: 'backend_node',
+          isDemo: false
         };
       }
     } catch {
       // Fallback para gerador algorítmico local
     }
 
-    // Simular processamento da IA
-    await new Promise(resolve => setTimeout(resolve, 600));
+    // Simulação do cálculo
+    await new Promise(resolve => setTimeout(resolve, 450));
 
     const plan = generateSmartItinerary(params);
     return {
       ...plan,
-      source: 'local-engine'
+      source: 'demonstracao_algoritmica',
+      isDemo: true
     };
   }
 

@@ -1,10 +1,12 @@
 /**
  * FREIXO AI — Widget Flutuante de Assistente com Inteligência Artificial
- * Conversação natural, sugestões em tempo real e formatação rica de respostas
+ * Conversação natural, sugestões em tempo real, distinção rigorosa de fontes
+ * e preparação para proxy Node.js / FastAPI
  */
 
 import { aiService } from '../services/aiService.js';
 import { storageService } from '../services/storageService.js';
+import { API_CONFIG } from '../config/apiConfig.js';
 
 export class AiChatWidget {
   constructor() {
@@ -29,9 +31,13 @@ export class AiChatWidget {
       this.messages = [
         {
           sender: 'ai',
-          text: `Olá! Sou o **Freixo AI**, o teu guia pessoal para descobrir os segredos de Freixo de Espada à Cinta.
+          text: `Olá! Sou o **Freixo AI**, o teu assistente para conhecer o concelho de Freixo de Espada à Cinta.
 
-Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Douro**, a **gastronomia transmontana** ou pedir um roteiro à tua medida. Em que te posso inspirar hoje?`,
+Podes perguntar-me sobre a **arte da seda**, os **miradouros do Douro**, o **circuito manuelino**, a **gastronomia local** ou pedir um roteiro à medida.
+
+*Nota: Em caso de indisponibilidade dos serviços de backend, respondo com base na documentação local de demonstração.*`,
+          isDemo: true,
+          source: 'demonstracao_inicial',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ];
@@ -47,9 +53,43 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
         this.handleUserPrompt(e.detail.prompt);
       }
     });
+
+    // Ouvinte de mudança de conectividade da API
+    window.addEventListener('freixo:apiStateChanged', (e) => {
+      this.updateHeaderBadge(e.detail);
+    });
+  }
+
+  getHeaderBadgeText() {
+    if (API_CONFIG.STATE.nodeConnected) {
+      return { label: 'Online • Gateway Node.js', dotColor: 'bg-emerald-400' };
+    }
+    if (API_CONFIG.STATE.fastApiConnected) {
+      return { label: 'Online • FastAPI IA', dotColor: 'bg-emerald-400' };
+    }
+    return { label: 'Demonstração Local • Backend Offline', dotColor: 'bg-amber-400' };
+  }
+
+  updateHeaderBadge(state) {
+    const badgeEl = document.getElementById('ai-status-badge');
+    const dotEl = document.getElementById('ai-status-dot');
+    if (!badgeEl || !dotEl) return;
+
+    if (state.nodeConnected) {
+      badgeEl.textContent = 'Online • Gateway Node.js';
+      dotEl.className = 'w-2 h-2 rounded-full bg-emerald-400';
+    } else if (state.fastApiConnected) {
+      badgeEl.textContent = 'Online • FastAPI IA';
+      dotEl.className = 'w-2 h-2 rounded-full bg-emerald-400';
+    } else {
+      badgeEl.textContent = 'Demonstração Local • Backend Offline';
+      dotEl.className = 'w-2 h-2 rounded-full bg-amber-400';
+    }
   }
 
   render(container) {
+    const status = this.getHeaderBadgeText();
+
     container.innerHTML = `
       <!-- Botão Flutuante (Trigger) -->
       <button id="ai-chat-bubble" 
@@ -63,11 +103,14 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
       </button>
 
       <!-- Painel de Conversação (Gaveta Flutuante) -->
-      <div id="ai-chat-panel" 
-           class="fixed bottom-6 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[410px] h-[580px] max-h-[85vh] bg-[#FAF8F5] rounded-2xl shadow-2xl border border-[#182E22]/15 flex flex-col overflow-hidden transition-all duration-300 transform scale-90 opacity-0 pointer-events-none">
+      <section id="ai-chat-panel" 
+               class="fixed bottom-6 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[410px] h-[580px] max-h-[85vh] bg-[#FAF8F5] rounded-2xl shadow-2xl border border-[#182E22]/15 flex flex-col overflow-hidden transition-all duration-300 transform scale-90 opacity-0 pointer-events-none"
+               role="dialog"
+               aria-label="Janela de Conversação com o Assistente Freixo AI"
+               aria-modal="false">
         
         <!-- Cabeçalho do Chat -->
-        <div class="px-5 py-4 bg-[#182E22] text-[#FAF8F5] flex items-center justify-between border-b border-[#234332]">
+        <div class="px-5 py-3.5 bg-[#182E22] text-[#FAF8F5] flex items-center justify-between border-b border-[#234332]">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-full bg-[#234332] border border-[#DFBA71]/30 flex items-center justify-center text-[#DFBA71] font-bold text-base shadow">
               <span>F</span>
@@ -75,40 +118,40 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
             <div>
               <div class="flex items-center gap-2">
                 <h3 class="font-display font-bold text-sm tracking-wide leading-none text-[#FAF8F5]">Assistente Freixo AI</h3>
-                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span id="ai-status-dot" class="w-2 h-2 rounded-full ${status.dotColor}"></span>
               </div>
-              <p class="text-[10px] text-[#DDD4C7] mt-1 font-mono">Guia Inteligente • FastAPI Ready</p>
+              <p id="ai-status-badge" class="text-[10px] text-[#DDD4C7] mt-1 font-mono">${status.label}</p>
             </div>
           </div>
 
           <div class="flex items-center gap-1.5">
-            <button id="ai-clear-btn" class="p-1.5 text-xs text-[#DDD4C7] hover:text-[#FAF8F5] rounded hover:bg-white/10 transition-colors" title="Limpar conversa">
+            <button id="ai-clear-btn" class="p-1.5 text-xs text-[#DDD4C7] hover:text-[#FAF8F5] rounded hover:bg-white/10 transition-colors" title="Limpar conversa" aria-label="Limpar histórico de conversa">
               🗑️
             </button>
-            <button id="ai-close-btn" class="p-1.5 text-sm text-[#DDD4C7] hover:text-[#FAF8F5] rounded hover:bg-white/10 transition-colors" aria-label="Fechar">
+            <button id="ai-close-btn" class="p-1.5 text-sm text-[#DDD4C7] hover:text-[#FAF8F5] rounded hover:bg-white/10 transition-colors" aria-label="Fechar janela de chat">
               ✕
             </button>
           </div>
         </div>
 
         <!-- Sugestões Rápidas (Chips de Pergunta) -->
-        <div class="px-4 py-2.5 bg-[#F4EFEA] border-b border-[#182E22]/10 overflow-x-auto flex items-center gap-2 no-scrollbar text-[11px]">
-          <button class="ai-chip flex-shrink-0 px-2.5 py-1 rounded-full bg-white border border-[#182E22]/15 text-[#182E22] hover:border-[#182E22] hover:bg-[#182E22] hover:text-white transition-all">
+        <div class="px-4 py-2.5 bg-[#F4EFEA] border-b border-[#182E22]/10 overflow-x-auto flex items-center gap-2 no-scrollbar text-[11px]" role="region" aria-label="Sugestões de perguntas">
+          <button type="button" class="ai-chip flex-shrink-0 px-2.5 py-1 rounded-full bg-white border border-[#182E22]/15 text-[#182E22] hover:border-[#182E22] hover:bg-[#182E22] hover:text-white transition-all">
             🌿 Onde ver a seda a tecer?
           </button>
-          <button class="ai-chip flex-shrink-0 px-2.5 py-1 rounded-full bg-white border border-[#182E22]/15 text-[#182E22] hover:border-[#182E22] hover:bg-[#182E22] hover:text-white transition-all">
+          <button type="button" class="ai-chip flex-shrink-0 px-2.5 py-1 rounded-full bg-white border border-[#182E22]/15 text-[#182E22] hover:border-[#182E22] hover:bg-[#182E22] hover:text-white transition-all">
             🦅 Como visitar o Penedo Durão?
           </button>
-          <button class="ai-chip flex-shrink-0 px-2.5 py-1 rounded-full bg-white border border-[#182E22]/15 text-[#182E22] hover:border-[#182E22] hover:bg-[#182E22] hover:text-white transition-all">
+          <button type="button" class="ai-chip flex-shrink-0 px-2.5 py-1 rounded-full bg-white border border-[#182E22]/15 text-[#182E22] hover:border-[#182E22] hover:bg-[#182E22] hover:text-white transition-all">
             🍷 O que comer de típico?
           </button>
-          <button class="ai-chip flex-shrink-0 px-2.5 py-1 rounded-full bg-white border border-[#182E22]/15 text-[#182E22] hover:border-[#182E22] hover:bg-[#182E22] hover:text-white transition-all">
+          <button type="button" class="ai-chip flex-shrink-0 px-2.5 py-1 rounded-full bg-white border border-[#182E22]/15 text-[#182E22] hover:border-[#182E22] hover:bg-[#182E22] hover:text-white transition-all">
             🏛️ Rota dos Portais Manuelinos
           </button>
         </div>
 
         <!-- Área de Mensagens -->
-        <div id="ai-messages-container" class="flex-grow p-4 overflow-y-auto space-y-3.5 bg-[#FAF8F5]">
+        <div id="ai-messages-container" class="flex-grow p-4 overflow-y-auto space-y-3.5 bg-[#FAF8F5]" role="log" aria-live="polite">
           <!-- As mensagens serão inseridas aqui dinamicamente -->
         </div>
 
@@ -128,7 +171,8 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
                  id="ai-input" 
                  placeholder="Pergunta qualquer coisa sobre Freixo..." 
                  class="flex-grow px-3.5 py-2.5 rounded-xl bg-white border border-[#182E22]/20 text-xs sm:text-sm text-[#24211D] focus:outline-none focus:border-[#182E22] focus:ring-1 focus:ring-[#182E22] placeholder:text-[#7E9283]"
-                 autocomplete="off" />
+                 autocomplete="off"
+                 aria-label="Mensagem para o assistente de IA" />
           
           <button type="submit" 
                   id="ai-send-btn" 
@@ -140,7 +184,7 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
           </button>
         </form>
 
-      </div>
+      </section>
     `;
 
     this.renderMessages();
@@ -161,6 +205,7 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
         this.messages = [{
           sender: 'ai',
           text: 'Conversa reiniciada. Em que posso ser útil agora?',
+          isDemo: true,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }];
         storageService.saveChatHistory(this.messages);
@@ -187,6 +232,13 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
         this.handleUserPrompt(text);
       });
     });
+
+    // Fechar com Escape quando focado
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.isOpen) {
+        this.closeChat();
+      }
+    });
   }
 
   toggleChat() {
@@ -205,7 +257,7 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
     if (bubble) bubble.classList.add('opacity-0', 'pointer-events-none');
 
     const input = document.getElementById('ai-input');
-    if (input) setTimeout(() => input.focus(), 250);
+    if (input) setTimeout(() => input.focus(), 200);
 
     this.scrollToBottom();
   }
@@ -239,7 +291,6 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
     if (indicator) indicator.classList.remove('hidden');
 
     try {
-      // Obter histórico de mensagens relevantes para contexto
       const history = this.messages.map(m => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
         content: m.text
@@ -251,6 +302,10 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
         sender: 'ai',
         text: response.reply,
         source: response.source,
+        isConfirmed: response.isConfirmed,
+        isDemo: response.isDemo,
+        disclaimer: response.disclaimer,
+        sources: response.sources || [],
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       this.messages.push(aiMsg);
@@ -259,6 +314,7 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
       this.messages.push({
         sender: 'ai',
         text: 'Lamento, ocorreu uma pequena indisponibilidade temporária. Por favor tenta novamente.',
+        isDemo: true,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
     } finally {
@@ -277,10 +333,23 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
       const isUser = m.sender === 'user';
       return `
         <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
-          <div class="max-w-[85%] px-4 py-3 text-xs sm:text-[13px] leading-relaxed ${
+          <div class="max-w-[88%] px-4 py-3 text-xs sm:text-[13px] leading-relaxed ${
             isUser ? 'chat-bubble-user' : 'chat-bubble-ai text-[#24211D]'
           }">
             ${this.formatMarkdown(m.text)}
+
+            ${!isUser && m.isDemo ? `
+              <div class="mt-2 pt-2 border-t border-[#182E22]/10 text-[10px] text-amber-800 font-sans flex items-center gap-1">
+                <span>ℹ️</span>
+                <span>Modo de demonstração local (Pendente de validação de API)</span>
+              </div>
+            ` : ''}
+
+            ${!isUser && m.sources && m.sources.length ? `
+              <div class="mt-2 pt-2 border-t border-[#182E22]/10 text-[10px] text-emerald-800 font-sans">
+                <span class="font-bold">Fontes verificadas:</span> ${m.sources.join(', ')}
+              </div>
+            ` : ''}
           </div>
           <span class="text-[9px] text-[#7E9283] mt-1 px-1 font-mono">${m.timestamp}</span>
         </div>
@@ -290,7 +359,6 @@ Podes perguntar-me sobre a secular **tradição da seda**, os **miradouros do Do
 
   formatMarkdown(text) {
     if (!text) return '';
-    // Formatador simples para negrito, itálico, listas e quebras de linha
     return text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')

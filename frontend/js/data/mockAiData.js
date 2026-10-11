@@ -259,6 +259,8 @@ export function generateSmartItinerary({ days = 2, interest = "cultura", pace = 
       mobility,
       totalStops: itineraries.reduce((acc, d) => acc + d.stops.length, 0),
       estimatedKm: daysCount * 18,
+      isDemonstration: true,
+      disclaimer: "Itinerário sugerido por algoritmo demonstrativo. Paragens, distâncias e horários são indicativos e devem ser validados junto do Posto de Turismo.",
       seasonTip: "Freixo goza de microclima mediterrânico: primaveras floridas e verões solarengos ideais para o rio."
     },
     days: itineraries

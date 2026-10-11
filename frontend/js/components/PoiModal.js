@@ -1,6 +1,6 @@
 /**
  * FREIXO AI — Modal Imersivo de Ponto de Interesse (POI)
- * Detalhes aprofundados, leitor de áudio-guia simulado e ações
+ * Detalhes aprofundados, identificação rigorosa de fontes e leitor demonstrativo de áudio
  */
 
 import { storageService } from '../services/storageService.js';
@@ -20,9 +20,18 @@ export function openPoiModal(poi) {
   }
 
   const isFav = storageService.isFavorite(poi.id);
+  const verification = poi.verification || {
+    status: 'confirmado',
+    source: 'Município de Freixo de Espada à Cinta',
+    notes: 'Dados patrimoniais de Freixo de Espada à Cinta.'
+  };
 
   modalOverlay.innerHTML = `
-    <div class="relative w-full max-w-3xl max-h-[90vh] bg-[#FAF8F5] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-[#182E22]/15 transform scale-95 transition-transform duration-300" id="poi-modal-card">
+    <div class="relative w-full max-w-3xl max-h-[90vh] bg-[#FAF8F5] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-[#182E22]/15 transform scale-95 transition-transform duration-300" 
+         id="poi-modal-card" 
+         role="dialog" 
+         aria-modal="true" 
+         aria-labelledby="poi-modal-title">
       
       <!-- Cabeçalho com Imagem e Fechar -->
       <div class="relative h-64 sm:h-72 w-full bg-[#182E22] overflow-hidden flex-shrink-0">
@@ -30,21 +39,24 @@ export function openPoiModal(poi) {
         <div class="absolute inset-0 bg-gradient-to-t from-[#122419] via-black/30 to-black/20"></div>
 
         <!-- Botão Fechar -->
-        <button id="modal-close-btn" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors backdrop-blur-sm" aria-label="Fechar">
+        <button id="modal-close-btn" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors backdrop-blur-sm" aria-label="Fechar janela de detalhes">
           ✕
         </button>
 
-        <!-- Categoria e Favorito -->
-        <div class="absolute top-4 left-4 flex items-center gap-2">
+        <!-- Categoria e Badges -->
+        <div class="absolute top-4 left-4 flex flex-wrap items-center gap-2">
           <span class="editorial-badge bg-[#FAF8F5]/90 text-[#182E22] font-semibold border-none">
             ${poi.categoryLabel}
+          </span>
+          <span class="text-[10px] bg-emerald-950/80 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30 backdrop-blur-sm">
+            ✓ Fonte: ${verification.source}
           </span>
         </div>
 
         <!-- Título e Subtítulo sobre a imagem -->
         <div class="absolute bottom-4 left-4 right-4 text-[#FAF8F5]">
-          <h2 class="font-display text-2xl sm:text-3xl font-bold tracking-tight leading-snug">${poi.title}</h2>
-          <p class="text-xs text-[#EBE4DA] flex items-center gap-2 mt-1">
+          <h2 id="poi-modal-title" class="font-display text-2xl sm:text-3xl font-bold tracking-tight leading-snug">${poi.title}</h2>
+          <p class="text-xs text-[#EBE4DA] flex flex-wrap items-center gap-2 mt-1">
             <span>📍 ${poi.location}</span>
             <span>•</span>
             <span>⛰️ ${poi.altitude || '450m'}</span>
@@ -59,10 +71,21 @@ export function openPoiModal(poi) {
         
         <!-- Descrição Principal -->
         <div>
-          <h3 class="text-xs uppercase tracking-[0.16em] font-bold text-[#B65737] mb-2">Narrativa & Contexto</h3>
+          <h3 class="text-xs uppercase tracking-[0.16em] font-bold text-[#B65737] mb-2">Narrativa & Contexto Histórico</h3>
           <p class="text-base text-[#24211D] leading-relaxed font-sans">
             ${poi.fullDescription || poi.shortDescription}
           </p>
+        </div>
+
+        <!-- Nota de Rigor e Fonte Documental -->
+        <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/70 text-xs text-emerald-900 flex items-start gap-2.5">
+          <span class="text-sm">🏛️</span>
+          <div>
+            <span class="font-bold block">Enquadramento Documental:</span>
+            <p class="text-[11px] leading-relaxed mt-0.5 text-emerald-800">
+              ${verification.notes || 'Registo catalogado na memória histórica e patrimonial do concelho de Freixo de Espada à Cinta.'}
+            </p>
+          </div>
         </div>
 
         <!-- Leitor de Áudio-Guia Simulado -->
@@ -70,19 +93,22 @@ export function openPoiModal(poi) {
           <div class="p-4 rounded-xl bg-[#182E22] text-[#FAF8F5] shadow-inner space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <button id="audio-play-btn" class="w-10 h-10 rounded-full bg-[#DFBA71] text-[#182E22] flex items-center justify-center font-bold text-lg hover:scale-105 transition-transform shadow-md">
+                <button id="audio-play-btn" class="w-10 h-10 rounded-full bg-[#DFBA71] text-[#182E22] flex items-center justify-center font-bold text-lg hover:scale-105 transition-transform shadow-md" aria-label="Reproduzir áudio guia">
                   <span id="audio-play-icon">▶</span>
                 </button>
                 <div>
-                  <h4 class="text-sm font-semibold text-[#FAF8F5]">${poi.audioGuide.title}</h4>
-                  <p class="text-[11px] text-[#DDD4C7]">Áudio-guia narrado com contexto histórico</p>
+                  <div class="flex items-center gap-2">
+                    <h4 class="text-sm font-semibold text-[#FAF8F5]">${poi.audioGuide.title}</h4>
+                    <span class="text-[9px] bg-white/10 text-[#DFBA71] px-1.5 py-0.5 rounded uppercase tracking-wider font-mono">Protótipo Áudio</span>
+                  </div>
+                  <p class="text-[11px] text-[#DDD4C7]">Narração de demonstração com contexto cultural</p>
                 </div>
               </div>
               <span id="audio-timer" class="text-xs font-mono text-[#DFBA71]">00:00 / ${poi.audioGuide.duration}</span>
             </div>
 
             <!-- Barra de Progresso do Áudio -->
-            <div class="w-full bg-[#234332] h-1.5 rounded-full overflow-hidden">
+            <div class="w-full bg-[#234332] h-1.5 rounded-full overflow-hidden" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
               <div id="audio-progress-bar" class="bg-[#DFBA71] h-full w-0 transition-all duration-300"></div>
             </div>
 
@@ -113,7 +139,7 @@ export function openPoiModal(poi) {
           </div>
         ` : ''}
 
-        <!-- Informações Práticas -->
+        <!-- Informações Práticas & Avisos de Validação -->
         <div class="p-4 rounded-xl bg-[#EBE4DA]/60 border border-[#182E22]/10 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
             <span class="font-bold text-[#182E22] block mb-1">Horário & Acesso:</span>
@@ -125,7 +151,7 @@ export function openPoiModal(poi) {
           </div>
           ${poi.tips ? `
             <div class="sm:col-span-2 pt-2 border-t border-[#182E22]/10">
-              <span class="font-bold text-[#B65737] block mb-0.5">💡 Dica do Especialista Freixo AI:</span>
+              <span class="font-bold text-[#B65737] block mb-0.5">💡 Recomendação de Visita:</span>
               <p class="text-[#3D3830]">${poi.tips}</p>
             </div>
           ` : ''}
@@ -137,7 +163,7 @@ export function openPoiModal(poi) {
       <div class="p-4 bg-[#F4EFEA] border-t border-[#182E22]/10 flex flex-wrap items-center justify-between gap-3">
         <button id="modal-fav-btn" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#182E22]/20 hover:border-[#182E22] text-xs font-semibold tracking-wide transition-all ${
           isFav ? 'bg-[#B65737] text-white border-[#B65737]' : 'bg-white text-[#182E22]'
-        }">
+        }" type="button">
           <span>${isFav ? '❤️ Nos Meus Favoritos' : '🤍 Guardar nos Favoritos'}</span>
         </button>
 

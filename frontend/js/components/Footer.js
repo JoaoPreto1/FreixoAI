@@ -1,6 +1,6 @@
 /**
  * FREIXO AI — Rodapé Editorial Partilhado
- * Inclui estado técnico das APIs, coordenadas e informações úteis
+ * Inclui estado técnico real das APIs, coordenadas e informações de apoio
  */
 
 import { API_CONFIG } from '../config/apiConfig.js';
@@ -10,6 +10,51 @@ export function renderFooter() {
   if (!mountPoint) return;
 
   const currentYear = new Date().getFullYear();
+
+  const getStatusMarkup = (state) => {
+    if (state.nodeConnected) {
+      return `
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-semibold text-[#FAF8F5] flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Arquitetura API
+          </span>
+          <span class="text-[10px] bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded text-emerald-300 font-mono">Node.js Ligado</span>
+        </div>
+        <p class="text-[#7E9283] text-[10px] leading-tight">
+          Conexão ativa à API Node.js (Porta 5000). Consultas em tempo real ativas.
+        </p>
+      `;
+    }
+    
+    if (state.fastApiConnected) {
+      return `
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-semibold text-[#FAF8F5] flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Arquitetura API
+          </span>
+          <span class="text-[10px] bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded text-emerald-300 font-mono">FastAPI IA Ligado</span>
+        </div>
+        <p class="text-[#7E9283] text-[10px] leading-tight">
+          Conexão direta ao serviço de IA FastAPI (Porta 8000). Respostas geradas por modelo.
+        </p>
+      `;
+    }
+
+    return `
+      <div class="flex items-center justify-between mb-1">
+        <span class="font-semibold text-[#FAF8F5] flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          Estado dos Serviços
+        </span>
+        <span class="text-[10px] bg-amber-950/80 border border-amber-600/40 px-2 py-0.5 rounded text-[#DFBA71] font-mono">Demonstração Local</span>
+      </div>
+      <p class="text-[#7E9283] text-[10px] leading-tight">
+        Backend offline. A operar com base documental local e fallback de demonstração (Pendente de ligação a API).
+      </p>
+    `;
+  };
 
   mountPoint.innerHTML = `
     <footer class="bg-[#122419] text-[#EBE4DA] pt-16 pb-12 border-t border-[#234332]/50 mt-auto editorial-grain">
@@ -31,7 +76,7 @@ export function renderFooter() {
             </div>
             
             <p class="text-sm text-[#DDD4C7] leading-relaxed max-w-md font-sans">
-              Onde o Douro abraça a tradição. Uma plataforma turística inteligente concebida para revelar o património milenar da seda, a monumentalidade das arribas graníticas e a riqueza dos sabores de Freixo de Espada à Cinta.
+              Onde o Douro abraça a tradição. Uma plataforma turística concebida para valorizar o património milenar da seda, a monumentalidade dos portais manuelinos e as arribas graníticas de Freixo de Espada à Cinta.
             </p>
 
             <div class="flex items-center gap-2 text-xs text-[#DFBA71]">
@@ -54,7 +99,7 @@ export function renderFooter() {
 
           <!-- Coluna 3: Contactos & Informação Local (4 cols) -->
           <div class="lg:col-span-4 flex flex-col gap-4">
-            <h4 class="text-xs font-semibold uppercase tracking-[0.18em] text-[#DFBA71]">Posto de Turismo & Apoio</h4>
+            <h4 class="text-xs font-semibold uppercase tracking-[0.18em] text-[#DFBA71]">Posto de Turismo Oficial</h4>
             <div class="text-xs text-[#DDD4C7] space-y-2">
               <p class="flex items-start gap-2">
                 <span class="text-[#DFBA71]">📍</span>
@@ -66,35 +111,36 @@ export function renderFooter() {
               </p>
               <p class="flex items-center gap-2">
                 <span class="text-[#DFBA71]">⏰</span>
-                <span>Terça a Domingo: 09h30 - 13h00 / 14h00 - 17h30</span>
+                <span>Terça a Domingo: 09h30 - 13h00 / 14h00 - 17h30 (Sujeito a confirmação sazonal)</span>
               </p>
             </div>
 
-            <!-- Badge de Prontidão Técnica / Arquitetura API -->
-            <div class="mt-2 p-3 rounded-lg bg-[#182E22] border border-[#234332] text-[11px] text-[#DDD4C7]">
-              <div class="flex items-center justify-between mb-1">
-                <span class="font-semibold text-[#FAF8F5] flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  Arquitetura API
-                </span>
-                <span class="text-[10px] bg-[#234332] px-1.5 py-0.5 rounded text-[#DFBA71] font-mono">Modo Demo Ativo</span>
-              </div>
-              <p class="text-[#7E9283] text-[10px] leading-tight">
-                Frontend desacoplado com fallback local. Pronto para Node.js (porta 5000) e FastAPI IA (porta 8000).
-              </p>
+            <!-- Badge de Estado Real da API -->
+            <div id="footer-api-status-box" class="mt-2 p-3 rounded-lg bg-[#182E22] border border-[#234332] text-[11px] text-[#DDD4C7]">
+              ${getStatusMarkup(API_CONFIG.STATE)}
             </div>
           </div>
         </div>
 
         <!-- Linha Inferior: Direitos e Créditos -->
         <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7E9283]">
-          <p>© ${currentYear} Freixo AI. Todos os direitos reservados. Promovendo a identidade do Douro Internacional.</p>
+          <p>© ${currentYear} Freixo AI. Promovendo a identidade do Douro Internacional e o património transmontano.</p>
           <div class="flex items-center gap-4">
-            <span class="hover:text-[#DDD4C7] transition-colors cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Voltar ao Topo ↑</span>
+            <button class="hover:text-[#DDD4C7] transition-colors cursor-pointer text-xs" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Voltar ao início da página">
+              Voltar ao Topo ↑
+            </button>
           </div>
         </div>
 
       </div>
     </footer>
   `;
+
+  // Ouvinte dinâmico para atualizar o status do backend em tempo real
+  window.addEventListener('freixo:apiStateChanged', (e) => {
+    const box = document.getElementById('footer-api-status-box');
+    if (box && e.detail) {
+      box.innerHTML = getStatusMarkup(e.detail);
+    }
+  });
 }

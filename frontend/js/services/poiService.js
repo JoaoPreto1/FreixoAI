@@ -15,19 +15,17 @@ class PoiService {
    * Obtém todos os pontos de interesse
    */
   async getAllPois() {
-    if (!API_CONFIG.USE_MOCK_FALLBACK) {
-      const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.POIS}`;
-      return await apiService.request(url, {}, API_CONFIG.NODE_API.TIMEOUT_MS);
-    }
-
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.POIS}`;
       const data = await apiService.request(url, {}, 1500);
-      return data;
+      if (Array.isArray(data) && data.length > 0) {
+        return data.map(item => ({ ...item, _provenance: 'api_node' }));
+      }
     } catch {
-      // Fallback transparente e instantâneo para dados locais de demonstração
-      return [...POIS_DATA];
+      // Backend offline ou rota inexistente — recorrer a dados locais
     }
+
+    return POIS_DATA.map(item => ({ ...item, _provenance: 'demonstracao_local' }));
   }
 
   /**
@@ -39,10 +37,15 @@ class PoiService {
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.POI_DETAIL(id)}`;
       const data = await apiService.request(url, {}, 1500);
-      return data;
+      if (data && data.id) {
+        return { ...data, _provenance: 'api_node' };
+      }
     } catch {
-      return POIS_DATA.find(poi => poi.id === id) || null;
+      // Fallback
     }
+
+    const found = POIS_DATA.find(poi => poi.id === id);
+    return found ? { ...found, _provenance: 'demonstracao_local' } : null;
   }
 
   /**
@@ -86,10 +89,11 @@ class PoiService {
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.ROUTES}`;
       const data = await apiService.request(url, {}, 1500);
-      return data;
+      if (Array.isArray(data) && data.length > 0) return data;
     } catch {
-      return [...ROUTES_DATA];
+      // Fallback
     }
+    return [...ROUTES_DATA];
   }
 
   /**
@@ -99,10 +103,11 @@ class PoiService {
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.GASTRONOMY}`;
       const data = await apiService.request(url, {}, 1500);
-      return data;
+      if (data && data.dishes) return data;
     } catch {
-      return { ...GASTRONOMY_DATA };
+      // Fallback
     }
+    return { ...GASTRONOMY_DATA };
   }
 
   /**
@@ -112,10 +117,11 @@ class PoiService {
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.HERITAGE}`;
       const data = await apiService.request(url, {}, 1500);
-      return data;
+      if (data && data.silkTradition) return data;
     } catch {
-      return { ...HERITAGE_DATA };
+      // Fallback
     }
+    return { ...HERITAGE_DATA };
   }
 }
 

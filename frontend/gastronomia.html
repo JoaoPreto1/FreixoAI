@@ -43,6 +43,9 @@
     }
   </script>
 
+  <!-- Favicon SVG Editorial -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+
   <!-- CSS Editorial -->
   <link rel="stylesheet" href="assets/css/editorial.css">
 </head>
@@ -191,7 +194,7 @@
         `).join('');
       }
 
-      // Renderizar Restaurantes
+      // Renderizar Restaurantes com distinção de demonstração
       const restGrid = document.getElementById('restaurants-grid');
       if (restGrid && data.restaurants) {
         restGrid.innerHTML = data.restaurants.map(r => `
@@ -199,11 +202,14 @@
             <div>
               <div class="flex items-center justify-between mb-2">
                 <span class="text-xs text-gold font-bold">★ ${r.rating}</span>
-                <span class="text-xs text-olive font-mono">${r.priceRange}</span>
+                <span class="text-[9px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200">
+                  Pendente de Validação
+                </span>
               </div>
               <h4 class="font-display font-bold text-lg text-pine-900">${r.name}</h4>
               <p class="text-xs text-olive mt-1">📍 ${r.location}</p>
               <p class="text-xs text-parchment-800 mt-2 font-medium">Especialidades: ${r.specialty}</p>
+              <p class="text-[10px] text-amber-800 italic mt-1">${r.verification?.note || 'Dados de contacto demonstrativos.'}</p>
             </div>
 
             <div class="pt-3 border-t border-pine-800/10 flex items-center justify-between text-xs">

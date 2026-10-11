@@ -1,15 +1,15 @@
 /**
  * FREIXO AI — Serviço de Comunicação HTTP
- * Encapsula chamadas REST, gestão de timeouts e fallback transparente para Mock
+ * Encapsula chamadas REST, controlo de tempos limites e deteção de conectividade real
  */
 
 import { API_CONFIG } from '../config/apiConfig.js';
 
 class ApiService {
   /**
-   * Executa um fetch com controlo de tempo limite (timeout)
+   * Executa um pedido HTTP com timeout e cancelamento seguro
    */
-  async request(url, options = {}, timeoutMs = 6000) {
+  async request(url, options = {}, timeoutMs = 4000) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -27,7 +27,7 @@ class ApiService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       return await response.json();
@@ -38,7 +38,8 @@ class ApiService {
   }
 
   /**
-   * Verifica o estado de conectividade das APIs backend
+   * Avalia a conectividade real dos serviços de backend (Node.js e FastAPI)
+   * Sem falsos positivos: se o serviço não responder com 200 OK, é marcado como offline
    */
   async checkHealth() {
     const status = {
@@ -47,25 +48,47 @@ class ApiService {
       timestamp: new Date().toISOString()
     };
 
-    // Testar Node.js Express
+    // 1. Testar se o Gateway Node.js está operacional
     try {
-      const res = await this.request(`${API_CONFIG.NODE_API.BASE_URL}/health`, {}, 2500);
-      status.nodeApi = Boolean(res?.status === 'ok' || res?.healthy);
+      const res = await this.request(
+        `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.HEALTH}`,
+        { method: 'GET' },
+        2000
+      );
+      status.nodeApi = Boolean(res && (res.status === 'ok' || res.healthy === true));
     } catch {
       status.nodeApi = false;
     }
 
-    // Testar FastAPI
+    // 2. Testar se o serviço Python / FastAPI está operacional
     try {
-      const res = await this.request(`${API_CONFIG.FASTAPI_AI.BASE_URL}${API_CONFIG.FASTAPI_AI.ENDPOINTS.HEALTH}`, {}, 2500);
-      status.fastApi = Boolean(res?.status === 'ok' || res?.healthy);
+      const res = await this.request(
+        `${API_CONFIG.FASTAPI_AI.BASE_URL}${API_CONFIG.FASTAPI_AI.ENDPOINTS.HEALTH}`,
+        { method: 'GET' },
+        2000
+      );
+      status.fastApi = Boolean(res && (res.status === 'ok' || res.status === 'healthy'));
     } catch {
       status.fastApi = false;
+    }
+
+    // Determinar modo ativo com base nas respostas reais
+    if (status.nodeApi) {
+      API_CONFIG.STATE.activeMode = 'node_gateway';
+    } else if (status.fastApi) {
+      API_CONFIG.STATE.activeMode = 'fastapi_direto';
+    } else {
+      API_CONFIG.STATE.activeMode = 'demonstracao_local';
     }
 
     API_CONFIG.STATE.nodeConnected = status.nodeApi;
     API_CONFIG.STATE.fastApiConnected = status.fastApi;
     API_CONFIG.STATE.lastChecked = status.timestamp;
+
+    // Disparar evento para que a interface reflita o estado real
+    window.dispatchEvent(
+      new CustomEvent('freixo:apiStateChanged', { detail: { ...API_CONFIG.STATE } })
+    );
 
     return status;
   }

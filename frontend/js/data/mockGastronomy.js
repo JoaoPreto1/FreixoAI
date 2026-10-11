@@ -62,7 +62,12 @@ export const GASTRONOMY_DATA = {
       location: "Avenida Guerra Junqueiro, Centro",
       phone: "+351 279 652 230",
       rating: 4.8,
-      priceRange: "€€"
+      priceRange: "€€",
+      verification: {
+        status: "pendente_validacao",
+        isDemo: true,
+        note: "Contacto e dados indicativos. Sujeito a confirmação direta com o restaurante."
+      }
     },
     {
       name: "Restaurante da Congida (Margem do Douro)",
@@ -70,7 +75,12 @@ export const GASTRONOMY_DATA = {
       location: "Complexo Fluvial da Congida",
       phone: "+351 279 653 112",
       rating: 4.7,
-      priceRange: "€€"
+      priceRange: "€€",
+      verification: {
+        status: "pendente_validacao",
+        isDemo: true,
+        note: "Contacto e horários sazonais sujeitos a confirmação no Complexo Fluvial."
+      }
     },
     {
       name: "Tasca do Forno",
@@ -78,7 +88,12 @@ export const GASTRONOMY_DATA = {
       location: "Largo do Município",
       phone: "+351 279 652 441",
       rating: 4.9,
-      priceRange: "€"
+      priceRange: "€",
+      verification: {
+        status: "pendente_validacao",
+        isDemo: true,
+        note: "Contacto e dados indicativos. Sujeito a confirmação direta."
+      }
     }
   ]
 };

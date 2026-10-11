@@ -5,8 +5,8 @@
   "description": "Frontend editorial e inteligente para o Freixo AI - Freixo de Espada à Cinta",
   "main": "js/app.js",
   "scripts": {
-    "start": "npx -y serve . -l 3000",
-    "dev": "npx -y serve . -l 3000"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "keywords": [
     "freixo-de-espada-a-cinta",

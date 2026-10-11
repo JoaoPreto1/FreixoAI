@@ -1,6 +1,7 @@
 /**
  * FREIXO AI — Gerador e Visualizador de Roteiro Inteligente
  * Gera planos personalizados por dias, ritmo, interesses e mobilidade
+ * com distinção clara entre estimativas de demonstração e dados confirmados
  */
 
 import { aiService } from '../services/aiService.js';
@@ -46,14 +47,14 @@ export class ItineraryPlanner {
             
             <!-- Duração em Dias -->
             <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-[#182E22] mb-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-[#182E22] mb-2" id="days-label">
                 Duração da Estadia
               </label>
-              <div class="grid grid-cols-4 gap-2">
+              <div class="grid grid-cols-4 gap-2" role="group" aria-labelledby="days-label">
                 ${[1, 2, 3, 4].map(d => `
                   <button type="button" class="day-btn py-2.5 text-xs font-semibold rounded-xl border border-[#182E22]/20 hover:border-[#182E22] transition-all text-center ${
                     d === 2 ? 'bg-[#182E22] text-[#FAF8F5] border-[#182E22]' : 'bg-white text-[#24211D]'
-                  }" data-days="${d}">
+                  }" data-days="${d}" aria-pressed="${d === 2 ? 'true' : 'false'}">
                     ${d} ${d === 1 ? 'Dia' : 'Dias'}
                   </button>
                 `).join('')}
@@ -63,7 +64,7 @@ export class ItineraryPlanner {
 
             <!-- Estilo / Interesse Principal -->
             <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-[#182E22] mb-2">
+              <label for="input-interest" class="block text-xs font-bold uppercase tracking-wider text-[#182E22] mb-2">
                 Perfil de Interesse
               </label>
               <select id="input-interest" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#182E22]/20 text-xs text-[#24211D] font-medium focus:ring-1 focus:ring-[#182E22] focus:outline-none">
@@ -76,17 +77,17 @@ export class ItineraryPlanner {
 
             <!-- Ritmo da Visita -->
             <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-[#182E22] mb-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-[#182E22] mb-2" id="pace-label">
                 Ritmo da Experiência
               </label>
-              <div class="grid grid-cols-3 gap-2">
-                <button type="button" class="pace-btn py-2 text-[11px] font-medium rounded-xl border border-[#182E22]/20 bg-white text-[#24211D]" data-pace="tranquilo">
+              <div class="grid grid-cols-3 gap-2" role="group" aria-labelledby="pace-label">
+                <button type="button" class="pace-btn py-2 text-[11px] font-medium rounded-xl border border-[#182E22]/20 bg-white text-[#24211D]" data-pace="tranquilo" aria-pressed="false">
                   Tranquilo
                 </button>
-                <button type="button" class="pace-btn py-2 text-[11px] font-semibold rounded-xl border border-[#182E22] bg-[#182E22] text-[#FAF8F5]" data-pace="equilibrado">
+                <button type="button" class="pace-btn py-2 text-[11px] font-semibold rounded-xl border border-[#182E22] bg-[#182E22] text-[#FAF8F5]" data-pace="equilibrado" aria-pressed="true">
                   Equilibrado
                 </button>
-                <button type="button" class="pace-btn py-2 text-[11px] font-medium rounded-xl border border-[#182E22]/20 bg-white text-[#24211D]" data-pace="dinamico">
+                <button type="button" class="pace-btn py-2 text-[11px] font-medium rounded-xl border border-[#182E22]/20 bg-white text-[#24211D]" data-pace="dinamico" aria-pressed="false">
                   Dinâmico
                 </button>
               </div>
@@ -95,54 +96,51 @@ export class ItineraryPlanner {
 
             <!-- Modo de Deslocação -->
             <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-[#182E22] mb-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-[#182E22] mb-2" id="mobility-label">
                 Mobilidade
               </label>
-              <div class="grid grid-cols-2 gap-2">
-                <button type="button" class="mobility-btn py-2 text-xs font-semibold rounded-xl border border-[#182E22] bg-[#182E22] text-[#FAF8F5]" data-mobility="carro">
-                  🚗 De Carro
+              <div class="grid grid-cols-2 gap-2" role="group" aria-labelledby="mobility-label">
+                <button type="button" class="mobility-btn py-2 text-xs font-semibold rounded-xl border border-[#182E22] bg-[#182E22] text-[#FAF8F5]" data-mobility="carro" aria-pressed="true">
+                  🚗 Automóvel
                 </button>
-                <button type="button" class="mobility-btn py-2 text-xs font-medium rounded-xl border border-[#182E22]/20 bg-white text-[#24211D]" data-mobility="pedestre">
+                <button type="button" class="mobility-btn py-2 text-xs font-medium rounded-xl border border-[#182E22]/20 bg-white text-[#24211D]" data-mobility="a-pe" aria-pressed="false">
                   🚶 A Pé no Centro
                 </button>
               </div>
               <input type="hidden" id="input-mobility" value="carro" />
             </div>
 
-            <!-- Botão Gerar Roteiro -->
+            <!-- Botão de Ação -->
             <button type="submit" 
-                    id="generate-plan-btn" 
-                    class="w-full py-3.5 px-4 rounded-xl bg-[#182E22] hover:bg-[#234332] text-[#FAF8F5] text-xs font-bold tracking-widest uppercase transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 group">
-              <span id="btn-spinner" class="hidden w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                    id="generate-plan-btn"
+                    class="w-full py-3.5 px-6 rounded-xl bg-[#182E22] hover:bg-[#234332] text-[#FAF8F5] text-xs font-bold tracking-wider uppercase transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group">
+              <span id="btn-spinner" class="hidden w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
               <span id="btn-text">Gerar Roteiro com IA</span>
-              <span class="group-hover:translate-x-1 transition-transform">✨</span>
+              <span class="group-hover:translate-x-1 transition-transform">→</span>
             </button>
-
           </form>
         </div>
 
-        <!-- Área de Exibição dos Resultados do Plano (8 colunas) -->
-        <div class="lg:col-span-8 flex flex-col gap-6" id="itinerary-output">
+        <!-- Visualizador do Roteiro Gerado (8 colunas) -->
+        <div class="lg:col-span-8 flex flex-col space-y-6">
           
-          <!-- Estado Inicial (Vazio ou Placeholder Elegante) -->
-          <div id="itinerary-placeholder" class="p-8 sm:p-12 text-center rounded-2xl border-2 border-dashed border-[#182E22]/20 bg-[#FAF8F5]/50 flex flex-col items-center justify-center gap-4">
-            <div class="w-14 h-14 rounded-full bg-[#182E22]/10 flex items-center justify-center text-2xl text-[#182E22]">
-              🧭
+          <!-- Estado Vazio / Inicial -->
+          <div id="itinerary-placeholder" class="bg-[#FAF8F5] p-10 rounded-2xl border border-[#182E22]/10 text-center space-y-4">
+            <div class="w-14 h-14 rounded-full bg-[#182E22]/5 text-[#182E22] flex items-center justify-center mx-auto text-2xl">
+              🗺️
             </div>
-            <div class="max-w-md">
-              <h4 class="font-display text-xl font-bold text-[#182E22]">O teu roteiro inteligente está à espera</h4>
-              <p class="text-xs text-[#7E9283] mt-1.5 leading-relaxed">
-                Seleciona os teus dias e preferências à esquerda e clica em "Gerar Roteiro com IA" para que o nosso modelo construa uma rota otimizada e enriquecida com horários, dicas e paragens recomendadas.
-              </p>
-            </div>
-            <button id="quick-demo-btn" class="mt-2 text-xs font-semibold text-[#B65737] hover:underline">
-              Ou clica aqui para ver um roteiro modelo de 2 dias →
+            <h4 class="font-display text-xl font-bold text-[#182E22]">Nenhum Roteiro Gerado Ainda</h4>
+            <p class="text-xs text-[#7E9283] max-w-md mx-auto leading-relaxed">
+              Configura a duração da tua estadia e clica em <strong>"Gerar Roteiro com IA"</strong>. O sistema apresentará uma proposta diária articulando os monumentos do centro e os miradouros das arribas.
+            </p>
+            <button type="button" id="quick-demo-btn" class="px-5 py-2.5 rounded-full bg-white border border-[#182E22]/20 hover:border-[#182E22] text-xs font-semibold text-[#182E22] transition-colors">
+              Ver Exemplo Rápido de 2 Dias
             </button>
           </div>
 
-          <!-- Conteúdo Renderizado do Plano -->
-          <div id="itinerary-days-container" class="space-y-6 hidden">
-            <!-- Dias serão inseridos dinamicamente aqui -->
+          <!-- Conteúdo Renderizado dos Dias -->
+          <div id="itinerary-days-container" class="hidden space-y-6">
+            <!-- Injetado por renderPlanResults() -->
           </div>
 
         </div>
@@ -163,9 +161,12 @@ export class ItineraryPlanner {
       btn.addEventListener('click', () => {
         dayBtns.forEach(b => {
           b.className = 'day-btn py-2.5 text-xs font-semibold rounded-xl border border-[#182E22]/20 bg-white text-[#24211D] hover:border-[#182E22] transition-all text-center';
+          b.setAttribute('aria-pressed', 'false');
         });
         btn.className = 'day-btn py-2.5 text-xs font-semibold rounded-xl border border-[#182E22] bg-[#182E22] text-[#FAF8F5] transition-all text-center';
-        document.getElementById('input-days').value = btn.dataset.days;
+        btn.setAttribute('aria-pressed', 'true');
+        const inputDays = document.getElementById('input-days');
+        if (inputDays) inputDays.value = btn.dataset.days;
       });
     });
 
@@ -174,9 +175,12 @@ export class ItineraryPlanner {
       btn.addEventListener('click', () => {
         paceBtns.forEach(b => {
           b.className = 'pace-btn py-2 text-[11px] font-medium rounded-xl border border-[#182E22]/20 bg-white text-[#24211D]';
+          b.setAttribute('aria-pressed', 'false');
         });
         btn.className = 'pace-btn py-2 text-[11px] font-semibold rounded-xl border border-[#182E22] bg-[#182E22] text-[#FAF8F5]';
-        document.getElementById('input-pace').value = btn.dataset.pace;
+        btn.setAttribute('aria-pressed', 'true');
+        const inputPace = document.getElementById('input-pace');
+        if (inputPace) inputPace.value = btn.dataset.pace;
       });
     });
 
@@ -185,9 +189,12 @@ export class ItineraryPlanner {
       btn.addEventListener('click', () => {
         mobilityBtns.forEach(b => {
           b.className = 'mobility-btn py-2 text-xs font-medium rounded-xl border border-[#182E22]/20 bg-white text-[#24211D]';
+          b.setAttribute('aria-pressed', 'false');
         });
         btn.className = 'mobility-btn py-2 text-xs font-semibold rounded-xl border border-[#182E22] bg-[#182E22] text-[#FAF8F5]';
-        document.getElementById('input-mobility').value = btn.dataset.mobility;
+        btn.setAttribute('aria-pressed', 'true');
+        const inputMobility = document.getElementById('input-mobility');
+        if (inputMobility) inputMobility.value = btn.dataset.mobility;
       });
     });
 
@@ -247,27 +254,45 @@ export class ItineraryPlanner {
     if (placeholder) placeholder.classList.add('hidden');
     container.classList.remove('hidden');
 
+    const isDemo = Boolean(plan.isDemo || plan.summary?.isDemonstration);
+
     container.innerHTML = `
       <!-- Cabeçalho do Roteiro Gerado -->
       <div class="p-6 rounded-2xl bg-[#182E22] text-[#FAF8F5] shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div class="flex items-center gap-2 mb-1">
+          <div class="flex flex-wrap items-center gap-2 mb-1">
             <span class="editorial-badge bg-[#DFBA71] text-[#182E22] font-bold border-none text-[10px]">
-              ${plan.summary.days} DIAS OTIMIZADOS
+              ${plan.summary.days} DIAS SUGERIDOS
             </span>
-            <span class="text-xs text-[#DFBA71]">• ${plan.summary.totalStops} Paragens Recomendadas</span>
+            <span class="text-xs text-[#DFBA71]">• ${plan.summary.totalStops} Paragens Indicativas</span>
+            ${isDemo ? `
+              <span class="text-[9px] bg-white/10 text-amber-300 px-2 py-0.5 rounded-full font-mono">
+                Sugestão Demonstrativa
+              </span>
+            ` : ''}
           </div>
           <h3 class="font-display text-2xl font-bold tracking-tight">Roteiro Personalizado para Freixo</h3>
           <p class="text-xs text-[#DDD4C7] mt-1 font-sans">${plan.summary.seasonTip}</p>
         </div>
 
         <div class="flex items-center gap-2">
-          <button id="print-plan-btn" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-colors" title="Imprimir Roteiro">
+          <button id="print-plan-btn" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-colors" title="Imprimir Roteiro" type="button">
             🖨️ Imprimir
           </button>
-          <button id="ask-ai-plan-btn" class="px-3.5 py-2 rounded-xl bg-[#DFBA71] hover:bg-[#cda453] text-xs font-bold text-[#182E22] transition-colors">
+          <button id="ask-ai-plan-btn" class="px-3.5 py-2 rounded-xl bg-[#DFBA71] hover:bg-[#cda453] text-xs font-bold text-[#182E22] transition-colors" type="button">
             Perguntar à IA ✨
           </button>
+        </div>
+      </div>
+
+      <!-- Aviso de Rigor Informativo -->
+      <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2.5">
+        <span class="text-sm">ℹ️</span>
+        <div>
+          <span class="font-bold">Aviso de Planeamento:</span>
+          <p class="text-[11px] leading-relaxed mt-0.5 text-amber-800">
+            ${plan.summary.disclaimer || 'Este itinerário resulta de um modelo algorítmico demonstrativo. Os horários e trajetos são orientativos e estão sujeitos a validação presencial no Posto de Turismo de Freixo de Espada à Cinta.'}
+          </p>
         </div>
       </div>
 
