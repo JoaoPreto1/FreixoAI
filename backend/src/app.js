@@ -1,98 +1,68 @@
 /**
- * FREIXO AI — Backend API Gateway (Node.js)
- * Servidor leve em Node.js vanilla sem dependências externas obrigatórias.
- * Responsável pela orquestração de rotas, API REST e proxy para o serviço FastAPI de IA.
+ * FREIXO AI — Express Application Bootstrap
+ * Configuração de middlewares, rotas canónicas e tratamento centralizado de erros.
  */
 
-import http from 'http';
+import express from 'express';
+import { ENV } from './config/env.js';
+import { corsMiddleware } from './middleware/cors.js';
+import { notFoundHandler, centralErrorHandler } from './middleware/errorHandler.js';
+import apiRouter from './routes/index.js';
 
-const PORT = process.env.PORT || 5000;
-const FASTAPI_URL = process.env.FASTAPI_URL || 'http://127.0.0.1:8000';
+export const createApp = () => {
+  const app = express();
 
-const setCorsHeaders = (res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+  // 1. Middlewares globais essenciais
+  app.use(corsMiddleware);
+  app.use(express.json({ limit: '1mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+  // 2. Rota de apresentação da API
+  app.get('/', (req, res) => {
+    res.status(200).json({
+      name: 'Freixo AI — Backend API',
+      version: '1.0.0',
+      description: 'API Node.js/Express para o ecossistema turístico e territorial de Freixo de Espada à Cinta',
+      documentation: '/api/health',
+      endpoints: [
+        'GET /api/health',
+        'GET /api/freguesias',
+        'GET /api/places',
+        'GET /api/places/:slug',
+        'GET /api/trails',
+        'GET /api/events',
+        'POST /api/chat'
+      ],
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // 3. Montagem do Router Principal
+  app.use('/api', apiRouter);
+
+  // 4. Tratamento de rotas inexistentes (404)
+  app.use(notFoundHandler);
+
+  // 5. Middleware centralizado de tratamento de erros
+  app.use(centralErrorHandler);
+
+  return app;
 };
 
-const server = http.createServer(async (req, res) => {
-  setCorsHeaders(res);
+const app = createApp();
 
-  // Tratamento de preflight OPTIONS
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204);
-    return res.end();
-  }
+// Se executado diretamente (ex: node src/app.js)
+const isDirectRun = process.argv[1] && (
+  process.argv[1].endsWith('app.js') ||
+  process.argv[1].endsWith('server.js')
+);
 
-  const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const pathname = url.pathname;
+if (isDirectRun && process.env.NODE_ENV !== 'test') {
+  app.listen(ENV.PORT, () => {
+    console.log(`[Freixo AI] Servidor Express ativo em: http://localhost:${ENV.PORT}`);
+    console.log(`[Freixo AI] Gateway configurado para FastAPI em: ${ENV.FASTAPI_URL}`);
+    console.log(`[Freixo AI] Modo de execução: ${ENV.NODE_ENV}`);
+  });
+}
 
-  // 1. Health check do Gateway
-  if (req.method === 'GET' && pathname === '/api/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify({
-      status: 'ok',
-      healthy: true,
-      service: 'freixo-backend-gateway',
-      version: '1.0.0',
-      timestamp: new Date().toISOString()
-    }));
-  }
-
-  // 2. Gateway Proxy para o Chat do Serviço de IA (FastAPI)
-  if (req.method === 'POST' && pathname === '/api/chat') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', async () => {
-      try {
-        const parsed = JSON.parse(body || '{}');
-        const question = parsed.question || parsed.message || '';
-        const language = parsed.language || 'pt';
-
-        // Encaminhar para o microserviço FastAPI (/chat)
-        try {
-          const fastApiResponse = await fetch(`${FASTAPI_URL}/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question, language }),
-            signal: AbortSignal.timeout(10000)
-          });
-
-          if (fastApiResponse.ok) {
-            const data = await fastApiResponse.json();
-            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-            return res.end(JSON.stringify({
-              answer: data.answer || data.reply,
-              sources: data.sources || [],
-              grounded: Boolean(data.grounded),
-              model: data.model,
-              forwardedFrom: 'fastapi'
-            }));
-          }
-        } catch (fastApiErr) {
-          console.warn('[Backend Gateway] FastAPI não acessível em ' + FASTAPI_URL + ':', fastApiErr.message);
-        }
-
-        // Se o FastAPI não responder, devolver resposta informativa
-        res.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8' });
-        return res.end(JSON.stringify({
-          error: 'Serviço de IA (FastAPI) temporariamente indisponível no endpoint ' + FASTAPI_URL,
-          serviceAvailable: false
-        }));
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
-        return res.end(JSON.stringify({ error: 'Pedido JSON inválido', detail: err.message }));
-      }
-    });
-    return;
-  }
-
-  // Rota não encontrada
-  res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
-  res.end(JSON.stringify({ error: `Rota não encontrada: ${pathname}` }));
-});
-
-server.listen(PORT, () => {
-  console.log(`Freixo AI Backend Gateway ativo em: http://localhost:${PORT}`);
-  console.log(`Proxy configurado para o serviço FastAPI em: ${FASTAPI_URL}`);
-});
+export default app;

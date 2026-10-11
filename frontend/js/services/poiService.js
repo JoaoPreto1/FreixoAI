@@ -17,9 +17,18 @@ class PoiService {
   async getAllPois() {
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.POIS}`;
-      const data = await apiService.request(url, {}, 1500);
-      if (Array.isArray(data) && data.length > 0) {
-        return data.map(item => ({ ...item, _provenance: 'api_node' }));
+      const res = await apiService.request(url, {}, 2500);
+      const items = Array.isArray(res) ? res : (res?.data || []);
+      if (Array.isArray(items) && items.length > 0) {
+        return items.map(item => ({
+          ...item,
+          image: item.image || item.image_url || 'assets/images/penedo-durao.png',
+          categoryLabel: item.categoryLabel || item.category_label || item.category,
+          shortDescription: item.shortDescription || item.short_description || '',
+          fullDescription: item.fullDescription || item.full_description || '',
+          coordinates: item.coordinates || (item.latitude && item.longitude ? { lat: item.latitude, lng: item.longitude } : null),
+          _provenance: item._provenance || 'api_node'
+        }));
       }
     } catch {
       // Backend offline ou rota inexistente — recorrer a dados locais
@@ -36,9 +45,18 @@ class PoiService {
 
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.POI_DETAIL(id)}`;
-      const data = await apiService.request(url, {}, 1500);
+      const res = await apiService.request(url, {}, 2500);
+      const data = res?.data || res;
       if (data && data.id) {
-        return { ...data, _provenance: 'api_node' };
+        return {
+          ...data,
+          image: data.image || data.image_url || 'assets/images/penedo-durao.png',
+          categoryLabel: data.categoryLabel || data.category_label || data.category,
+          shortDescription: data.shortDescription || data.short_description || '',
+          fullDescription: data.fullDescription || data.full_description || '',
+          coordinates: data.coordinates || (data.latitude && data.longitude ? { lat: data.latitude, lng: data.longitude } : null),
+          _provenance: data._provenance || 'api_node'
+        };
       }
     } catch {
       // Fallback
@@ -88,8 +106,9 @@ class PoiService {
   async getAllRoutes() {
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.ROUTES}`;
-      const data = await apiService.request(url, {}, 1500);
-      if (Array.isArray(data) && data.length > 0) return data;
+      const res = await apiService.request(url, {}, 2500);
+      const items = Array.isArray(res) ? res : (res?.data || []);
+      if (Array.isArray(items) && items.length > 0) return items;
     } catch {
       // Fallback
     }
