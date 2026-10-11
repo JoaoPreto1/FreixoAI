@@ -1,11 +1,3 @@
--- ==============================================================================
--- FREIXO AI — Esquema SQL de Tabelas Turísticas (Supabase / PostgreSQL)
--- ==============================================================================
--- IMPORTANTE:
--- Este script NÃO apaga nem modifica as tabelas existentes 'sources' e 'knowledge_chunks'.
--- Cria apenas as tabelas complementares do domínio turístico do concelho de
--- Freixo de Espada à Cinta com cláusulas 'IF NOT EXISTS'.
--- ==============================================================================
 
 -- 1. Freguesias do Concelho de Freixo de Espada à Cinta
 CREATE TABLE IF NOT EXISTS public.freguesias (
