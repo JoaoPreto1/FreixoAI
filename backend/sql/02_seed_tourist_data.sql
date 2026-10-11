@@ -146,6 +146,24 @@ VALUES
     'confirmado', 'Município de Freixo de Espada à Cinta / APA', FALSE
 ),
 (
+    'calcada-alpajares',
+    'calcada-alpajares',
+    'Calçada e Castelo Velho de Alpajares',
+    'patrimonio',
+    'Arqueologia & Paisagem',
+    'freixo-mazouco',
+    'Calçada antiga sobre o canhão granítico do rio Mosteiro, povoado fortificado proto-histórico e aves rupícolas.',
+    'A Calçada de Alpajares (também conhecida por Calçada dos Diabos) serpenteia por uma garganta escarpada no vale da ribeira do Mosteiro. No topo ergue-se o Castelo Velho, castro da Idade do Ferro com muralhas imponentes e gravuras rupestres.',
+    'Vale da Ribeira do Mosteiro, a 5 km a sul de Freixo',
+    41.0503, -6.8532, '380 m', '2h 30 min (percurso pedestre)',
+    'Trilho de montanha irregular; requer calçado de caminhada',
+    'Acesso livre e permanente',
+    'Evitar nas horas de maior calor no verão; levar água e bastão de caminhada.',
+    'assets/images/alpajares.png',
+    '["Calçada ancestral gravada em rocha granítica", "Castro e muralhas proto-históricas", "Paisagem agreste e observação de aves de rapina"]'::jsonb,
+    'confirmado', 'DGPC / ICNF / PNDI', FALSE
+),
+(
     'ponto-teste-demonstracao',
     'ponto-teste-demonstracao',
     'Registo de Teste — Demonstração Técnica da API',

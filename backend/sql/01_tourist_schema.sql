@@ -99,35 +99,41 @@ CREATE INDEX IF NOT EXISTS idx_events_slug ON public.events(slug);
 
 -- ==============================================================================
 -- Políticas de Segurança (Row Level Security - RLS)
--- Apenas leitura pública permitida para SELECT
+-- Apenas leitura pública permitida para SELECT; modificações restritas a administradores
 -- ==============================================================================
 ALTER TABLE public.freguesias ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.places ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.trails ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 
+-- Garantir permissões de leitura no PostgREST para utilizadores anónimos e autenticados
+GRANT SELECT ON TABLE public.freguesias TO anon, authenticated, service_role;
+GRANT SELECT ON TABLE public.places TO anon, authenticated, service_role;
+GRANT SELECT ON TABLE public.trails TO anon, authenticated, service_role;
+GRANT SELECT ON TABLE public.events TO anon, authenticated, service_role;
+
 DO $$
 BEGIN
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE tablename = 'freguesias' AND policyname = 'Leitura pública de freguesias'
+        SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'freguesias' AND policyname = 'Leitura pública de freguesias'
     ) THEN
         CREATE POLICY "Leitura pública de freguesias" ON public.freguesias FOR SELECT USING (true);
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE tablename = 'places' AND policyname = 'Leitura pública de locais'
+        SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'places' AND policyname = 'Leitura pública de locais'
     ) THEN
         CREATE POLICY "Leitura pública de locais" ON public.places FOR SELECT USING (true);
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE tablename = 'trails' AND policyname = 'Leitura pública de percursos'
+        SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'trails' AND policyname = 'Leitura pública de percursos'
     ) THEN
         CREATE POLICY "Leitura pública de percursos" ON public.trails FOR SELECT USING (true);
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE tablename = 'events' AND policyname = 'Leitura pública de eventos'
+        SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'events' AND policyname = 'Leitura pública de eventos'
     ) THEN
         CREATE POLICY "Leitura pública de eventos" ON public.events FOR SELECT USING (true);
     END IF;
