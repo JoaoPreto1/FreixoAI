@@ -39,14 +39,17 @@ Interface web focada em estética editorial, acessibilidade e interatividade:
 ---
 
 ### 2. `backend/` (Serviço de Aplicação)
-API em Node.js responsável pela orquestração de pedidos e serviços de aplicação.
-- **Tecnologias:** Node.js (ES Modules), arquitetura modular (`controllers`, `routes`, `services`).
+API REST em Node.js/Express responsável pela orquestração territorial, acesso a dados e gateway de IA.
+- **Tecnologias:** Node.js (ES Modules), Express, CORS configurado, Supabase (acesso seguro no servidor), proxy FastAPI.
 - **Como executar:**
   ```bash
   cd backend
-  npm install
-  npm start
+  npm ci          # Instalação limpa das dependências a partir do lockfile
+  npm start       # Inicia o servidor HTTP em http://localhost:5000
+  npm run dev     # Inicia em modo de desenvolvimento com hot-reload (--watch)
+  npm test        # Executa os testes automatizados (20 testes)
   ```
+- **Endpoints principais:** `GET /`, `GET /api/health`, `GET /api/freguesias`, `GET /api/places`, `GET /api/places/:slug`, `GET /api/trails`, `GET /api/events`, `POST /api/chat`.
 
 ---
 

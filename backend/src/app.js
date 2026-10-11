@@ -54,7 +54,7 @@ const app = createApp();
 // Se executado diretamente (ex: node src/app.js)
 const isDirectRun = process.argv[1] && (
   process.argv[1].endsWith('app.js') ||
-  process.argv[1].endsWith('server.js')
+  process.argv[1].endsWith('app')
 );
 
 if (isDirectRun && process.env.NODE_ENV !== 'test') {

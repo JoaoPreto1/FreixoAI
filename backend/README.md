@@ -85,18 +85,20 @@ SUPABASE_SECRET_KEY=sb_secret_...
 
 ## 3. Comandos de Execução no Windows (PowerShell / Prompt de Comando)
 
-### Instalar Dependências
+### Instalar Dependências a partir do Lockfile (Recomendado para instalação limpa)
 ```powershell
 cd "c:\Users\User\Desktop\Inteligencia artificial projeto\backend"
-npm install
+npm ci
 ```
+*(Ou `npm install` caso deseje atualizar pacotes).*
 
-### Iniciar em Produção / Padrão
+### Iniciar Servidor HTTP na Porta Configurada (Padrão)
 ```powershell
 npm start
 ```
+Executa `node src/server.js` e inicia o servidor HTTP Express na porta `5000` (ou na porta definida em `PORT`). Também é possível iniciar diretamente com `node src/app.js`.
 
-### Iniciar em Modo de Desenvolvimento (Watch)
+### Iniciar em Modo de Desenvolvimento (Hot Reload / Watch)
 ```powershell
 npm run dev
 ```
@@ -106,7 +108,7 @@ O servidor ficará disponível em: `http://localhost:5000`
 ```powershell
 npm test
 ```
-Executa a validação nativa de todas as 17 asserções em `tests/api.test.js`.
+Executa a validação nativa de todas as 20 asserções em `tests/api.test.js` (arranque, rotas de saúde, CORS, endpoints territoriais, validações de entrada, integridade de slug, respostas 404 e resiliência a falhas de microserviço).
 
 ---
 

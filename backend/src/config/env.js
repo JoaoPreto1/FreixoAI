@@ -1,13 +1,22 @@
-
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Carrega o .env localizado na raiz da pasta backend
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+// Resolução segura do caminho do ficheiro .env
+const backendEnvPath = path.resolve(__dirname, '../../.env');
+const rootEnvPath = path.resolve(__dirname, '../../../.env');
+
+if (fs.existsSync(backendEnvPath)) {
+  dotenv.config({ path: backendEnvPath });
+} else if (fs.existsSync(rootEnvPath)) {
+  dotenv.config({ path: rootEnvPath });
+} else {
+  dotenv.config();
+}
 
 export const ENV = {
   PORT: parseInt(process.env.PORT || '5000', 10),
@@ -21,7 +30,7 @@ export const ENV = {
   isTest: process.env.NODE_ENV === 'test'
 };
 
-// Verificação de segurança: garantir que as chaves não estão vazias em produção
+// Verificação de segurança: nunca expor nem registar chaves secretas nos logs
 if (ENV.isProduction && (!ENV.SUPABASE_URL || !ENV.SUPABASE_SECRET_KEY)) {
-  console.warn('[AVISO DE CONFIGURAÇÃO] SUPABASE_URL ou SUPABASE_SECRET_KEY não estão definidas no ambiente de produção.');
+  console.warn('[Config] SUPABASE_URL ou SUPABASE_SECRET_KEY não estão definidas no ambiente de produção.');
 }

@@ -13,7 +13,6 @@ __pycache__/
 
 # Dependências Node.js
 node_modules/
-package-lock.json
 
 # Ficheiros de Ambiente e Segredos (NUNCA enviar para o GitHub)
 .env

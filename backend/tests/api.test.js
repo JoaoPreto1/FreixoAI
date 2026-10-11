@@ -247,10 +247,46 @@ test('POST /api/chat — Se FastAPI não estiver ativo, deve devolver 503 contro
 });
 
 // ==============================================================================
-// 9. Rota Não Encontrada (404)
+// 9. Arranque e Rota Raiz (GET /)
+// ==============================================================================
+test('GET / — Deve responder com 200, metadados da API e lista de endpoints', async () => {
+  const res = await fetch(`${baseUrl}/`);
+  assert.equal(res.status, 200);
+
+  const json = await res.json();
+  assert.equal(json.name, 'Freixo AI — Backend API');
+  assert.equal(json.version, '1.0.0');
+  assert.ok(Array.isArray(json.endpoints));
+  assert.ok(json.endpoints.includes('GET /api/health'));
+  assert.ok(json.endpoints.includes('POST /api/chat'));
+});
+
+// ==============================================================================
+// 10. CORS (Cross-Origin Resource Sharing)
+// ==============================================================================
+test('CORS — Deve incluir cabeçalhos Access-Control-Allow-Origin para CLIENT_ORIGIN', async () => {
+  const res = await fetch(`${baseUrl}/api/health`, {
+    headers: { 'Origin': 'http://localhost:3000' }
+  });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('access-control-allow-origin'), 'http://localhost:3000');
+});
+
+// ==============================================================================
+// 11. Rota Não Encontrada (404)
 // ==============================================================================
 test('GET /api/rota-inexistente — Deve devolver erro 404 com envelope padronizado', async () => {
   const res = await fetch(`${baseUrl}/api/rota-inexistente`);
+  assert.equal(res.status, 404);
+
+  const json = await res.json();
+  assert.equal(json.success, false);
+  assert.equal(json.error.code, 'ROUTE_NOT_FOUND');
+  assert.equal(json.error.status, 404);
+});
+
+test('GET /rota-global-desconhecida — Deve responder com 404 consistente fora de /api', async () => {
+  const res = await fetch(`${baseUrl}/rota-global-desconhecida`);
   assert.equal(res.status, 404);
 
   const json = await res.json();
