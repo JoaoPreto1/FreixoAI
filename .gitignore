@@ -1,0 +1,34 @@
+# Ambientes Virtuais Python
+.venv/
+venv/
+ENV/
+env/
+ai-service/.venv/
+
+# Caches e Binários Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+
+# Dependências Node.js
+node_modules/
+package-lock.json
+
+# Ficheiros de Ambiente e Segredos (NUNCA enviar para o GitHub)
+.env
+*.env
+!.env.example
+ai-service/.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ficheiros do Sistema Operativo e IDEs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
