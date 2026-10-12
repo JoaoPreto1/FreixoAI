@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Componente de Cartão de Ponto de Interesse (POI)
- * Renderiza cartões editoriais com imagem, metadados, fontes e botões de ação
- */
-
 import { storageService } from '../services/storageService.js';
 import { openPoiModal } from './PoiModal.js';
 import { showToast } from './Toast.js';
@@ -19,17 +14,14 @@ export function createPoiCard(poi, onCardClick = null) {
   const isPending = poi.verification?.pendingValidation === true;
 
   card.innerHTML = `
-    <!-- Imagem de Destaque -->
     <div class="relative h-56 sm:h-64 w-full bg-[#182E22] overflow-hidden cursor-pointer" data-action="open-modal">
       <img src="${poi.image}" 
            alt="${poi.title}" 
            loading="lazy"
            class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108 group-hover:opacity-95" />
       
-      <!-- Overlay Sombreado Suave -->
       <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
 
-      <!-- Badges de Categoria & Validação -->
       <div class="absolute top-3.5 left-3.5 flex flex-col gap-1.5 items-start">
         <span class="editorial-badge bg-[#FAF8F5]/90 text-[#182E22] shadow-sm">
           ${poi.categoryLabel}
@@ -49,7 +41,6 @@ export function createPoiCard(poi, onCardClick = null) {
         `)}
       </div>
 
-      <!-- Botão Favorito Flutuante -->
       <button class="fav-toggle-btn absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-[#FAF8F5]/85 text-[#182E22] hover:text-[#B65737] hover:bg-white flex items-center justify-center transition-all duration-200 shadow-md ${
         isFav ? 'text-[#B65737]' : ''
       }" 
@@ -61,7 +52,6 @@ export function createPoiCard(poi, onCardClick = null) {
         </svg>
       </button>
 
-      <!-- Metadados na Imagem -->
       <div class="absolute bottom-3 left-3.5 right-3.5 flex items-center justify-between text-[11px] text-[#FAF8F5] font-medium">
         <span class="flex items-center gap-1 opacity-90">
           <span>⛰️</span> ${poi.altitude || '450m'}
@@ -72,7 +62,6 @@ export function createPoiCard(poi, onCardClick = null) {
       </div>
     </div>
 
-    <!-- Corpo do Cartão -->
     <div class="p-5 sm:p-6 flex flex-col flex-grow justify-between gap-4">
       
       <div>
@@ -87,25 +76,27 @@ export function createPoiCard(poi, onCardClick = null) {
         </p>
       </div>
 
-      <!-- Ações no Fundo do Cartão -->
-      <div class="pt-3 border-t border-[#182E22]/10 flex items-center justify-between">
-        <button class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#182E22] hover:text-[#B65737] transition-colors btn-editorial-arrow" data-action="open-modal" type="button">
-          <span>Explorar Detalhes</span>
-          <span class="arrow-icon">→</span>
-        </button>
+      <div class="pt-3 border-t border-[#182E22]/10 flex items-center justify-between gap-2">
+        <a href="detalhe.html?slug=${poi.slug || poi.id}" 
+           class="inline-flex items-center gap-1.5 text-xs font-bold text-[#182E22] hover:text-[#B65737] transition-colors group/link" 
+           aria-label="Ver ficha completa de ${poi.title}">
+          <span>Ficha do Local</span>
+          <span class="text-sm transition-transform group-hover/link:translate-x-1">→</span>
+        </a>
 
-        ${poi.audioGuide ? `
-          <button class="flex items-center gap-1 text-[11px] text-[#7E9283] hover:text-[#182E22] transition-colors" data-action="open-modal" title="Áudio demonstrativo disponível" type="button">
-            <span>🎧</span>
-            <span>Áudio (${poi.audioGuide.duration})</span>
+        <div class="flex items-center gap-2">
+          <button class="text-[11px] text-[#7E9283] hover:text-[#182E22] transition-colors font-medium px-2 py-1 rounded hover:bg-[#182E22]/5" 
+                  data-action="open-modal" 
+                  type="button"
+                  title="Pré-visualização rápida">
+            <span>👁️ Ver no Mapa</span>
           </button>
-        ` : ''}
+        </div>
       </div>
 
     </div>
   `;
 
-  // Ouvintes de clique e teclado
   card.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && e.target === card) {
       openPoiModal(poi);

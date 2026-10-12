@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Express Application Bootstrap
- * Configuração de middlewares, rotas canónicas e tratamento centralizado de erros.
- */
-
 import express from 'express';
 import { ENV } from './config/env.js';
 import { corsMiddleware } from './middleware/cors.js';
@@ -12,12 +7,10 @@ import apiRouter from './routes/index.js';
 export const createApp = () => {
   const app = express();
 
-  // 1. Middlewares globais essenciais
   app.use(corsMiddleware);
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-  // 2. Rota de apresentação da API
   app.get('/', (req, res) => {
     res.status(200).json({
       name: 'Freixo AI — Backend API',
@@ -30,20 +23,18 @@ export const createApp = () => {
         'GET /api/places',
         'GET /api/places/:slug',
         'GET /api/trails',
+        'GET /api/trails/:slug',
         'GET /api/events',
-        'POST /api/chat'
+        'GET /api/events/:slug',
+        'POST /api/chat',
+        'POST /api/itinerary/generate'
       ],
       timestamp: new Date().toISOString()
     });
   });
 
-  // 3. Montagem do Router Principal
   app.use('/api', apiRouter);
-
-  // 4. Tratamento de rotas inexistentes (404)
   app.use(notFoundHandler);
-
-  // 5. Middleware centralizado de tratamento de erros
   app.use(centralErrorHandler);
 
   return app;

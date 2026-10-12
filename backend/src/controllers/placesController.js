@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Places Controller
- * Gestão de pontos de interesse, monumentos, miradouros e património do concelho.
- */
-
 import { tourismService } from '../services/tourismService.js';
 
 export const getPlaces = async (req, res, next) => {
@@ -16,7 +11,6 @@ export const getPlaces = async (req, res, next) => {
       includeDemo
     });
 
-    // Se o cliente solicitar explicitamente o formato em array plano (ex: frontend legado)
     if (raw === 'true') {
       return res.status(200).json(items);
     }

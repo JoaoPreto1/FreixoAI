@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Seda & Património Manuelino — Freixo AI</title>
   <meta name="description" content="Conheça a arte secular da seda viva e os mais de 40 portais manuelinos de Freixo de Espada à Cinta. Um património histórico e artesanal único em Portugal.">
-  
-  <!-- Tailwind CSS CDN -->
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -43,21 +42,16 @@
     }
   </script>
 
-  <!-- Favicon SVG Editorial -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
 
-  <!-- Variáveis de Ambiente Públicas -->
   <script src="env.js"></script>
 
-  <!-- CSS Editorial -->
   <link rel="stylesheet" href="assets/css/editorial.css">
 </head>
 <body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain">
 
-  <!-- Navbar -->
   <div id="navbar-mount"></div>
 
-  <!-- Hero Editorial de Património -->
   <header class="relative min-h-[60vh] flex items-center justify-center bg-pine-900 text-parchment-100 overflow-hidden">
     <div class="absolute inset-0 z-0">
       <img src="assets/images/seda-loom.png" 
@@ -79,10 +73,8 @@
     </div>
   </header>
 
-  <!-- ÁREA PRINCIPAL -->
   <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-grow space-y-24">
-    
-    <!-- SECÇÃO 1: O CICLO INTEGRAL DA SEDA -->
+
     <section class="space-y-12">
       <div class="max-w-3xl">
         <span class="editorial-badge bg-pine-800 text-gold mb-3">O Ciclo do Bombyx Mori</span>
@@ -94,7 +86,6 @@
         </p>
       </div>
 
-      <!-- Etapas do Ciclo da Seda (Grelha 4 Passos) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         
         <div class="bg-parchment-50 p-6 rounded-2xl border border-pine-800/10 shadow hover:shadow-md transition-shadow space-y-3">
@@ -139,7 +130,6 @@
 
       </div>
 
-      <!-- Destaque do Museu da Seda -->
       <div class="p-8 rounded-3xl bg-pine-800 text-parchment-50 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
         <div class="space-y-2">
           <span class="text-xs text-gold uppercase tracking-widest font-bold">Visitas ao Museu da Seda e do Território</span>
@@ -147,14 +137,18 @@
           <p class="text-xs text-parchment-200 max-w-xl">
             Largo do Convento de S. Francisco • Terça a Domingo • Peças exclusivas disponíveis para aquisição na loja de artesanato.
           </p>
+        <div class="flex flex-wrap items-center gap-3">
+          <a href="detalhe.html?slug=museu-da-seda" class="px-6 py-3 rounded-full bg-gold text-pine-900 font-bold text-xs uppercase tracking-wider hover:bg-[#cfa85e] transition-colors whitespace-nowrap shadow-md flex items-center gap-1.5">
+            <span>Ver Ficha do Museu</span>
+            <span>→</span>
+          </a>
+          <button class="px-5 py-3 rounded-full bg-white/15 text-white hover:bg-white/25 text-xs font-semibold tracking-wider uppercase transition-colors" onclick="window.dispatchEvent(new CustomEvent('freixo:openAiChat', {detail: {prompt: 'Gostava de visitar o Museu da Seda. Como posso agendar ou ver horários?'}}))">
+            Perguntar à IA ✨
+          </button>
         </div>
-        <button class="px-6 py-3 rounded-full bg-gold text-pine-900 font-bold text-xs uppercase tracking-wider hover:bg-[#cfa85e] transition-colors whitespace-nowrap" onclick="window.dispatchEvent(new CustomEvent('freixo:openAiChat', {detail: {prompt: 'Gostava de visitar o Museu da Seda. Como posso agendar ou ver horários?'}}))">
-          Perguntar Horários à IA
-        </button>
       </div>
     </section>
 
-    <!-- SECÇÃO 2: OS 42 PORTAIS MANUELINOS -->
     <section id="portais" class="space-y-12 pt-8 border-t border-pine-800/15">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
         
@@ -195,10 +189,8 @@
       </div>
     </section>
 
-    <!-- SECÇÃO 3: LENDAS & MEMÓRIA -->
     <section class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-pine-800/15">
-      
-      <!-- Lenda do Nome -->
+
       <div class="bg-parchment-50 p-8 rounded-3xl border border-pine-800/10 shadow-md space-y-4">
         <span class="editorial-badge bg-white text-pine-900">Lenda Secular</span>
         <h3 class="font-display text-2xl font-bold text-pine-900">A Lenda do Freixo e da Espada</h3>
@@ -210,7 +202,6 @@
         </p>
       </div>
 
-      <!-- Guerra Junqueiro -->
       <div class="bg-parchment-50 p-8 rounded-3xl border border-pine-800/10 shadow-md space-y-4">
         <span class="editorial-badge bg-white text-pine-900">Voz dos Simples</span>
         <h3 class="font-display text-2xl font-bold text-pine-900">Guerra Junqueiro (1850–1923)</h3>
@@ -227,7 +218,6 @@
 
     </section>
 
-    <!-- SECÇÃO 4: FREGUESIAS E DIVISÃO TERRITORIAL (Ligado a GET /api/freguesias) -->
     <section class="space-y-8 pt-8 border-t border-pine-800/15">
       <div class="max-w-3xl">
         <span class="editorial-badge bg-pine-800 text-gold mb-3">Território & Comunidades</span>
@@ -240,14 +230,13 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="freguesias-grid">
-        <!-- Renderizado dinamicamente por JS a partir de GET /api/freguesias -->
+        
         <div class="col-span-full text-center py-8 text-xs text-olive animate-pulse">
           A carregar freguesias através da API Node.js...
         </div>
       </div>
     </section>
 
-    <!-- SECÇÃO 5: AGENDA DE EVENTOS E TRADIÇÕES (Ligado a GET /api/events) -->
     <section class="space-y-8 pt-8 border-t border-pine-800/15">
       <div class="max-w-3xl">
         <span class="editorial-badge bg-white text-pine-900 mb-3">Ciclo Cultural Anual</span>
@@ -260,7 +249,7 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="events-grid">
-        <!-- Renderizado dinamicamente por JS a partir de GET /api/events -->
+        
         <div class="col-span-full text-center py-8 text-xs text-olive animate-pulse">
           A carregar eventos através da API Node.js...
         </div>
@@ -269,13 +258,10 @@
 
   </main>
 
-  <!-- Rodapé -->
   <div id="footer-mount"></div>
 
-  <!-- Chat Widget -->
   <div id="ai-chat-mount"></div>
 
-  <!-- Scripts -->
   <script type="module">
     import { freixoApp } from './js/app.js';
     import { poiService } from './js/services/poiService.js';
@@ -283,7 +269,6 @@
     document.addEventListener('DOMContentLoaded', async () => {
       await freixoApp.init('patrimonio');
 
-      // 1. Carregar e renderizar Freguesias (GET /api/freguesias)
       const freguesiasGrid = document.getElementById('freguesias-grid');
       if (freguesiasGrid) {
         try {
@@ -323,7 +308,6 @@
         }
       }
 
-      // 2. Carregar e renderizar Eventos (GET /api/events)
       const eventsGrid = document.getElementById('events-grid');
       if (eventsGrid) {
         try {
@@ -348,11 +332,10 @@
                   <p class="text-xs text-parchment-800 leading-relaxed font-sans">${e.description}</p>
                   <div class="pt-2 border-t border-pine-800/10 flex items-center justify-between text-[11px] text-olive">
                     <span>📍 ${e.location || 'Freixo'}</span>
-                    <span class="text-[9px] font-semibold px-2 py-0.5 rounded-full ${
-                      isApi ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                    }">
-                      ${isApi ? '✓ API Node.js' : 'Demonstração'}
-                    </span>
+                    <a href="evento.html?slug=${e.slug || e.id}" class="text-terracotta hover:underline font-bold text-xs inline-flex items-center gap-1">
+                      <span>Ver Ficha</span>
+                      <span>→</span>
+                    </a>
                   </div>
                 </div>
               </div>

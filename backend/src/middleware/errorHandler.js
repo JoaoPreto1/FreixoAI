@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Middleware Centralizado de Erros e 404
- * Garante respostas JSON estruturadas, códigos HTTP adequados e consistência em toda a API.
- */
-
 import { ENV } from '../config/env.js';
 
 export const notFoundHandler = (req, res) => {

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Detalhe do Local — Freixo AI</title>
+  <meta id="meta-description" name="description" content="Informações detalhadas, coordenadas georreferenciadas, história e dicas práticas sobre os pontos de interesse de Freixo de Espada à Cinta.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              100: '#E6EFE9',
+              600: '#315843',
+              700: '#234332',
+              800: '#182E22',
+              900: '#122419',
+            },
+            parchment: {
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#EBE4DA',
+              300: '#DDD4C7',
+              800: '#3D3830',
+              900: '#24211D',
+            },
+            terracotta: '#B65737',
+            gold: '#DFBA71',
+            olive: '#7E9283'
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            editorial: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            monument: ['"Cinzel"', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+
+  <script src="env.js"></script>
+
+  <link rel="stylesheet" href="assets/css/editorial.css">
+</head>
+<body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain selection:bg-terracotta selection:text-white">
+
+  <div id="navbar-mount"></div>
+
+  <div id="loading-state" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow w-full space-y-8 animate-pulse">
+    <div class="h-6 bg-pine-800/10 rounded w-1/4"></div>
+    <div class="h-96 bg-pine-800/20 rounded-3xl"></div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="md:col-span-2 space-y-4">
+        <div class="h-8 bg-pine-800/15 rounded w-3/4"></div>
+        <div class="h-4 bg-pine-800/10 rounded w-full"></div>
+        <div class="h-4 bg-pine-800/10 rounded w-5/6"></div>
+        <div class="h-4 bg-pine-800/10 rounded w-2/3"></div>
+      </div>
+      <div class="h-64 bg-pine-800/10 rounded-2xl"></div>
+    </div>
+  </div>
+
+  <div id="error-state" class="hidden max-w-4xl mx-auto px-4 py-20 text-center flex-grow flex flex-col items-center justify-center space-y-6">
+    <div class="w-20 h-20 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-4xl shadow-inner">
+      🧭
+    </div>
+    <span class="editorial-badge bg-amber-100 text-amber-900 border-amber-300">Local Não Identificado</span>
+    <h1 class="font-display text-3xl sm:text-4xl font-bold text-pine-900" id="error-title">
+      Lugar Não Encontrado
+    </h1>
+    <p class="text-sm text-parchment-800 max-w-md mx-auto leading-relaxed" id="error-message">
+      O ponto de interesse solicitado não consta no catálogo oficial ou o endereço é inválido. Podes explorar todos os monumentos e miradouros confirmados de Freixo de Espada à Cinta no mapa.
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+      <a href="explorar.html" class="px-6 py-3 rounded-full bg-pine-900 text-white font-semibold text-xs tracking-wider uppercase hover:bg-pine-800 transition-all shadow-md">
+        ← Voltar ao Mapa de Exploração
+      </a>
+      <a href="index.html" class="px-6 py-3 rounded-full bg-white border border-pine-900/20 text-pine-900 font-semibold text-xs tracking-wider uppercase hover:bg-parchment-200 transition-all">
+        Página Inicial
+      </a>
+    </div>
+  </div>
+
+  <main id="poi-content" class="hidden flex-grow w-full pb-20">
+
+    <div class="bg-pine-950 text-parchment-300 border-b border-pine-800/80 text-xs py-3.5 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        <nav aria-label="Navegação em trilho de pão" class="flex items-center gap-2">
+          <a href="index.html" class="hover:text-gold transition-colors">Início</a>
+          <span class="text-pine-600">/</span>
+          <a href="explorar.html" class="hover:text-gold transition-colors">Explorar</a>
+          <span class="text-pine-600">/</span>
+          <span id="breadcrumb-title" class="text-white font-semibold truncate max-w-xs sm:max-w-md">...</span>
+        </nav>
+
+        <div id="provenance-badge" class="flex items-center gap-2">
+          
+        </div>
+      </div>
+    </div>
+
+    <header class="relative min-h-[50vh] sm:min-h-[58vh] bg-pine-900 text-white overflow-hidden flex items-end">
+      
+      <div class="absolute inset-0 z-0">
+        <img id="hero-image" 
+             src="assets/images/penedo-durao.png" 
+             alt="Fotografia do Ponto de Interesse" 
+             class="w-full h-full object-cover object-center scale-100 transition-transform duration-1000 ease-out hover:scale-105 opacity-80" />
+        <div class="absolute inset-0 bg-gradient-to-t from-pine-950 via-pine-950/50 to-black/30"></div>
+      </div>
+
+      <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 w-full">
+        <div class="max-w-3xl space-y-4">
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <span id="hero-category-badge" class="editorial-badge bg-[#FAF8F5] text-pine-900 font-bold border-none shadow-md">
+              ...
+            </span>
+            <span id="hero-validation-badge" class="text-[11px] font-semibold bg-emerald-950/90 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/40 backdrop-blur-md flex items-center gap-1.5 shadow-sm">
+              <span>✓ Fonte:</span>
+              <span id="hero-validation-source">Oficial</span>
+            </span>
+          </div>
+
+          <h1 id="poi-title" class="font-display text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1] drop-shadow-md">
+            ...
+          </h1>
+
+          <div class="flex flex-wrap items-center gap-y-2 gap-x-4 text-xs sm:text-sm text-parchment-200 font-medium pt-1">
+            <span class="flex items-center gap-1.5">
+              <span>📍</span> <span id="meta-location">...</span>
+            </span>
+            <span class="text-pine-600 hidden sm:inline">•</span>
+            <span class="flex items-center gap-1.5">
+              <span>⛰️</span> <span id="meta-altitude">...</span>
+            </span>
+            <span class="text-pine-600 hidden sm:inline">•</span>
+            <span class="flex items-center gap-1.5">
+              <span>⏱️</span> <span id="meta-time">...</span>
+            </span>
+            <span class="text-pine-600 hidden sm:inline">•</span>
+            <span class="flex items-center gap-1.5 font-mono text-xs text-parchment-300">
+              <span>🧭</span> <span id="meta-coords">...</span>
+            </span>
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <section class="sticky top-20 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-pine-800/15 py-3.5 px-4 sm:px-6 lg:px-8 shadow-sm transition-all">
+      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        
+        <div class="flex flex-wrap items-center gap-2.5">
+          
+          <a id="btn-directions-gps" 
+             href="#" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             class="px-4 py-2.5 rounded-full bg-pine-900 text-white hover:bg-pine-800 text-xs font-bold tracking-wider uppercase transition-all shadow flex items-center gap-2 group">
+            <span>🧭 Como Chegar (GPS)</span>
+            <span class="text-gold group-hover:translate-x-0.5 transition-transform">↗</span>
+          </a>
+
+          <button id="btn-toggle-favorite" 
+                  type="button" 
+                  class="px-4 py-2.5 rounded-full bg-white border border-pine-900/20 text-pine-900 hover:border-terracotta hover:text-terracotta text-xs font-semibold transition-all shadow-sm flex items-center gap-2">
+            <span id="fav-icon">🤍</span>
+            <span id="fav-text">Guardar nos Favoritos</span>
+          </button>
+
+          <button id="btn-share-link" 
+                  type="button" 
+                  class="px-4 py-2.5 rounded-full bg-white border border-pine-900/20 text-pine-900 hover:bg-parchment-200 text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5"
+                  title="Copiar endereço deste local">
+            <span>🔗 Partilhar</span>
+          </button>
+        </div>
+
+        <button id="btn-ask-ai" 
+                type="button" 
+                class="px-4 py-2.5 rounded-full bg-gold hover:bg-[#cfa85e] text-pine-950 text-xs font-bold tracking-wider uppercase transition-all shadow flex items-center gap-2">
+          <span>Perguntar ao Freixo AI</span>
+          <span>✨</span>
+        </button>
+
+      </div>
+    </section>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 space-y-16">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+
+        <div class="lg:col-span-8 space-y-10">
+
+          <article class="bg-[#FAF8F5] p-6 sm:p-10 rounded-3xl border border-pine-800/10 shadow-sm space-y-6">
+            <div class="border-b border-pine-800/10 pb-4">
+              <span class="editorial-badge bg-terracotta text-white mb-2 text-[10px]">Património & Identidade</span>
+              <h2 class="font-display text-2xl sm:text-3xl font-bold text-pine-900">
+                Narrativa & Enquadramento Histórico
+              </h2>
+            </div>
+            
+            <p id="poi-short-desc" class="text-base sm:text-lg font-editorial italic text-pine-900 leading-relaxed font-normal">
+              ...
+            </p>
+
+            <div id="poi-full-desc" class="text-sm sm:text-base text-parchment-900 leading-relaxed font-sans space-y-4">
+              
+            </div>
+          </article>
+
+          <section class="space-y-4">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-gold"></span>
+              <h3 class="font-display text-xl sm:text-2xl font-bold text-pine-900">
+                Destaques do Local
+              </h3>
+            </div>
+
+            <div id="highlights-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+            </div>
+          </section>
+
+          <section class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <h3 class="font-display text-xl sm:text-2xl font-bold text-pine-900">
+                  Localização Geográfica & Acesso
+                </h3>
+              </div>
+              <span class="text-xs text-olive font-mono" id="map-coords-display">...</span>
+            </div>
+
+            <div class="rounded-3xl overflow-hidden border border-pine-800/20 shadow-xl bg-parchment-200">
+              <div class="p-3 bg-parchment-50 border-b border-pine-800/10 flex items-center justify-between text-xs text-pine-900 font-medium">
+                <span class="flex items-center gap-2">
+                  <span>🗺️</span>
+                  <span>Coordenadas Oficiais WGS84 de Freixo de Espada à Cinta</span>
+                </span>
+                <span class="text-olive text-[11px]">Interage com o mapa para ver arredores</span>
+              </div>
+              <div id="poi-detail-map" class="h-80 sm:h-96 w-full z-10"></div>
+            </div>
+          </section>
+
+          <section class="p-6 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-emerald-950 space-y-3 shadow-sm">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🏛️</span>
+              <h4 class="font-bold text-sm">Garantia Documental & Fiabilidade Histórica</h4>
+            </div>
+            <p class="text-xs leading-relaxed text-emerald-900" id="doc-enquadramento-text">
+              Registo catalogado na base de dados turística do concelho de Freixo de Espada à Cinta, com coordenadas e informações validadas conforme o acervo documental oficial.
+            </p>
+            <div class="pt-2 border-t border-emerald-200/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-emerald-800">
+              <span>Entidade Certificadora: <strong id="doc-entity-source">Oficial</strong></span>
+              <span class="font-mono bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300" id="doc-status-badge">confirmado</span>
+            </div>
+          </section>
+
+        </div>
+
+        <aside class="lg:col-span-4 space-y-8">
+
+          <div class="bg-[#FAF8F5] p-6 sm:p-7 rounded-3xl border border-pine-800/15 shadow-lg space-y-6">
+            <div>
+              <span class="editorial-badge bg-pine-900 text-gold mb-2 text-[10px]">Informação de Terreno</span>
+              <h3 class="font-display text-xl font-bold text-pine-900">Guia Prático da Visita</h3>
+            </div>
+
+            <div class="space-y-5 text-xs text-parchment-900">
+
+              <div class="flex items-start gap-3 pb-4 border-b border-pine-800/10">
+                <div class="w-8 h-8 rounded-full bg-pine-800/10 text-pine-900 flex items-center justify-center flex-shrink-0 text-sm">
+                  🕒
+                </div>
+                <div>
+                  <strong class="text-pine-900 block text-xs mb-0.5">Horário de Visita</strong>
+                  <p id="practical-hours" class="text-parchment-800 leading-relaxed font-sans">...</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3 pb-4 border-b border-pine-800/10">
+                <div class="w-8 h-8 rounded-full bg-pine-800/10 text-pine-900 flex items-center justify-center flex-shrink-0 text-sm">
+                  ♿
+                </div>
+                <div>
+                  <strong class="text-pine-900 block text-xs mb-0.5">Condições de Acessibilidade</strong>
+                  <p id="practical-accessibility" class="text-parchment-800 leading-relaxed font-sans">...</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center flex-shrink-0 text-sm">
+                  💡
+                </div>
+                <div>
+                  <strong class="text-terracotta block text-xs mb-0.5">Recomendação Especial</strong>
+                  <p id="practical-tips" class="text-parchment-800 leading-relaxed font-sans italic">...</p>
+                </div>
+              </div>
+
+            </div>
+
+            <a href="roteiro.html" class="w-full py-3 px-4 rounded-xl bg-pine-900 hover:bg-pine-800 text-white text-xs font-bold tracking-wider uppercase transition-colors shadow text-center block">
+              Adicionar ao Meu Roteiro AI →
+            </a>
+          </div>
+
+          <div class="bg-[#FAF8F5] p-6 sm:p-7 rounded-3xl border border-pine-800/15 shadow-md space-y-4">
+            <div>
+              <span class="editorial-badge bg-pine-800 text-gold mb-1 text-[10px]">Trilhos do Concelho</span>
+              <h3 class="font-display text-lg font-bold text-pine-900">Percursos Associados</h3>
+              <p class="text-[11px] text-parchment-800 mt-1">Trilhos oficiais onde este local é uma das paragens fundamentais.</p>
+            </div>
+
+            <div id="associated-trails-container" class="space-y-3 pt-2">
+              <p class="text-xs text-olive italic">A verificar percursos...</p>
+            </div>
+          </div>
+
+          <div id="audioguide-box" class="hidden p-5 rounded-3xl bg-pine-900 text-white shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="editorial-badge bg-gold text-pine-900 font-bold border-none text-[9px]">AUDIOGUIA</span>
+              <span class="text-[10px] text-parchment-300 font-mono" id="audio-duration-badge">02:30</span>
+            </div>
+            <h4 class="font-display text-base font-bold" id="audio-title">Audioguia do Local</h4>
+            <p class="text-xs text-parchment-300 leading-relaxed" id="audio-transcript-snippet">
+              Ouve a reconstituição histórica narrada deste monumento.
+            </p>
+            <button id="audio-toggle-btn" class="w-full py-2.5 px-4 rounded-xl bg-white text-pine-900 hover:bg-parchment-200 text-xs font-bold transition-all flex items-center justify-center gap-2">
+              <span id="audio-icon">▶</span>
+              <span id="audio-status-text">Ouvir Narrativa Sonora</span>
+            </button>
+          </div>
+
+        </aside>
+
+      </div>
+
+      <section class="pt-12 border-t border-pine-800/15 space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="editorial-badge bg-white text-pine-900 mb-1">Mais Para Ver</span>
+            <h3 class="font-display text-2xl sm:text-3xl font-bold text-pine-900">
+              Continua a Explorar Freixo
+            </h3>
+          </div>
+          <a href="explorar.html" class="text-xs font-bold text-pine-900 hover:text-terracotta transition-colors flex items-center gap-1">
+            <span>Ver Todos os Lugares</span>
+            <span>→</span>
+          </a>
+        </div>
+
+        <div id="related-pois-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <div id="footer-mount"></div>
+
+  <div id="ai-chat-mount"></div>
+
+  <script type="module">
+    import { freixoApp } from './js/app.js';
+    import { poiService } from './js/services/poiService.js';
+    import { storageService } from './js/services/storageService.js';
+    import { showToast } from './js/components/Toast.js';
+    import { createPoiCard } from './js/components/PoiCardComponent.js';
+
+    let currentPoi = null;
+    let detailMap = null;
+    let poiMarker = null;
+    let detailTrailLayers = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await freixoApp.init('explorar');
+
+      const loadingEl = document.getElementById('loading-state');
+      const errorEl = document.getElementById('error-state');
+      const contentEl = document.getElementById('poi-content');
+
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get('slug') || params.get('lugar') || params.get('id');
+
+      if (!slug) {
+        showError('Identificador Ausente', 'Por favor escolhe um ponto de interesse a partir do mapa ou da lista de exploração.');
+        return;
+      }
+
+      try {
+        currentPoi = await poiService.getPoiBySlug(slug);
+
+        if (!currentPoi) {
+          showError('Local Não Encontrado', `Não encontrámos nenhum ponto de interesse com o identificador "${slug}". Confirma se o nome está correto.`);
+          return;
+        }
+
+        renderPoiDetail(currentPoi);
+
+        initPoiMap(currentPoi);
+        loadAssociatedTrails(currentPoi);
+        loadRelatedPois(currentPoi);
+
+      } catch (err) {
+        console.error('[Detalhe] Erro fatal ao carregar local:', err);
+        showError('Erro de Carregamento', 'Ocorreu um erro ao comunicar com os serviços turísticos. Tenta novamente dentro de momentos.');
+      }
+    });
+
+    function showError(title, message) {
+      document.getElementById('loading-state')?.classList.add('hidden');
+      document.getElementById('poi-content')?.classList.add('hidden');
+      const errorEl = document.getElementById('error-state');
+      if (errorEl) {
+        errorEl.classList.remove('hidden');
+        document.getElementById('error-title').textContent = title;
+        document.getElementById('error-message').textContent = message;
+      }
+    }
+
+    function renderPoiDetail(poi) {
+      document.getElementById('loading-state')?.classList.add('hidden');
+      document.getElementById('error-state')?.classList.add('hidden');
+      const contentEl = document.getElementById('poi-content');
+      contentEl?.classList.remove('hidden');
+
+      document.title = `${poi.title} — Freixo AI (Turismo de Freixo de Espada à Cinta)`;
+      document.getElementById('page-title').textContent = `${poi.title} — Freixo AI`;
+      document.getElementById('meta-description').setAttribute('content', poi.shortDescription || poi.fullDescription);
+      document.getElementById('breadcrumb-title').textContent = poi.title;
+
+      const provEl = document.getElementById('provenance-badge');
+      if (provEl) {
+        if (poi.is_demo) {
+          provEl.innerHTML = '<span class="px-2.5 py-0.5 rounded-full bg-amber-900 text-amber-200 text-[10px] font-mono border border-amber-600">Registo Demonstrativo</span>';
+        } else if (poi._provenance === 'api_node') {
+          provEl.innerHTML = '<span class="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 text-[10px] font-mono border border-emerald-500/40">✓ Servido por API Node.js / Supabase</span>';
+        } else {
+          provEl.innerHTML = '<span class="px-2.5 py-0.5 rounded-full bg-pine-800 text-parchment-200 text-[10px] font-mono">Dados Verificados Locais</span>';
+        }
+      }
+
+      document.getElementById('hero-image').src = poi.image || 'assets/images/penedo-durao.png';
+      document.getElementById('hero-category-badge').textContent = poi.categoryLabel || poi.category;
+      document.getElementById('hero-validation-source').textContent = poi.verification?.source || 'Oficial';
+      document.getElementById('poi-title').textContent = poi.title;
+
+      document.getElementById('meta-location').textContent = poi.location || 'Freixo de Espada à Cinta';
+      document.getElementById('meta-altitude').textContent = poi.altitude || '450 m';
+      document.getElementById('meta-time').textContent = poi.estimatedTime || '1h';
+      
+      const lat = poi.coordinates?.lat || poi.latitude;
+      const lng = poi.coordinates?.lng || poi.longitude;
+      const coordsText = (lat && lng) ? `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° W` : 'Freixo de Espada à Cinta';
+      document.getElementById('meta-coords').textContent = coordsText;
+      document.getElementById('map-coords-display').textContent = coordsText;
+
+      document.getElementById('poi-short-desc').textContent = poi.shortDescription || '';
+      const fullDescEl = document.getElementById('poi-full-desc');
+      if (fullDescEl) {
+        const fullText = poi.fullDescription || poi.shortDescription || '';
+        const paragraphs = fullText.split('\n\n').filter(Boolean);
+        fullDescEl.innerHTML = paragraphs.map(p => `<p class="leading-relaxed">${p}</p>`).join('');
+      }
+
+      const hlContainer = document.getElementById('highlights-container');
+      if (hlContainer) {
+        if (Array.isArray(poi.highlights) && poi.highlights.length > 0) {
+          hlContainer.innerHTML = poi.highlights.map(hl => `
+            <div class="p-4 rounded-2xl bg-white border border-pine-800/10 shadow-sm flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-gold/20 text-pine-900 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">✦</span>
+              <span class="text-xs sm:text-sm text-parchment-900 font-medium">${hl}</span>
+            </div>
+          `).join('');
+        } else {
+          hlContainer.innerHTML = `
+            <div class="col-span-2 p-4 rounded-2xl bg-white border border-pine-800/10 text-xs text-parchment-800">
+              Ponto classificado no inventário patrimonial e paisagístico do concelho de Freixo de Espada à Cinta.
+            </div>
+          `;
+        }
+      }
+
+      document.getElementById('doc-entity-source').textContent = poi.verification?.source || 'Entidade Oficial';
+      document.getElementById('doc-status-badge').textContent = poi.verification?.status || 'confirmado';
+      if (poi.verification?.notes) {
+        document.getElementById('doc-enquadramento-text').textContent = poi.verification.notes;
+      }
+
+      document.getElementById('practical-hours').textContent = poi.openingHours || 'Acesso livre e permanente';
+      document.getElementById('practical-accessibility').textContent = poi.accessibility || 'Acesso geral verificado';
+      document.getElementById('practical-tips').textContent = poi.tips || 'Visite com calçado confortável e máquina fotográfica para captar a paisagem duriense.';
+
+      const audioBox = document.getElementById('audioguide-box');
+      if (audioBox && poi.audioGuide) {
+        audioBox.classList.remove('hidden');
+        document.getElementById('audio-duration-badge').textContent = poi.audioGuide.duration || '02:00';
+        if (poi.audioGuide.title) document.getElementById('audio-title').textContent = poi.audioGuide.title;
+        if (poi.audioGuide.transcript) {
+          document.getElementById('audio-transcript-snippet').textContent = `"${poi.audioGuide.transcript.slice(0, 140)}..."`;
+        }
+        
+        const audioBtn = document.getElementById('audio-toggle-btn');
+        let audioPlaying = false;
+        audioBtn?.addEventListener('click', () => {
+          audioPlaying = !audioPlaying;
+          if (audioPlaying) {
+            document.getElementById('audio-icon').textContent = '⏸';
+            document.getElementById('audio-status-text').textContent = 'A reproduzir narrativa...';
+            showToast('A reproduzir audioguia de demonstração.', 'info');
+          } else {
+            document.getElementById('audio-icon').textContent = '▶';
+            document.getElementById('audio-status-text').textContent = 'Ouvir Narrativa Sonora';
+          }
+        });
+      }
+
+      setupActionButtons(poi);
+    }
+
+    function setupActionButtons(poi) {
+      const lat = poi.coordinates?.lat || poi.latitude;
+      const lng = poi.coordinates?.lng || poi.longitude;
+
+      const btnGps = document.getElementById('btn-directions-gps');
+      if (btnGps && lat && lng) {
+        btnGps.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+      } else if (btnGps) {
+        btnGps.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(poi.title + ', Freixo de Espada a Cinta')}`;
+      }
+
+      const favBtn = document.getElementById('btn-toggle-favorite');
+      const favIcon = document.getElementById('fav-icon');
+      const favText = document.getElementById('fav-text');
+
+      const updateFavUi = (isFav) => {
+        if (isFav) {
+          favBtn.className = 'px-4 py-2.5 rounded-full bg-[#B65737] text-white hover:bg-[#a04a2d] text-xs font-semibold transition-all shadow flex items-center gap-2';
+          favIcon.textContent = '❤️';
+          favText.textContent = 'Nos Meus Favoritos';
+        } else {
+          favBtn.className = 'px-4 py-2.5 rounded-full bg-white border border-pine-900/20 text-pine-900 hover:border-terracotta hover:text-terracotta text-xs font-semibold transition-all shadow-sm flex items-center gap-2';
+          favIcon.textContent = '🤍';
+          favText.textContent = 'Guardar nos Favoritos';
+        }
+      };
+
+      updateFavUi(storageService.isFavorite(poi.id));
+
+      favBtn?.addEventListener('click', () => {
+        const nowFav = storageService.toggleFavorite(poi.id);
+        updateFavUi(nowFav);
+        if (nowFav) {
+          showToast(`"${poi.title}" guardado nos teus favoritos!`, 'success');
+        } else {
+          showToast(`"${poi.title}" removido dos teus favoritos.`, 'info');
+        }
+      });
+
+      const shareBtn = document.getElementById('btn-share-link');
+      shareBtn?.addEventListener('click', async () => {
+        const canonicalUrl = `${window.location.origin}/detalhe.html?slug=${poi.slug || poi.id}`;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(canonicalUrl);
+            showToast('Link canónico copiado para a área de transferência!', 'success');
+          } else {
+            showToast(`Link: ${canonicalUrl}`, 'info');
+          }
+        } catch {
+          showToast(`Link: ${canonicalUrl}`, 'info');
+        }
+      });
+
+      const askAiBtn = document.getElementById('btn-ask-ai');
+      askAiBtn?.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('freixo:openAiChat', {
+          detail: { prompt: `Conta-me em detalhe a história, lendas e o que não posso perder na visita ao ${poi.title} em Freixo de Espada à Cinta.` }
+        }));
+      });
+    }
+
+    function initPoiMap(poi) {
+      const container = document.getElementById('poi-detail-map');
+      if (!container || typeof L === 'undefined') return;
+
+      const lat = poi.coordinates?.lat || poi.latitude || 41.0922;
+      const lng = poi.coordinates?.lng || poi.longitude || -6.8078;
+
+      if (detailMap) {
+        detailMap.remove();
+        detailMap = null;
+        poiMarker = null;
+        detailTrailLayers = [];
+      }
+
+      detailMap = L.map('poi-detail-map', {
+        center: [lat, lng],
+        zoom: 14,
+        zoomControl: true,
+        scrollWheelZoom: false
+      });
+
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18
+      }).addTo(detailMap);
+
+      const customIcon = L.divIcon({
+        className: 'custom-leaflet-pin',
+        html: `
+          <div class="custom-map-pin ring-4 ring-[#DFBA71]" title="${poi.title}">
+            <span class="text-base">${getCategoryEmoji(poi.category)}</span>
+          </div>
+        `,
+        iconSize: [38, 38],
+        iconAnchor: [19, 19],
+        popupAnchor: [0, -20]
+      });
+
+      poiMarker = L.marker([lat, lng], { icon: customIcon }).addTo(detailMap);
+
+      poiMarker.bindPopup(`
+        <div class="p-1 max-w-[220px]">
+          <strong class="font-display block text-sm text-[#182E22] mb-1">${poi.title}</strong>
+          <span class="text-[10px] text-[#7E9283] block mb-2">${poi.location}</span>
+          <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" class="w-full py-1 px-2 rounded bg-[#182E22] text-white text-[10px] font-semibold uppercase tracking-wider block text-center">
+            Abrir Rota GPS ↗
+          </a>
+        </div>
+      `).openPopup();
+    }
+
+    async function loadAssociatedTrails(poi) {
+      const container = document.getElementById('associated-trails-container');
+      if (!container) return;
+
+      try {
+        const trails = await poiService.getTrailsForPoi(poi.id || poi.slug);
+
+        if (trails && trails.length > 0) {
+          container.innerHTML = trails.map(trail => {
+            const isConfirmed = trail.geometry_status === 'confirmado' && trail.geojson;
+            const statusBadge = isConfirmed
+              ? '<span class="px-2 py-0.5 rounded text-[9px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-500/30">✓ Traçado GeoJSON Oficial</span>'
+              : '<span class="px-2 py-0.5 rounded text-[9px] font-medium bg-amber-900/20 text-amber-800 border border-amber-600/30">Traçado em Validação</span>';
+
+            const limitationsNote = trail.geometry_limitations
+              ? `<p class="text-[10px] text-parchment-700 italic border-l-2 border-amber-600/40 pl-2 mt-1">${trail.geometry_limitations}</p>`
+              : '';
+
+            return `
+              <div class="p-3.5 rounded-2xl bg-white border border-pine-800/10 shadow-sm space-y-2.5">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <span class="editorial-badge bg-pine-800 text-gold text-[9px]">${trail.category || 'Percurso Pedestre'}</span>
+                  ${statusBadge}
+                </div>
+                <h4 class="font-display font-bold text-sm text-pine-900 leading-snug">${trail.title}</h4>
+                <p class="text-[11px] text-parchment-800 line-clamp-2 leading-relaxed">${trail.description}</p>
+                ${limitationsNote}
+                <div class="pt-1 flex items-center justify-between text-[10px] font-semibold text-pine-900 border-t border-pine-800/10">
+                  <span>⏱️ ${trail.duration} • 📏 ${trail.distance}</span>
+                  <a href="trilho.html?slug=${encodeURIComponent(trail.slug || trail.id)}" class="text-terracotta hover:underline font-bold">
+                    Ver Ficha do Trilho →
+                  </a>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          // Renderizar na miniatura do mapa o traçado confirmado se existir
+          if (detailMap && typeof L !== 'undefined') {
+            trails.forEach(trail => {
+              if (trail.geometry_status === 'confirmado' && trail.geojson) {
+                try {
+                  const trailLayer = L.geoJSON(trail.geojson, {
+                    style: {
+                      color: '#B65737',
+                      weight: 4,
+                      opacity: 0.85,
+                      dashArray: '8, 6',
+                      lineCap: 'round',
+                      lineJoin: 'round'
+                    }
+                  }).addTo(detailMap);
+
+                  trailLayer.bindTooltip(trail.title, {
+                    sticky: true,
+                    className: 'trail-leaflet-tooltip'
+                  });
+
+                  detailTrailLayers.push(trailLayer);
+
+                  if (poiMarker) {
+                    const bounds = trailLayer.getBounds().extend(poiMarker.getLatLng());
+                    detailMap.fitBounds(bounds, { padding: [25, 25], maxZoom: 15 });
+                  } else {
+                    detailMap.fitBounds(trailLayer.getBounds(), { padding: [25, 25], maxZoom: 15 });
+                  }
+                } catch (mapErr) {
+                  console.warn('[Detalhe] Não foi possível desenhar traçado do trilho no mini-mapa:', mapErr);
+                }
+              }
+            });
+          }
+        } else {
+          container.innerHTML = `
+            <div class="p-3.5 rounded-2xl bg-white border border-pine-800/10 text-xs text-parchment-800">
+              Ponto de visita autónomo. Podes integrá-lo no teu percurso através do <a href="roteiro.html" class="text-terracotta font-semibold hover:underline">Planeador de Roteiro</a>.
+            </div>
+          `;
+        }
+      } catch (err) {
+        container.innerHTML = '<p class="text-xs text-parchment-800">Sem percursos adicionais no momento.</p>';
+      }
+    }
+
+    async function loadRelatedPois(current) {
+      const container = document.getElementById('related-pois-grid');
+      if (!container) return;
+
+      try {
+        const all = await poiService.getAllPois();
+        const related = all.filter(p => p.id !== current.id && p.slug !== current.slug).slice(0, 3);
+
+        container.innerHTML = '';
+        related.forEach(poi => {
+          const card = createPoiCard(poi);
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.warn('[Detalhe] Falha ao carregar locais relacionados:', err);
+      }
+    }
+
+    function getCategoryEmoji(cat) {
+      switch (cat) {
+        case 'miradouro': return '🦅';
+        case 'patrimonio': return '🏛️';
+        case 'natureza': return '🏖️';
+        case 'trilhos': return '🥾';
+        default: return '📍';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,7 +1,3 @@
-/**
- * FREIXO AI — Entrada do Servidor HTTP
- */
-
 import app from './app.js';
 import { ENV } from './config/env.js';
 

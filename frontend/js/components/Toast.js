@@ -1,7 +1,3 @@
-/**
- * FREIXO AI — Notificações Toast Flutuantes
- */
-
 export function showToast(message, type = 'info', duration = 3000) {
   let container = document.getElementById('freixo-toast-container');
   if (!container) {
@@ -30,7 +26,6 @@ export function showToast(message, type = 'info', duration = 3000) {
 
   container.appendChild(toast);
 
-  // Trigger enter animation
   requestAnimationFrame(() => {
     toast.classList.remove('translate-y-4', 'opacity-0');
     toast.classList.add('translate-y-0', 'opacity-100');

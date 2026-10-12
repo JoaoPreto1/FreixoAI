@@ -1,17 +1,49 @@
-/**
- * FREIXO AI — Roteiros Temáticos Recomendados
- */
+import { PR1_ALPAJARES_GEOJSON } from './geodata/alpajaresGeojson.js';
 
 export const ROUTES_DATA = [
   {
+    id: "pr1-calcada-alpajares",
+    slug: "pr1-calcada-alpajares",
+    title: "PR1 FEC — Vale da Ribeira do Mosteiro e Calçada de Alpajares",
+    category: "Natureza & Arqueologia",
+    duration: "3h30",
+    distance: "7.5 km",
+    distance_km: 7.5,
+    difficulty: "Difícil",
+    heroImage: "assets/images/alpajares.png",
+    description: "Percurso circular homologado no Parque Natural do Douro Internacional. Serpenteia pela monumental Calçada dos Diabos, desfiladeiro da Ribeira do Mosteiro e povoado fortificado de Alpajares.",
+    geometry_status: "confirmado",
+    geometry_source: "OpenStreetMap (Relação Oficial 2610592) / ICNF / Natural.pt",
+    geometry_consulted_at: "2026-10-12",
+    geometry_limitations: "Traçado integral homologado confirmado. Declives acentuados e piso irregular em rocha granítica; requer calçado de caminhada aderente e reserva de água.",
+    geojson: PR1_ALPAJARES_GEOJSON,
+    stops: [
+      {
+        order: 1,
+        time: "09:00",
+        poiId: "calcada-alpajares",
+        title: "Calçada e Castelo Velho de Alpajares",
+        description: "Garganta escarpada com calçada em rocha viva e vestígios de povoado fortificado proto-histórico.",
+        duration: "3h30"
+      }
+    ]
+  },
+  {
     id: "rota-seda-manuelino",
+    slug: "rota-seda-manuelino",
     title: "A Rota da Seda e dos Portais Manuelinos",
     category: "Cultura & Património",
     duration: "1 Dia (A pé no centro)",
     distance: "3.5 km",
+    distance_km: 3.5,
     difficulty: "Fácil",
     heroImage: "assets/images/manueline-portal.png",
     description: "Uma imersão no coração histórico de Freixo. Descobre tecedeiras de seda viva, a torre heptagonal do Castelo e dezenas de portais esculpidos em cantaria quinhentista.",
+    geometry_status: "indisponivel",
+    geometry_source: "Município de Freixo de Espada à Cinta",
+    geometry_consulted_at: "2026-10-12",
+    geometry_limitations: "Circuito pedestre pelo núcleo urbano quinhentista. Os pontos de visita estão assinalados no centro histórico; traçado contínuo em levantamento.",
+    geojson: null,
     stops: [
       {
         order: 1,
@@ -57,13 +89,20 @@ export const ROUTES_DATA = [
   },
   {
     id: "rota-douro-grifos",
+    slug: "rota-douro-grifos",
     title: "Canhões do Douro e o Voo dos Grifos",
     category: "Natureza & Miradouros",
     duration: "1 Dia (Carro + Pequenos percursos)",
     distance: "28 km",
+    distance_km: 28.0,
     difficulty: "Moderado",
     heroImage: "assets/images/penedo-durao.png",
     description: "Um dia inesquecível pelo Parque Natural do Douro Internacional. Miradouros vertiginosos sobre arribas imensas e praias fluviais serenas.",
+    geometry_status: "indisponivel",
+    geometry_source: "ICNF / Parque Natural do Douro Internacional",
+    geometry_consulted_at: "2026-10-12",
+    geometry_limitations: "Traçado contínuo GeoJSON indisponível em dados abertos oficiais. Este percurso é um itinerário misto (rodoviário de 28 km com acessos pedonais aos miradouros). Por rigor informativo, não são traçadas linhas fictícias até homologação formal da geometria completa.",
+    geojson: null,
     stops: [
       {
         order: 1,

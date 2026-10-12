@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roteiro Inteligente com IA — Freixo AI</title>
   <meta name="description" content="Gera o teu itinerário personalizado em Freixo de Espada à Cinta com o motor de inteligência artificial: património, natureza, gastronomia e ritmo à tua escolha.">
-  
-  <!-- Tailwind CSS CDN -->
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -43,21 +42,16 @@
     }
   </script>
 
-  <!-- Favicon SVG Editorial -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
 
-  <!-- Variáveis de Ambiente Públicas -->
   <script src="env.js"></script>
 
-  <!-- CSS Editorial -->
   <link rel="stylesheet" href="assets/css/editorial.css">
 </head>
 <body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain">
 
-  <!-- Navbar -->
   <div id="navbar-mount"></div>
 
-  <!-- Cabeçalho da Secção Roteiro -->
   <section class="bg-pine-900 text-parchment-100 py-14 px-4 sm:px-6 lg:px-8 border-b border-pine-800">
     <div class="max-w-7xl mx-auto">
       <div class="max-w-3xl space-y-3">
@@ -79,15 +73,12 @@
     </div>
   </section>
 
-  <!-- ÁREA DO GERADOR DE ROTEIROS INTELIGENTES -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow w-full space-y-16">
-    
-    <!-- Componente Principal do Planeador -->
+
     <div id="itinerary-planner-container">
-      <!-- Injetado por ItineraryPlanner.js -->
+      
     </div>
 
-    <!-- SECÇÃO DE ROTEIROS PRÉ-DEFINIDOS DE AUTOR -->
     <div class="pt-10 border-t border-pine-800/15">
       <div class="mb-8">
         <span class="editorial-badge bg-white text-pine-800 mb-2">Curadoria Local</span>
@@ -100,11 +91,10 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="curated-routes-grid">
-        <!-- Renderizado dinamicamente por JS -->
+        
       </div>
     </div>
 
-    <!-- CAIXA DE PROMPTS PARA O ASSISTENTE DE IA -->
     <div class="bg-parchment-50 p-8 rounded-3xl border border-pine-800/10 shadow-lg space-y-6">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-full bg-pine-800 text-gold flex items-center justify-center font-bold text-lg">
@@ -142,13 +132,10 @@
 
   </main>
 
-  <!-- Rodapé -->
   <div id="footer-mount"></div>
 
-  <!-- Chat Widget -->
   <div id="ai-chat-mount"></div>
 
-  <!-- Scripts da Página -->
   <script type="module">
     import { freixoApp } from './js/app.js';
     import { poiService } from './js/services/poiService.js';
@@ -157,11 +144,9 @@
     document.addEventListener('DOMContentLoaded', async () => {
       await freixoApp.init('roteiro');
 
-      // Inicializar Planeador
       const planner = new ItineraryPlanner('itinerary-planner-container');
       planner.init();
 
-      // Renderizar Roteiros de Autor Curados (GET /api/trails)
       const routesGrid = document.getElementById('curated-routes-grid');
       if (routesGrid) {
         routesGrid.innerHTML = `
@@ -207,7 +192,6 @@
             `;
           }).join('');
 
-          // Ouvintes de clique nos roteiros
           routesGrid.querySelectorAll('.load-curated-btn').forEach(btn => {
             btn.addEventListener('click', () => {
               const routeId = btn.dataset.routeId;
@@ -228,7 +212,6 @@
         }
       }
 
-      // Ouvintes dos cards de prompt rápido
       document.querySelectorAll('.quick-ask-card').forEach(btn => {
         btn.addEventListener('click', () => {
           const prompt = btn.dataset.prompt;

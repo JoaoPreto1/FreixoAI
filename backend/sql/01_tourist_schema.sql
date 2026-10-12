@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS public.places (
 
 -- 3. Percursos Pedestres e Rotas Turísticas
 CREATE TABLE IF NOT EXISTS public.trails (
-    id TEXT PRIMARY KEY,                       -- Ex: 'rota-seda-manuelino', 'rota-douro-grifos'
+    id TEXT PRIMARY KEY,                       -- Ex: 'rota-seda-manuelino', 'rota-douro-grifos', 'pr1-calcada-alpajares'
     slug TEXT UNIQUE NOT NULL,                 -- Slug canónico
     title TEXT NOT NULL,
     category TEXT NOT NULL,                    -- 'Cultura & Património', 'Natureza & Miradouros', etc.
@@ -53,12 +53,25 @@ CREATE TABLE IF NOT EXISTS public.trails (
     description TEXT NOT NULL,
     hero_image TEXT,
     stops JSONB DEFAULT '[]'::jsonb,           -- Paragens ordenadas com tempo e descrição
+    geojson JSONB,                             -- Geometria GeoJSON (LineString / MultiLineString em EPSG:4326)
+    geometry_status TEXT DEFAULT 'indisponivel', -- 'confirmado', 'parcial', 'indisponivel'
+    geometry_source TEXT,                      -- Ex: 'OpenStreetMap (Relação 2610592) / ICNF'
+    geometry_consulted_at DATE,                -- Data da consulta da geometria
+    geometry_limitations TEXT,                 -- Nota/aviso sobre acessibilidade ou limitações cartográficas
     verification_status TEXT DEFAULT 'confirmado',
     verification_source TEXT,
     is_demo BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
+
+-- Migrações idempotentes para tabelas existentes
+ALTER TABLE public.trails ADD COLUMN IF NOT EXISTS geojson JSONB;
+ALTER TABLE public.trails ADD COLUMN IF NOT EXISTS geometry_status TEXT DEFAULT 'indisponivel';
+ALTER TABLE public.trails ADD COLUMN IF NOT EXISTS geometry_source TEXT;
+ALTER TABLE public.trails ADD COLUMN IF NOT EXISTS geometry_consulted_at DATE;
+ALTER TABLE public.trails ADD COLUMN IF NOT EXISTS geometry_limitations TEXT;
+
 
 -- 4. Eventos e Festividades
 CREATE TABLE IF NOT EXISTS public.events (

@@ -1,9 +1,3 @@
-/**
- * FREIXO AI — Serviço Gateway para o Microserviço de IA (Python / FastAPI)
- * Responsabilidade única: Encaminhar chamadas e orquestrar comunicação com o FastAPI (porta 8000).
- * CONFORME REQUISITO 8: Não duplica nem altera a lógica de RAG, embeddings ou Ollama.
- */
-
 import { ENV } from '../config/env.js';
 
 class AiGatewayService {

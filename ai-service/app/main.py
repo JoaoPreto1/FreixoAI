@@ -114,7 +114,7 @@ async def models():
 async def chat(request: ChatRequest):
     try:
         # Gerar embedding da pergunta
-        async with httpx.AsyncClient(timeout=120) as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             response = await client.post(
                 f"{OLLAMA_BASE_URL}/api/embed",
                 json={
@@ -174,7 +174,7 @@ async def chat(request: ChatRequest):
 
         source_result = (
             supabase.table("sources")
-            .select("id, title, institution, source_url, source_type")
+            .select("id, title, institution, source_url, source_type, reliability_notes")
             .in_("id", source_ids)
             .execute()
         )
@@ -275,7 +275,7 @@ de tentares adivinhar.
             },
         }
 
-        async with httpx.AsyncClient(timeout=180) as client:
+        async with httpx.AsyncClient(timeout=45) as client:
             response = await client.post(
                 f"{OLLAMA_BASE_URL}/api/chat",
                 json=payload,
@@ -293,6 +293,12 @@ de tentares adivinhar.
 
     except HTTPException:
         raise
+    except httpx.TimeoutException as exc:
+        logging.warning("Tempo limite excedido na resposta do Ollama (45s)")
+        raise HTTPException(
+            status_code=504,
+            detail="O modelo Ollama excedeu o tempo limite de resposta.",
+        ) from exc
     except httpx.HTTPStatusError as exc:
         logging.exception("O Ollama devolveu um erro")
         raise HTTPException(
@@ -315,7 +321,7 @@ de tentares adivinhar.
 @app.post("/embed")
 async def embed(request: EmbeddingRequest):
     try:
-        async with httpx.AsyncClient(timeout=120) as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             response = await client.post(
                 f"{OLLAMA_BASE_URL}/api/embed",
                 json={
@@ -539,7 +545,7 @@ async def ingest_knowledge(request: IngestRequest):
 @app.post("/knowledge/search")
 async def search_knowledge(request: KnowledgeSearchRequest):
     try:
-        async with httpx.AsyncClient(timeout=120) as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             response = await client.post(
                 f"{OLLAMA_BASE_URL}/api/embed",
                 json={

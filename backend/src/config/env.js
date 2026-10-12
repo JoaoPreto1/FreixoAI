@@ -5,8 +5,6 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Resolução segura do caminho do ficheiro .env
 const backendEnvPath = path.resolve(__dirname, '../../.env');
 const rootEnvPath = path.resolve(__dirname, '../../../.env');
 
@@ -30,7 +28,6 @@ export const ENV = {
   isTest: process.env.NODE_ENV === 'test'
 };
 
-// Verificação de segurança: nunca expor nem registar chaves secretas nos logs
 if (ENV.isProduction && (!ENV.SUPABASE_URL || !ENV.SUPABASE_SECRET_KEY)) {
   console.warn('[Config] SUPABASE_URL ou SUPABASE_SECRET_KEY não estão definidas no ambiente de produção.');
 }

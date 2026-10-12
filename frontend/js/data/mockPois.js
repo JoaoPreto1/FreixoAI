@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Pontos de Interesse (POIs) de Freixo de Espada à Cinta
- * Dados autênticos com coordenadas, categorias, descrições editoriais e multimédia
- */
-
 export const POIS_DATA = [
   {
     id: "penedo-durao",
@@ -22,7 +17,7 @@ export const POIS_DATA = [
     location: "A 8 km a sudeste de Freixo de Espada à Cinta",
     coordinates: { lat: 41.0427, lng: -6.8242 },
     altitude: "550 m",
-    estimatedTime: "1h30 min",
+    estimatedTime: "1h 30 min",
     accessibility: "Acessível de carro; passadiço e rampa adaptada",
     highlights: [
       "Voo próximo de grifos e abutres protegidos",
@@ -186,39 +181,39 @@ export const POIS_DATA = [
   },
   {
     id: "calcada-alpajares",
-    title: "Calçada de Alpajares & Canhão do Mosteiro",
-    category: "trilhos",
-    categoryLabel: "Trilhos & Arqueologia",
+    slug: "calcada-alpajares",
+    title: "Calçada e Castelo Velho de Alpajares",
+    category: "patrimonio",
+    categoryLabel: "Arqueologia & Paisagem",
     verification: {
       status: "confirmado",
-      source: "Parque Natural do Douro Internacional / ICNF",
+      source: "DGPC / ICNF / PNDI",
       sourceType: "oficial",
       isAudioDemo: true,
-      pendingValidation: true,
-      notes: "Trilho de montanha e abrigo rupestre catalogados. Duração e extensão sujeitas a validação no terreno."
+      pendingValidation: false,
+      notes: "Monumento e paisagem protegida no Parque Natural do Douro Internacional."
     },
-    shortDescription: "Caminho milenar em ziguezague cavado nas escarpas, com gravuras rupestres e paisagem selvagem.",
-    fullDescription: "Conhecida localmente como 'Calçada do Diabo', é um traçado de calçada ancestral empoleirado na garganta profunda da ribeira de Mosteiro. Pelo caminho encontram-se vestígios de arte rupestre esquemática, moinhos de água ancestrais e flora mediterrânica única como zimbros e laranjeiras bravas.",
-    location: "Junto à aldeia de Fornos / Ribeira de Mosteiro",
-    coordinates: { lat: 41.0315, lng: -6.8520 },
-    altitude: "320 m",
-    estimatedTime: "3h 00 min",
-    accessibility: "Trilho de montanha exigente; requer calçado de caminhada",
+    shortDescription: "Calçada antiga sobre o canhão granítico do rio Mosteiro, povoado fortificado proto-histórico e aves rupícolas.",
+    fullDescription: "A Calçada de Alpajares (também conhecida por Calçada dos Diabos) serpenteia por uma garganta escarpada no vale da ribeira do Mosteiro. No topo ergue-se o Castelo Velho, castro da Idade do Ferro com muralhas imponentes e gravuras rupestres.",
+    location: "Vale da Ribeira do Mosteiro, a 5 km a sul de Freixo",
+    coordinates: { lat: 41.0503, lng: -6.8532 },
+    altitude: "380 m",
+    estimatedTime: "2h 30 min",
+    accessibility: "Trilho de montanha irregular; requer calçado de caminhada",
     highlights: [
-      "Calçada histórica em curvas apertadas esculpidas no penhasco",
-      "Pinturas e gravuras rupestres no abrigo da Fraga do Gato",
-      "Paisagem intocada do Parque Natural do Douro Internacional",
-      "Avifauna rupícola e silêncio monumental"
+      "Calçada ancestral gravada em rocha granítica",
+      "Castro e muralhas proto-históricas",
+      "Paisagem agreste e observação de aves de rapina"
     ],
-    image: "assets/images/hero-douro.png",
+    image: "assets/images/alpajares.png",
     audioGuide: {
       duration: "03:30",
       isDemo: true,
       title: "A Rota Ancestral dos Alpajares",
       transcript: "Durante milénios, pastores, soldados e contrabandistas desceram esta calçada vertiginosa. O barulho da água no fundo do desfiladeiro acompanha cada passo do caminhante..."
     },
-    openingHours: "Recomendado durante o dia com tempo seco",
-    tips: "Evite as horas centrais de calor no pico do verão e leve água em abundância."
+    openingHours: "Acesso livre e permanente",
+    tips: "Evitar nas horas de maior calor no verão; levar água e bastão de caminhada."
   },
   {
     id: "igreja-matriz",

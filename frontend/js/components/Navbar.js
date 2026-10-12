@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Componente de Navegação Editorial
- * Header responsivo, gaveta móvel, acessibilidade e indicador de favoritos em tempo real
- */
-
 import { storageService } from '../services/storageService.js';
 
 export function renderNavbar(activePage = 'index') {
@@ -24,7 +19,6 @@ export function renderNavbar(activePage = 'index') {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
           
-          <!-- Marca & Logótipo Editorial -->
           <a href="index.html" class="flex items-center gap-3.5 group" aria-label="Freixo AI - Página Inicial">
             <div class="w-10 h-10 rounded-full bg-[#182E22] flex items-center justify-center text-[#FAF8F5] transition-transform duration-300 group-hover:scale-105 shadow-md">
               <span class="font-display italic text-xl font-bold text-[#DFBA71]">F</span>
@@ -35,7 +29,6 @@ export function renderNavbar(activePage = 'index') {
             </div>
           </a>
 
-          <!-- Links de Navegação Desktop -->
           <nav class="hidden md:flex items-center gap-1 lg:gap-2" aria-label="Navegação Principal">
             ${navLinks.map(link => {
               const isActive = activePage === link.id;
@@ -53,10 +46,8 @@ export function renderNavbar(activePage = 'index') {
             }).join('')}
           </nav>
 
-          <!-- Ações: Favoritos + Botão Assistente IA + Mobile Menu Toggle -->
           <div class="flex items-center gap-2.5 sm:gap-4">
             
-            <!-- Contador de Favoritos -->
             <a href="explorar.html?view=favorites" 
                id="nav-fav-link" 
                class="relative p-2 text-[#24211D] hover:text-[#B65737] transition-colors rounded-full hover:bg-black/5" 
@@ -70,7 +61,6 @@ export function renderNavbar(activePage = 'index') {
               </span>
             </a>
 
-            <!-- Botão Assistente IA -->
             <button id="nav-open-ai-btn" 
                     class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#182E22] text-[#FAF8F5] text-xs font-semibold tracking-wider uppercase hover:bg-[#234332] transition-all shadow-sm hover:shadow hover:scale-[1.02]"
                     aria-label="Abrir assistente conversacional Freixo AI">
@@ -78,7 +68,6 @@ export function renderNavbar(activePage = 'index') {
               <span>Assistente AI</span>
             </button>
 
-            <!-- Hamburguer Mobile -->
             <button id="mobile-menu-toggle" 
                     class="md:hidden p-2 rounded-lg text-[#182E22] hover:bg-[#182E22]/10 transition-colors" 
                     aria-label="Abrir Menu de Navegação"
@@ -92,7 +81,6 @@ export function renderNavbar(activePage = 'index') {
         </div>
       </div>
 
-      <!-- Menu Gaveta Mobile -->
       <div id="mobile-menu-drawer" class="hidden md:hidden border-t border-[#182E22]/10 bg-[#FAF8F5] px-4 pt-3 pb-6 shadow-xl transition-all" role="navigation" aria-label="Menu Mobile">
         <div class="flex flex-col gap-2">
           ${navLinks.map(link => {
@@ -121,7 +109,6 @@ export function renderNavbar(activePage = 'index') {
     </header>
   `;
 
-  // Event Listeners
   const toggleBtn = document.getElementById('mobile-menu-toggle');
   const drawer = document.getElementById('mobile-menu-drawer');
   if (toggleBtn && drawer) {
@@ -131,7 +118,6 @@ export function renderNavbar(activePage = 'index') {
     });
   }
 
-  // Atualizar contador de favoritos reativo
   storageService.onFavoritesChange((favs) => {
     const badge = document.getElementById('nav-fav-badge');
     const link = document.getElementById('nav-fav-link');
@@ -145,7 +131,6 @@ export function renderNavbar(activePage = 'index') {
     }
   });
 
-  // Abrir widget de IA
   const openAiBtn = document.getElementById('nav-open-ai-btn');
   const mobileOpenAiBtn = document.getElementById('mobile-open-ai-btn');
   const triggerAi = () => {

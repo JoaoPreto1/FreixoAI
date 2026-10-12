@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gastronomia & Vinhos — Freixo AI</title>
   <meta name="description" content="Descubra a gastronomia autêntica de Freixo de Espada à Cinta: vinhos Montes Ermos D.O.C. Douro, sopas de tomate, posta mirandesa e amêndoas cobertas.">
-  
-  <!-- Tailwind CSS CDN -->
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -43,21 +42,16 @@
     }
   </script>
 
-  <!-- Favicon SVG Editorial -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
 
-  <!-- Variáveis de Ambiente Públicas -->
   <script src="env.js"></script>
 
-  <!-- CSS Editorial -->
   <link rel="stylesheet" href="assets/css/editorial.css">
 </head>
 <body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain">
 
-  <!-- Navbar -->
   <div id="navbar-mount"></div>
 
-  <!-- Hero Editorial Gastronomia -->
   <header class="relative min-h-[60vh] flex items-center justify-center bg-pine-900 text-parchment-100 overflow-hidden">
     <div class="absolute inset-0 z-0">
       <img src="assets/images/douro-wine.png" 
@@ -79,10 +73,8 @@
     </div>
   </header>
 
-  <!-- CONTEÚDO PRINCIPAL -->
   <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-grow space-y-20">
-    
-    <!-- SECÇÃO 1: PRATOS TRADICIONAIS -->
+
     <section class="space-y-10">
       <div class="max-w-2xl">
         <span class="editorial-badge bg-pine-800 text-gold mb-2">Tradição de Conforto</span>
@@ -95,11 +87,10 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="dishes-grid">
-        <!-- Renderizado por JS via mockGastronomy -->
+        
       </div>
     </section>
 
-    <!-- SECÇÃO 2: OS VINHOS MONTES ERMOS (D.O.C. DOURO) -->
     <section class="p-8 sm:p-12 rounded-3xl bg-pine-900 text-parchment-100 shadow-2xl relative overflow-hidden editorial-grain">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
         
@@ -123,13 +114,12 @@
         </div>
 
         <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4" id="wines-grid">
-          <!-- Renderizado por JS -->
+          
         </div>
 
       </div>
     </section>
 
-    <!-- SECÇÃO 3: ONDE COMER (RESTAURANTES RECOMENDADOS) -->
     <section class="space-y-10 pt-4">
       <div class="max-w-2xl">
         <span class="editorial-badge bg-pine-800 text-gold mb-2">Hospitalidade Local</span>
@@ -142,19 +132,16 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="restaurants-grid">
-        <!-- Renderizado por JS -->
+        
       </div>
     </section>
 
   </main>
 
-  <!-- Rodapé -->
   <div id="footer-mount"></div>
 
-  <!-- Chat Widget -->
   <div id="ai-chat-mount"></div>
 
-  <!-- Scripts -->
   <script type="module">
     import { freixoApp } from './js/app.js';
     import { poiService } from './js/services/poiService.js';
@@ -164,7 +151,6 @@
 
       const data = await poiService.getGastronomy();
 
-      // Renderizar Pratos
       const dishesGrid = document.getElementById('dishes-grid');
       if (dishesGrid && data.dishes) {
         dishesGrid.innerHTML = data.dishes.map(d => `
@@ -180,7 +166,6 @@
         `).join('');
       }
 
-      // Renderizar Vinhos
       const winesGrid = document.getElementById('wines-grid');
       if (winesGrid && data.wines) {
         winesGrid.innerHTML = data.wines.map(w => `
@@ -197,7 +182,6 @@
         `).join('');
       }
 
-      // Renderizar Restaurantes com distinção de demonstração
       const restGrid = document.getElementById('restaurants-grid');
       if (restGrid && data.restaurants) {
         restGrid.innerHTML = data.restaurants.map(r => `

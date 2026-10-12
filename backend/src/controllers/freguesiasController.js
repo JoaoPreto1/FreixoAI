@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Freguesias Controller
- * Fornece a informação territorial oficial do concelho de Freixo de Espada à Cinta.
- */
-
 import { tourismService } from '../services/tourismService.js';
 
 export const getFreguesias = async (req, res, next) => {

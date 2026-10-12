@@ -1,4 +1,3 @@
-// Servidor estático local ultra-leve em Node.js vanilla sem dependências externas
 import http from 'http';
 import fs from 'fs';
 import path from 'path';

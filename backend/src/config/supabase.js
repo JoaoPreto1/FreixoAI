@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Inicialização do Cliente Supabase no Servidor
- * As credenciais são estritamente mantidas no servidor (Node.js) e NUNCA expostas ao frontend.
- */
-
 import { createClient } from '@supabase/supabase-js';
 import { ENV } from './env.js';
 

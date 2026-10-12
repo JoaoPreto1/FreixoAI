@@ -1,9 +1,4 @@
-/**
- * FREIXO AI — Repositório de Dados Locais Verificados e Controlados
- * Conforme Requisito 7: Nenhum dado factual é inventado.
- * Fontes oficiais documentadas (Censos 2021, ICNF, DGPC, Município de Freixo de Espada à Cinta).
- * Dados de teste estão expressamente marcados com is_demo: true e verification_status: 'demonstracao'.
- */
+import { PR1_ALPAJARES_GEOJSON } from './geodata/alpajaresGeojson.js';
 
 export const FREGUESIAS = [
   {
@@ -241,6 +236,29 @@ export const PLACES = [
 
 export const TRAILS = [
   {
+    id: 'pr1-calcada-alpajares',
+    slug: 'pr1-calcada-alpajares',
+    title: 'PR1 FEC — Vale da Ribeira do Mosteiro e Calçada de Alpajares',
+    category: 'Natureza & Arqueologia',
+    freguesia_id: 'freixo-mazouco',
+    duration: '3h30',
+    distance_km: 7.5,
+    difficulty: 'Difícil',
+    description: 'Percurso circular homologado no Parque Natural do Douro Internacional. Serpenteia pela monumental Calçada dos Diabos, desfiladeiro da Ribeira do Mosteiro e povoado fortificado de Alpajares.',
+    hero_image: 'assets/images/alpajares.png',
+    stops: [
+      { order: 1, poiId: 'calcada-alpajares', title: 'Calçada e Castelo Velho de Alpajares' }
+    ],
+    verification_status: 'confirmado',
+    verification_source: 'ICNF / PNDI / OpenStreetMap (Relação 2610592)',
+    is_demo: false,
+    geometry_status: 'confirmado',
+    geometry_source: 'OpenStreetMap (Relação Oficial 2610592) / ICNF / Natural.pt',
+    geometry_consulted_at: '2026-10-12',
+    geometry_limitations: 'Traçado integral homologado confirmado. Declives acentuados e piso irregular em rocha granítica; requer calçado de caminhada aderente e reserva de água.',
+    geojson: PR1_ALPAJARES_GEOJSON
+  },
+  {
     id: 'rota-seda-manuelino',
     slug: 'rota-seda-manuelino',
     title: 'A Rota da Seda e dos Portais Manuelinos',
@@ -258,7 +276,12 @@ export const TRAILS = [
     ],
     verification_status: 'confirmado',
     verification_source: 'Município de Freixo de Espada à Cinta',
-    is_demo: false
+    is_demo: false,
+    geometry_status: 'indisponivel',
+    geometry_source: 'Município de Freixo de Espada à Cinta',
+    geometry_consulted_at: '2026-10-12',
+    geometry_limitations: 'Circuito pedestre pelo núcleo urbano quinhentista. Os pontos de visita estão assinalados no centro histórico; traçado contínuo em levantamento.',
+    geojson: null
   },
   {
     id: 'rota-douro-grifos',
@@ -277,7 +300,12 @@ export const TRAILS = [
     ],
     verification_status: 'confirmado',
     verification_source: 'ICNF / Parque Natural do Douro Internacional',
-    is_demo: false
+    is_demo: false,
+    geometry_status: 'indisponivel',
+    geometry_source: 'ICNF / Parque Natural do Douro Internacional',
+    geometry_consulted_at: '2026-10-12',
+    geometry_limitations: 'Traçado contínuo GeoJSON indisponível em dados abertos oficiais. Este percurso é um itinerário misto (rodoviário de 28 km com acessos pedonais aos miradouros). Por rigor informativo, não são traçadas linhas fictícias até homologação formal da geometria completa.',
+    geojson: null
   },
   {
     id: 'trilho-teste-demonstracao',
@@ -296,7 +324,12 @@ export const TRAILS = [
     ],
     verification_status: 'demonstracao',
     verification_source: 'Freixo AI Test Suite',
-    is_demo: true
+    is_demo: true,
+    geometry_status: 'indisponivel',
+    geometry_source: 'Demonstração',
+    geometry_consulted_at: '2026-10-12',
+    geometry_limitations: 'Registo de validação de testes sem geometria cartográfica associada.',
+    geojson: null
   }
 ];
 
@@ -309,12 +342,20 @@ export const EVENTS = [
     category: 'Feira Tradicional & Gastronomia',
     freguesia_id: 'freixo-mazouco',
     location: 'Zona Ribeirinha e Centro de Freixo de Espada à Cinta',
+    coordinates: { lat: 41.0922, lng: -6.8078 },
     start_date: '2026-06-12',
     end_date: '2026-06-14',
-    periodicity: 'Anual (Junho)',
+    edition_dates: '12 a 14 de Junho de 2026',
+    edition_status: 'Datas indicadas para a edição de 2026 pelo calendário municipal',
+    periodicity: 'Anual (habitualmente em Junho)',
     image_url: 'assets/images/seda-loom.png',
+    historical_context: 'Freixo de Espada à Cinta é o único local da Península Ibérica onde ainda se produz e fia seda de forma 100% artesanal, num ciclo biológico ininterrupto desde o século XVI. A feira junta artesãos, tecedeiras e produtores durienses numa celebração da identidade concelhia.',
+    schedule_info: 'Programa oficial com horários de atuações musicais, oficinas de fiação e colóquios disponibilizado pelo Município na semana que antecede o evento.',
+    pricing: 'Entrada livre e gratuita no recinto da feira',
+    related_pois: ['museu-da-seda', 'igreja-matriz', 'torre-do-galo'],
     verification_status: 'confirmado',
     verification_source: 'Município de Freixo de Espada à Cinta',
+    consulted_at: '2026-10-12',
     is_demo: false
   },
   {
@@ -325,12 +366,20 @@ export const EVENTS = [
     category: 'Natureza & Tradição',
     freguesia_id: 'freixo-mazouco',
     location: 'Todo o concelho de Freixo de Espada à Cinta',
+    coordinates: { lat: 41.0886, lng: -6.8123 },
     start_date: '2026-02-20',
     end_date: '2026-03-08',
-    periodicity: 'Anual (Fevereiro/Março)',
+    edition_dates: 'Fevereiro a Março de 2026 (período de floração ativa)',
+    edition_status: 'Ocorrência sujeita às condições climatéricas e ciclo de floração biológico',
+    periodicity: 'Anual (habitualmente entre meados de Fevereiro e início de Março)',
     image_url: 'assets/images/colado-view.png',
+    historical_context: 'Conhecido como o Vale das Amendoeiras, o concelho beneficia de um microclima mediterrânico quente que antecipa a primavera em relação a Trás-os-Montes. A lenda das amendoeiras e a tradição dos doces de amêndoa constituem um pilar da identidade local.',
+    schedule_info: 'Passeios pedestres e rotas panorâmicas sugeridas ao longo do fim de semana. Mostras de artesanato e doces nos centros paroquiais.',
+    pricing: 'Acesso livre aos miradouros e mostras locais',
+    related_pois: ['miradouro-colado', 'penedo-durao'],
     verification_status: 'confirmado',
     verification_source: 'Município de Freixo de Espada à Cinta / Região de Turismo',
+    consulted_at: '2026-10-12',
     is_demo: false
   },
   {
@@ -341,12 +390,20 @@ export const EVENTS = [
     category: 'Religioso & Cultural',
     freguesia_id: 'freixo-mazouco',
     location: 'Largo do Convento e Centro Histórico',
+    coordinates: { lat: 41.0915, lng: -6.8062 },
     start_date: '2026-08-14',
     end_date: '2026-08-16',
-    periodicity: 'Anual (Agosto)',
+    edition_dates: '14 a 16 de Agosto de 2026',
+    edition_status: 'Datas habituais do fim de semana de meados de Agosto',
+    periodicity: 'Anual (meados de Agosto)',
     image_url: 'assets/images/igreja-matriz.png',
+    historical_context: 'Festa maior da vila de Freixo em honra do padroeiro dos viajantes, reunindo residentes e a comunidade emigrante. Destaca-se a solene procissão com andores ricamente decorados e a bênção de viaturas.',
+    schedule_info: 'Celebrações litúrgicas matinais e arraiais noturnos com atuações musicais no Largo do Convento de São Francisco.',
+    pricing: 'Acesso livre e gratuito a todas as atividades de rua',
+    related_pois: ['igreja-matriz', 'torre-do-galo'],
     verification_status: 'confirmado',
     verification_source: 'Comissão de Festas de São Cristóvão',
+    consulted_at: '2026-10-12',
     is_demo: false
   },
   {
@@ -357,12 +414,20 @@ export const EVENTS = [
     category: 'Demonstração & Testes',
     freguesia_id: 'freixo-mazouco',
     location: 'Ambiente de Testes',
+    coordinates: { lat: 41.092, lng: -6.808 },
     start_date: '2026-12-01',
     end_date: '2026-12-02',
+    edition_dates: '1 a 2 de Dezembro de 2026',
+    edition_status: 'Ambiente controlado de testes',
     periodicity: 'Demonstração',
     image_url: 'assets/images/demo.png',
+    historical_context: 'Registo reservado a suites automatizadas de teste.',
+    schedule_info: 'Execução de rotinas de verificação.',
+    pricing: 'N/A',
+    related_pois: [],
     verification_status: 'demonstracao',
     verification_source: 'Freixo AI Test Suite',
+    consulted_at: '2026-10-12',
     is_demo: true
   }
 ];

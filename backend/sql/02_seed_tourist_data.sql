@@ -186,9 +186,26 @@ ON CONFLICT (id) DO NOTHING;
 -- 3. Percursos (Trails)
 INSERT INTO public.trails (
     id, slug, title, category, freguesia_id, duration, distance_km, difficulty,
-    description, hero_image, stops, verification_status, verification_source, is_demo
+    description, hero_image, stops, verification_status, verification_source, is_demo,
+    geometry_status, geometry_source, geometry_consulted_at, geometry_limitations
 )
 VALUES
+(
+    'pr1-calcada-alpajares',
+    'pr1-calcada-alpajares',
+    'PR1 FEC — Vale da Ribeira do Mosteiro e Calçada de Alpajares',
+    'Natureza & Arqueologia',
+    'freixo-mazouco',
+    '3h30',
+    7.50,
+    'Difícil',
+    'Percurso circular homologado no Parque Natural do Douro Internacional. Serpenteia pela monumental Calçada dos Diabos, desfiladeiro da Ribeira do Mosteiro e povoado fortificado de Alpajares.',
+    'assets/images/alpajares.png',
+    '[{"order": 1, "poiId": "calcada-alpajares", "title": "Calçada e Castelo Velho de Alpajares"}]'::jsonb,
+    'confirmado', 'ICNF / PNDI / OpenStreetMap (Relação 2610592)', FALSE,
+    'confirmado', 'OpenStreetMap (Relação 2610592) / ICNF / Natural.pt', '2026-10-12',
+    'Traçado integral homologado confirmado. Terreno acidentado e declives acentuados; requer calçado de caminhada aderente e reserva de água.'
+),
 (
     'rota-seda-manuelino',
     'rota-seda-manuelino',
@@ -201,7 +218,9 @@ VALUES
     'Uma imersão no coração histórico de Freixo. Descobre tecedeiras de seda viva, a torre heptagonal do Castelo e dezenas de portais esculpidos em cantaria quinhentista.',
     'assets/images/manueline-portal.png',
     '[{"order": 1, "poiId": "museu-da-seda", "title": "Museu da Seda e do Território"}, {"order": 2, "poiId": "igreja-matriz", "title": "Igreja Matriz de São Miguel"}, {"order": 3, "poiId": "torre-do-galo", "title": "Torre do Galo & Castelo"}]'::jsonb,
-    'confirmado', 'Município de Freixo de Espada à Cinta', FALSE
+    'confirmado', 'Município de Freixo de Espada à Cinta', FALSE,
+    'indisponivel', 'Município de Freixo de Espada à Cinta', '2026-10-12',
+    'Circuito pedestre pelo núcleo urbano quinhentista. Os pontos de visita estão assinalados no centro histórico; traçado contínuo em levantamento.'
 ),
 (
     'rota-douro-grifos',
@@ -215,7 +234,9 @@ VALUES
     'Um dia inesquecível pelo Parque Natural do Douro Internacional. Miradouros vertiginosos sobre arribas imensas e praias fluviais serenas.',
     'assets/images/penedo-durao.png',
     '[{"order": 1, "poiId": "penedo-durao", "title": "Miradouro do Penedo Durão"}, {"order": 2, "poiId": "praia-congida", "title": "Praia Fluvial da Congida"}]'::jsonb,
-    'confirmado', 'ICNF / Parque Natural do Douro Internacional', FALSE
+    'confirmado', 'ICNF / Parque Natural do Douro Internacional', FALSE,
+    'indisponivel', 'ICNF / Parque Natural do Douro Internacional', '2026-10-12',
+    'Traçado contínuo GeoJSON indisponível em dados abertos oficiais. Este percurso é um itinerário misto (rodoviário de 28 km com acessos pedonais aos miradouros). Por rigor informativo, não são traçadas linhas fictícias até homologação formal da geometria completa.'
 ),
 (
     'trilho-teste-demonstracao',
@@ -229,7 +250,9 @@ VALUES
     'Percurso de teste para verificação do contrato de resposta JSON da rota GET /api/trails.',
     'assets/images/demo.png',
     '[{"order": 1, "title": "Ponto A"}, {"order": 2, "title": "Ponto B"}]'::jsonb,
-    'demonstracao', 'Freixo AI Test Suite', TRUE
+    'demonstracao', 'Freixo AI Test Suite', TRUE,
+    'indisponivel', 'Freixo AI Test Suite', '2026-10-12',
+    'Registo de validação de testes sem geometria cartográfica associada.'
 )
 ON CONFLICT (id) DO NOTHING;
 

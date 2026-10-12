@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Rodapé Editorial Partilhado
- * Inclui estado técnico real das APIs, coordenadas e informações de apoio
- */
-
 import { API_CONFIG } from '../config/apiConfig.js';
 
 export function renderFooter() {
@@ -60,10 +55,8 @@ export function renderFooter() {
     <footer class="bg-[#122419] text-[#EBE4DA] pt-16 pb-12 border-t border-[#234332]/50 mt-auto editorial-grain">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- Bloco Principal Superior -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 pb-14 border-b border-[#234332]/40">
           
-          <!-- Coluna 1: Identidade & Missão (5 cols) -->
           <div class="lg:col-span-5 flex flex-col gap-5">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-[#182E22] border border-[#DFBA71]/40 flex items-center justify-center text-[#DFBA71]">
@@ -85,7 +78,6 @@ export function renderFooter() {
             </div>
           </div>
 
-          <!-- Coluna 2: Navegação Rápida (3 cols) -->
           <div class="lg:col-span-3 flex flex-col gap-4">
             <h4 class="text-xs font-semibold uppercase tracking-[0.18em] text-[#DFBA71]">Exploração</h4>
             <ul class="flex flex-col gap-2.5 text-sm text-[#DDD4C7]">
@@ -97,7 +89,6 @@ export function renderFooter() {
             </ul>
           </div>
 
-          <!-- Coluna 3: Contactos & Informação Local (4 cols) -->
           <div class="lg:col-span-4 flex flex-col gap-4">
             <h4 class="text-xs font-semibold uppercase tracking-[0.18em] text-[#DFBA71]">Posto de Turismo Oficial</h4>
             <div class="text-xs text-[#DDD4C7] space-y-2">
@@ -115,14 +106,12 @@ export function renderFooter() {
               </p>
             </div>
 
-            <!-- Badge de Estado Real da API -->
             <div id="footer-api-status-box" class="mt-2 p-3 rounded-lg bg-[#182E22] border border-[#234332] text-[11px] text-[#DDD4C7]">
               ${getStatusMarkup(API_CONFIG.STATE)}
             </div>
           </div>
         </div>
 
-        <!-- Linha Inferior: Direitos e Créditos -->
         <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7E9283]">
           <p>© ${currentYear} Freixo AI. Promovendo a identidade do Douro Internacional e o património transmontano.</p>
           <div class="flex items-center gap-4">
@@ -136,7 +125,6 @@ export function renderFooter() {
     </footer>
   `;
 
-  // Ouvinte dinâmico para atualizar o status do backend em tempo real
   window.addEventListener('freixo:apiStateChanged', (e) => {
     const box = document.getElementById('footer-api-status-box');
     if (box && e.detail) {

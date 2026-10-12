@@ -1,7 +1,3 @@
-/**
- * FREIXO AI — Património, Tradição e Memória
- */
-
 export const HERITAGE_DATA = {
   silkTradition: {
     title: "O Fio da Vida: A Seda Artesanal de Freixo",

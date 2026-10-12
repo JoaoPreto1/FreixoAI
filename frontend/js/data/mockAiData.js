@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Base de Conhecimento e Motor de IA de Demonstração
- * Permite respostas contextuais ricas e geração dinâmica de itinerários
- */
-
 import { POIS_DATA } from './mockPois.js';
 
 export const AI_KNOWLEDGE_BASE = [
@@ -96,40 +91,60 @@ export function generateSmartItinerary({ days = 2, interest = "cultura", pace = 
       dayPlan.stops = [
         {
           time: "09:30",
+          poiId: "museu-da-seda",
+          poiSlug: "museu-da-seda",
           title: "Boas-vindas e Museu da Seda e do Território",
           location: "Centro Histórico",
+          estimatedVisitTime: "1h30",
+          travelNote: "Ponto de encontro no centro histórico",
           description: "Descubra o ciclo vivo da seda e observe as mestras tecedeiras a trabalhar em teares de madeira seculares.",
           icon: "feather",
           tip: "Reserve 1h30 para uma conversa com as artesãs."
         },
         {
           time: "11:15",
+          poiId: "igreja-matriz",
+          poiSlug: "igreja-matriz",
           title: "Passeio pelo Bairro Histórico e Portais Manuelinos",
           location: "Rua do Ouro e envolvente",
+          estimatedVisitTime: "45 min",
+          travelNote: "Percurso pedonal pelo centro",
           description: "Procure as mais de 40 portas e janelas manuelinas esculpidas em granito no coração da vila.",
           icon: "compass",
           tip: "Fotografe as cordas e nós esculpidos na pedra."
         },
         {
           time: "13:00",
+          poiId: "restaurante-candedo",
+          poiSlug: "restaurante-candedo",
           title: "Almoço Regional Transmontano",
           location: "Restaurante O Candedo ou Tasca do Forno",
+          estimatedVisitTime: "1h30",
+          travelNote: "No centro da vila",
           description: "Saboreie as autênticas Sopas de Tomate com ovos escalfados ou a Posta Mirandesa.",
           icon: "utensils",
           tip: "Peça uma garrafa de Montes Ermos Tinto Reserva."
         },
         {
           time: "15:00",
+          poiId: "igreja-matriz",
+          poiSlug: "igreja-matriz",
           title: "Igreja Matriz de São Miguel e Retábulo Quinhentista",
           location: "Largo do Município",
+          estimatedVisitTime: "45 min",
+          travelNote: "Largo do Município",
           description: "Aprecie o portal triunfal e as pinturas atribuídas à oficina do mestre Grão Vasco.",
           icon: "landmark",
           tip: "Admire a pia batismal manuelina lavrada."
         },
         {
           time: "16:30",
+          poiId: "torre-do-galo",
+          poiSlug: "torre-do-galo",
           title: "Torre do Galo & Pôr do Sol no Freixo Secular",
           location: "Cimo da Vila",
+          estimatedVisitTime: "45 min",
+          travelNote: "Subida pedonal pela calçada histórica",
           description: "Suba à torre heptagonal de 7 lados e veja o sol dourado a tocar as colinas da raia.",
           icon: "eye",
           tip: "A entrada é livre e o visual ao crepúsculo é inesquecível."
@@ -141,40 +156,60 @@ export function generateSmartItinerary({ days = 2, interest = "cultura", pace = 
       dayPlan.stops = [
         {
           time: "09:30",
+          poiId: "penedo-durao",
+          poiSlug: "penedo-durao",
           title: "Miradouro do Penedo Durão",
           location: "Parque Natural do Douro Internacional",
+          estimatedVisitTime: "1h30",
+          travelNote: "12 min de carro pela N221 a partir da vila",
           description: "Aviste o canhão colossal de mais de 500 metros e veja de perto o voo silencioso dos grifos e abutres.",
           icon: "mountain",
           tip: "Leve binóculos e máquina fotográfica."
         },
         {
           time: "12:00",
+          poiId: "praia-congida",
+          poiSlug: "praia-congida",
           title: "Descida à Praia Fluvial da Congida",
           location: "Margens da Albufeira de Saucelle",
+          estimatedVisitTime: "1h",
+          travelNote: "15 min de carro a descer para a margem do Douro",
           description: "Chegada a um vale verdejante e sereno, com piscinas na água do rio e esplanadas relaxantes.",
           icon: "sun",
           tip: "Mergulhe nas águas calmas se o tempo estiver quente."
         },
         {
           time: "13:15",
+          poiId: "praia-congida",
+          poiSlug: "praia-congida",
           title: "Almoço Ribadouro com Peixe do Rio ou Grelhados",
           location: "Restaurante da Praia da Congida",
+          estimatedVisitTime: "1h30",
+          travelNote: "Junto à margem do rio",
           description: "Almoço com vista direta sobre o espelho de água e as encostas espanholas fronteiriças.",
           icon: "coffee",
           tip: "Acompanhe com vinho branco fresco da região."
         },
         {
           time: "15:30",
+          poiId: "praia-congida",
+          poiSlug: "praia-congida",
           title: "Passeio de Barco Ecológico pelas Arribas",
           location: "Cais Fluvial da Congida",
+          estimatedVisitTime: "1h",
+          travelNote: "Cais de embarque da Congida",
           description: "Navegação silenciosa por trechos do rio onde apenas a água e as aves quebram a tranquilidade.",
           icon: "navigation",
           tip: "Confirme a partida com o operador turístico local."
         },
         {
           time: "18:00",
+          poiId: "adega-cooperativa",
+          poiSlug: "adega-cooperativa",
           title: "Prova de Vinhos e Azeites na Adega Cooperativa",
           location: "Freixo de Espada à Cinta",
+          estimatedVisitTime: "1h",
+          travelNote: "Regresso a Freixo de Espada à Cinta (~8 min de carro)",
           description: "Degustação comentada de vinhos Montes Ermos e azeites virgens extra prensados a frio.",
           icon: "wine",
           tip: "Compre as tradicionais amêndoas cobertas artesanais para levar."

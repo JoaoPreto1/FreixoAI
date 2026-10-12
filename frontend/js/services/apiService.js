@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Serviço de Comunicação HTTP
- * Encapsula chamadas REST, controlo de tempos limites e deteção de conectividade real
- */
-
 import { API_CONFIG } from '../config/apiConfig.js';
 
 class ApiService {
@@ -32,7 +27,6 @@ class ApiService {
           const errJson = await response.json();
           errorDetail = errJson.error?.message || errJson.message || errJson.detail || '';
         } catch {
-          // Resposta não-JSON
         }
         const message = errorDetail 
           ? `HTTP ${response.status}: ${errorDetail}` 
@@ -61,7 +55,6 @@ class ApiService {
       timestamp: new Date().toISOString()
     };
 
-    // 1. Testar se o Gateway Node.js está operacional e recolher integridade dos serviços
     try {
       const res = await this.request(
         `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.HEALTH}`,
@@ -80,7 +73,6 @@ class ApiService {
       status.details.nodeError = err.message;
     }
 
-    // Determinar modo ativo com base nas respostas reais do Gateway
     if (status.nodeApi) {
       API_CONFIG.STATE.activeMode = 'node_gateway';
     } else {
@@ -91,7 +83,6 @@ class ApiService {
     API_CONFIG.STATE.fastApiConnected = status.fastApi;
     API_CONFIG.STATE.lastChecked = status.timestamp;
 
-    // Disparar evento para que todos os componentes da interface atualizem o seu estado
     if (typeof window !== 'undefined') {
       window.dispatchEvent(
         new CustomEvent('freixo:apiStateChanged', { detail: { ...API_CONFIG.STATE, integrations: status.details.node?.integrations } })

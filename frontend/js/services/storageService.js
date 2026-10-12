@@ -1,13 +1,29 @@
-/**
- * FREIXO AI — Gestor de Armazenamento Local (LocalStorage)
- * Gere favoritos, preferências de viagem e histórico do assistente
- */
-
 const KEYS = {
   FAVORITES: 'freixo_ai_favorites',
   SAVED_ITINERARY: 'freixo_ai_saved_itinerary',
   CHAT_HISTORY: 'freixo_ai_chat_history',
   PREFERENCES: 'freixo_ai_user_preferences'
+};
+
+const memoryStore = new Map();
+
+const getStorageItem = (key) => {
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem) {
+      return localStorage.getItem(key);
+    }
+  } catch {}
+  return memoryStore.get(key) || null;
+};
+
+const setStorageItem = (key, value) => {
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+      localStorage.setItem(key, value);
+      return;
+    }
+  } catch {}
+  memoryStore.set(key, value);
 };
 
 class StorageService {
@@ -20,7 +36,7 @@ class StorageService {
    */
   getFavorites() {
     try {
-      const raw = localStorage.getItem(KEYS.FAVORITES);
+      const raw = getStorageItem(KEYS.FAVORITES);
       return raw ? JSON.parse(raw) : ["penedo-durao", "museu-da-seda"];
     } catch {
       return ["penedo-durao", "museu-da-seda"];
@@ -45,12 +61,11 @@ class StorageService {
     }
 
     try {
-      localStorage.setItem(KEYS.FAVORITES, JSON.stringify(current));
+      setStorageItem(KEYS.FAVORITES, JSON.stringify(current));
     } catch (e) {
       console.warn("Não foi possível gravar favorito no localStorage:", e);
     }
 
-    // Disparar evento para atualizar a interface em tempo real
     this.notifyFavoritesChanged(current);
     return isNowFav;
   }
@@ -76,8 +91,9 @@ class StorageService {
     this.listeners.forEach(cb => {
       try { cb(newList); } catch (e) { console.error(e); }
     });
-    // Disparar também evento no window
-    window.dispatchEvent(new CustomEvent('freixo:favoritesUpdated', { detail: { favorites: newList } }));
+    if (typeof window !== 'undefined' && window.dispatchEvent) {
+      window.dispatchEvent(new CustomEvent('freixo:favoritesUpdated', { detail: { favorites: newList } }));
+    }
   }
 
   /**
@@ -85,7 +101,7 @@ class StorageService {
    */
   saveItinerary(itinerary) {
     try {
-      localStorage.setItem(KEYS.SAVED_ITINERARY, JSON.stringify(itinerary));
+      setStorageItem(KEYS.SAVED_ITINERARY, JSON.stringify(itinerary));
     } catch (e) {
       console.warn(e);
     }
@@ -96,7 +112,7 @@ class StorageService {
    */
   getSavedItinerary() {
     try {
-      const raw = localStorage.getItem(KEYS.SAVED_ITINERARY);
+      const raw = getStorageItem(KEYS.SAVED_ITINERARY);
       return raw ? JSON.parse(raw) : null;
     } catch {
       return null;
@@ -108,7 +124,7 @@ class StorageService {
    */
   saveChatHistory(messages) {
     try {
-      localStorage.setItem(KEYS.CHAT_HISTORY, JSON.stringify(messages.slice(-20)));
+      setStorageItem(KEYS.CHAT_HISTORY, JSON.stringify(messages.slice(-20)));
     } catch (e) {
       console.warn(e);
     }
@@ -119,7 +135,7 @@ class StorageService {
    */
   getChatHistory() {
     try {
-      const raw = localStorage.getItem(KEYS.CHAT_HISTORY);
+      const raw = getStorageItem(KEYS.CHAT_HISTORY);
       return raw ? JSON.parse(raw) : [];
     } catch {
       return [];

@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Freixo AI — Onde o Douro Abraça a Tradição</title>
   <meta name="description" content="Descubra os encantos, património da seda, portais manuelinos e arribas do Douro Internacional em Freixo de Espada à Cinta com o seu assistente inteligente.">
-  
-  <!-- Tailwind CSS CDN com Configuração Customizada -->
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -43,23 +42,18 @@
     }
   </script>
 
-  <!-- Favicon SVG Editorial -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
 
-  <!-- Variáveis de Ambiente Públicas -->
   <script src="env.js"></script>
 
-  <!-- CSS Editorial Personalizado -->
   <link rel="stylesheet" href="assets/css/editorial.css">
 </head>
 <body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain selection:bg-terracotta selection:text-white">
 
-  <!-- Ponto de Montagem da Barra de Navegação -->
   <div id="navbar-mount"></div>
 
-  <!-- HERO SECTION EDITORIAL -->
   <header class="relative min-h-[92vh] flex items-center justify-center overflow-hidden bg-pine-900">
-    <!-- Imagem de Fundo Panorâmica -->
+    
     <div class="absolute inset-0 z-0">
       <img src="assets/images/hero-douro.png" 
            alt="Canhão do Douro Internacional em Freixo de Espada à Cinta" 
@@ -67,26 +61,21 @@
       <div class="absolute inset-0 bg-gradient-to-t from-pine-900 via-pine-900/40 to-black/30"></div>
     </div>
 
-    <!-- Conteúdo Central Hero -->
     <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center flex flex-col items-center">
-      
-      <!-- Badges de Cabeçalho -->
+
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#FAF8F5] text-[11px] uppercase tracking-[0.2em] font-medium mb-6 animate-fade-in">
         <span class="w-1.5 h-1.5 rounded-full bg-gold animate-ping"></span>
         <span>41°05'32'' N • 6°48'28'' W • Parque Natural do Douro Internacional</span>
       </div>
 
-      <!-- Título de Grande Impacto Editorial -->
       <h1 class="font-display text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-[#FAF8F5] leading-[1.08] max-w-4xl mb-6 shadow-sm drop-shadow-md">
         Onde o Douro abraça a tradição.
       </h1>
 
-      <!-- Subtítulo Poético -->
       <p class="font-sans text-base sm:text-lg md:text-xl text-parchment-200 max-w-2xl font-light leading-relaxed mb-10 drop-shadow">
         Descubra a arte viva da seda, a monumentalidade dos portais manuelinos e os miradouros arrebatadores de Freixo de Espada à Cinta com o seu assistente inteligente.
       </p>
 
-      <!-- Botões de Ação Hero -->
       <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
         <a href="roteiro.html" 
            class="w-full sm:w-auto px-8 py-4 rounded-full bg-gold hover:bg-[#cfa85e] text-pine-900 font-bold text-xs uppercase tracking-widest transition-all shadow-xl hover:scale-105 flex items-center justify-center gap-2 group">
@@ -101,7 +90,6 @@
         </a>
       </div>
 
-      <!-- Indicador de Scroll Suave -->
       <a href="#narrativa" class="mt-16 text-xs text-parchment-300 flex flex-col items-center gap-2 hover:text-[#FAF8F5] transition-colors group">
         <span class="uppercase tracking-widest text-[10px]">Descobrir Mais</span>
         <span class="animate-bounce text-sm">↓</span>
@@ -110,7 +98,6 @@
     </div>
   </header>
 
-  <!-- SECÇÃO DE NARRATIVA EDITORIAL -->
   <section id="narrativa" class="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
       
@@ -140,7 +127,6 @@
         </div>
       </div>
 
-      <!-- Painel Visual de Métricas Editoriais -->
       <div class="lg:col-span-5 bg-parchment-50 p-8 rounded-3xl border border-pine-800/10 shadow-xl space-y-6">
         <h3 class="font-display text-xl font-bold text-pine-900 border-b border-pine-800/10 pb-4">
           Singularidades do Concelho
@@ -179,11 +165,9 @@
     </div>
   </section>
 
-  <!-- SECÇÃO DE LUGARES IMPERDÍVEIS & MAPA PREVIEW -->
   <section class="py-20 bg-parchment-200/60 border-y border-pine-800/10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <!-- Cabeçalho de Secção -->
+
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
           <span class="editorial-badge bg-white text-pine-800 mb-2.5">Exploração Geográfica</span>
@@ -203,19 +187,16 @@
         </div>
       </div>
 
-      <!-- Grelha de Cartões POI em Destaque -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="home-pois-grid">
-        <!-- Renderizado dinamicamente por JS -->
+        
       </div>
 
     </div>
   </section>
 
-  <!-- SECÇÃO IMERSIVA: A SEDA E OS PORTAIS (DUAL EDITORIAL COMPOSITION) -->
   <section class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
-      
-      <!-- Bloco 1: A Tradição da Seda -->
+
       <div class="bg-parchment-50 rounded-3xl overflow-hidden border border-pine-800/10 shadow-lg flex flex-col justify-between group">
         <div class="relative h-72 sm:h-80 overflow-hidden bg-pine-900">
           <img src="assets/images/seda-loom.png" 
@@ -235,14 +216,14 @@
 
           <div class="pt-4 border-t border-pine-800/10 flex items-center justify-between">
             <span class="text-xs text-olive font-medium">Demonstrações ao Vivo • Ter a Dom</span>
-            <button class="text-xs font-bold text-terracotta hover:underline" onclick="window.dispatchEvent(new CustomEvent('freixo:openAiChat', {detail: {prompt: 'Fala-me sobre a tradição da seda viva no museu de Freixo'}}))">
-              Perguntar à IA ✨
-            </button>
+            <a href="detalhe.html?slug=museu-da-seda" class="text-xs font-bold text-terracotta hover:underline flex items-center gap-1">
+              <span>Ver Ficha do Museu</span>
+              <span>→</span>
+            </a>
           </div>
         </div>
       </div>
 
-      <!-- Bloco 2: Os Portais Manuelinos -->
       <div class="bg-parchment-50 rounded-3xl overflow-hidden border border-pine-800/10 shadow-lg flex flex-col justify-between group">
         <div class="relative h-72 sm:h-80 overflow-hidden bg-pine-900">
           <img src="assets/images/manueline-portal.png" 
@@ -272,7 +253,6 @@
     </div>
   </section>
 
-  <!-- SECÇÃO DE DESTAQUE GASTRONÓMICO & VINHOS -->
   <section class="py-20 bg-pine-900 text-parchment-100 editorial-grain">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -316,7 +296,6 @@
     </div>
   </section>
 
-  <!-- SECÇÃO DE CHAMADA PARA O ASSISTENTE DE IA -->
   <section class="py-24 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
     <div class="bg-parchment-50 p-8 sm:p-14 rounded-3xl border border-pine-800/15 shadow-2xl relative overflow-hidden">
       <div class="absolute -top-10 -right-10 w-40 h-40 bg-gold/15 rounded-full blur-3xl pointer-events-none"></div>
@@ -340,13 +319,10 @@
     </div>
   </section>
 
-  <!-- Ponto de Montagem do Rodapé -->
   <div id="footer-mount"></div>
 
-  <!-- Ponto de Montagem do Chat Widget -->
   <div id="ai-chat-mount"></div>
 
-  <!-- Scripts da Aplicação -->
   <script type="module">
     import { freixoApp } from './js/app.js';
     import { poiService } from './js/services/poiService.js';
@@ -355,7 +331,6 @@
     document.addEventListener('DOMContentLoaded', async () => {
       await freixoApp.init('index');
 
-      // Carregar os 4 POIs principais na página inicial com estado de carregamento
       const grid = document.getElementById('home-pois-grid');
       if (grid) {
         grid.innerHTML = Array(4).fill(0).map(() => `

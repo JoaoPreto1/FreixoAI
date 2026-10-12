@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Serviço de Pontos de Interesse (POIs), Freguesias, Percursos e Eventos
- * Integração robusta com a API Node.js/Express, normalização de dados e tratamento explícito de fallback.
- */
-
 import { apiService } from './apiService.js';
 import { API_CONFIG } from '../config/apiConfig.js';
 import { POIS_DATA, CATEGORIES } from '../data/mockPois.js';
@@ -27,6 +22,10 @@ class PoiService {
    */
   normalizePoi(item, defaultProvenance = 'api_node') {
     if (!item) return null;
+    const lat = item.latitude || (item.coordinates ? item.coordinates.lat : null);
+    const lng = item.longitude || (item.coordinates ? item.coordinates.lng : null);
+    const coordinates = (lat != null && lng != null) ? { lat: Number(lat), lng: Number(lng) } : null;
+
     return {
       ...item,
       id: item.id || item.slug,
@@ -37,9 +36,18 @@ class PoiService {
       shortDescription: item.shortDescription || item.short_description || '',
       fullDescription: item.fullDescription || item.full_description || item.shortDescription || '',
       location: item.location || 'Freixo de Espada à Cinta',
-      coordinates: item.coordinates || (item.latitude && item.longitude ? { lat: item.latitude, lng: item.longitude } : null),
+      coordinates,
+      latitude: coordinates ? coordinates.lat : null,
+      longitude: coordinates ? coordinates.lng : null,
+      altitude: item.altitude || '450 m',
+      estimatedTime: item.estimatedTime || item.estimated_time || '1h',
+      accessibility: item.accessibility || 'Acesso geral verificado',
+      openingHours: item.openingHours || item.opening_hours || 'Acesso permanente',
+      tips: item.tips || '',
+      freguesiaId: item.freguesiaId || item.freguesia_id || '',
       image: item.image || item.image_url || 'assets/images/penedo-durao.png',
-      highlights: item.highlights || [],
+      highlights: Array.isArray(item.highlights) ? item.highlights : [],
+      audioGuide: item.audioGuide || item.audio_guide || null,
       verification: item.verification || {
         status: item.verification_status || 'confirmado',
         source: item.verification_source || 'Oficial',
@@ -94,7 +102,6 @@ class PoiService {
       window.dispatchEvent(new CustomEvent('freixo:poisLoaded', { detail: { ...this.lastStatus.pois } }));
     }
 
-    // Fallback de demonstração local estritamente identificado
     let fallback = POIS_DATA.map(item => this.normalizePoi(item, 'demonstracao_local'));
     if (category && category !== 'all') {
       fallback = fallback.filter(p => p.category === category);
@@ -124,14 +131,41 @@ class PoiService {
         return this.normalizePoi(item, 'api_node');
       }
     } catch (err) {
-      // Se for 404, não existe
       if (err.status === 404) return null;
       console.warn(`[PoiService] Erro ao obter local '${idOrSlug}':`, err.message);
     }
 
-    // Fallback local
     const found = POIS_DATA.find(p => p.id === idOrSlug || p.slug === idOrSlug);
     return found ? this.normalizePoi(found, 'demonstracao_local') : null;
+  }
+
+  /**
+   * Alias explícito para obter por slug canónico
+   */
+  async getPoiBySlug(slug) {
+    return this.getPoiById(slug);
+  }
+
+  /**
+   * Obtém os percursos ou trilhos oficiais que incluem este ponto de interesse
+   */
+  async getTrailsForPoi(poiIdOrSlug) {
+    if (!poiIdOrSlug) return [];
+    try {
+      const trails = await this.getTrails();
+      const target = poiIdOrSlug.toLowerCase();
+      return (trails || []).filter(trail => {
+        const stops = Array.isArray(trail.stops) ? trail.stops : [];
+        return stops.some(stop => {
+          const sId = (stop.poiId || stop.poi_id || stop.id || '').toLowerCase();
+          const sTitle = (stop.title || '').toLowerCase();
+          return sId === target || target === sId || (sId && target.includes(sId)) || (sTitle && target.includes(sTitle));
+        });
+      });
+    } catch (err) {
+      console.warn('[PoiService] Erro ao associar trilhos ao ponto:', err.message);
+      return [];
+    }
   }
 
   /**
@@ -214,6 +248,54 @@ class PoiService {
   }
 
   /**
+   * Obtém percursos associados a um POI (por slug ou ID)
+   */
+  async getTrailsForPoi(poiIdOrSlug) {
+    const trails = await this.getTrails();
+    if (!poiIdOrSlug || !Array.isArray(trails)) return [];
+    const target = String(poiIdOrSlug).toLowerCase();
+    return trails.filter(t => {
+      const stops = Array.isArray(t.stops) ? t.stops : (Array.isArray(t.points_of_interest) ? t.points_of_interest : []);
+      return stops.some(s => {
+        if (!s) return false;
+        if (typeof s === 'string') {
+          const str = s.toLowerCase();
+          return str === target || str.includes(target) || target.includes(str);
+        }
+        const poiId = String(s.poiId || s.poi_id || s.id || s.slug || '').toLowerCase();
+        const title = String(s.title || '').toLowerCase();
+        return poiId === target || poiId.includes(target) || target.includes(poiId) || (title && title.includes(target));
+      });
+    });
+  }
+
+  /**
+   * Obtém um percurso específico por slug ou ID (GET /api/trails/:slug)
+   */
+  async getTrailBySlug(slugOrId) {
+    if (!slugOrId) return null;
+    try {
+      const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.TRAILS}/${encodeURIComponent(slugOrId)}`;
+      const res = await apiService.request(url, {}, 3000);
+      const item = res?.data || res;
+      if (item && (item.id || item.slug)) {
+        return {
+          ...item,
+          heroImage: item.heroImage || item.hero_image || 'assets/images/penedo-durao.png',
+          distance: item.distance || (item.distance_km ? `${item.distance_km} km` : 'Vários km'),
+          _provenance: 'api_node'
+        };
+      }
+    } catch (err) {
+      if (err.status === 404) return null;
+      console.warn(`[PoiService] Erro ao obter percurso '${slugOrId}':`, err.message);
+    }
+
+    const found = ROUTES_DATA.find(r => r.id === slugOrId || r.slug === slugOrId);
+    return found ? { ...found, _provenance: 'demonstracao_local' } : null;
+  }
+
+  /**
    * Obtém eventos e festividades (GET /api/events)
    */
   async getEvents(filters = {}) {
@@ -257,6 +339,35 @@ class PoiService {
   }
 
   /**
+   * Obtém um evento específico por slug ou ID (GET /api/events/:slug)
+   */
+  async getEventBySlug(slugOrId) {
+    if (!slugOrId) return null;
+    try {
+      const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.EVENT_DETAIL(encodeURIComponent(slugOrId))}`;
+      const res = await apiService.request(url, {}, 3000);
+      const item = res?.data || res;
+      if (item && (item.id || item.slug)) {
+        return {
+          ...item,
+          image: item.image || item.image_url || 'assets/images/seda-loom.png',
+          _provenance: res?.meta?.source || 'api_node'
+        };
+      }
+    } catch (err) {
+      if (err.status === 404) return null;
+      console.warn(`[PoiService] Erro ao obter evento '${slugOrId}':`, err.message);
+    }
+
+    const found = EVENTS_DATA.find(e => e.id === slugOrId || e.slug === slugOrId);
+    return found ? {
+      ...found,
+      image: found.image || found.image_url || 'assets/images/seda-loom.png',
+      _provenance: 'demonstracao_local'
+    } : null;
+  }
+
+  /**
    * Retorna as categorias de filtros disponíveis
    */
   getCategories() {
@@ -272,7 +383,6 @@ class PoiService {
       const res = await apiService.request(url, {}, 2000);
       if (res && res.dishes) return res;
     } catch {
-      // Fallback
     }
     return { ...GASTRONOMY_DATA };
   }
@@ -286,7 +396,6 @@ class PoiService {
       const res = await apiService.request(url, {}, 2000);
       if (res && res.silkTradition) return res;
     } catch {
-      // Fallback
     }
     return { ...HERITAGE_DATA };
   }

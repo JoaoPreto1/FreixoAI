@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Percurso Pedestre — Freixo AI</title>
+  <meta id="meta-description" name="description" content="Traçados GeoJSON oficiais, dados técnicos, altimetria e recomendações de segurança dos trilhos e percursos pedestres de Freixo de Espada à Cinta.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              100: '#E6EFE9',
+              600: '#315843',
+              700: '#234332',
+              800: '#182E22',
+              900: '#122419',
+              950: '#0C1811'
+            },
+            parchment: {
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#EBE4DA',
+              300: '#DDD4C7',
+              800: '#3D3830',
+              900: '#24211D',
+            },
+            terracotta: '#B65737',
+            gold: '#DFBA71',
+            olive: '#7E9283'
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            editorial: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            monument: ['"Cinzel"', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥾</text></svg>">
+
+  <script src="env.js"></script>
+
+  <link rel="stylesheet" href="assets/css/editorial.css">
+</head>
+<body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain selection:bg-terracotta selection:text-white">
+
+  <div id="navbar-mount"></div>
+
+  <div id="loading-state" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow w-full space-y-8 animate-pulse">
+    <div class="h-6 bg-pine-800/10 rounded w-1/4"></div>
+    <div class="h-96 bg-pine-800/20 rounded-3xl"></div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="md:col-span-2 space-y-4">
+        <div class="h-8 bg-pine-800/15 rounded w-3/4"></div>
+        <div class="h-4 bg-pine-800/10 rounded w-full"></div>
+        <div class="h-4 bg-pine-800/10 rounded w-5/6"></div>
+      </div>
+      <div class="h-64 bg-pine-800/10 rounded-2xl"></div>
+    </div>
+  </div>
+
+  <div id="error-state" class="hidden max-w-4xl mx-auto px-4 py-20 text-center flex-grow flex flex-col items-center justify-center space-y-6">
+    <div class="w-20 h-20 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-4xl shadow-inner">
+      🥾
+    </div>
+    <span class="editorial-badge bg-amber-100 text-amber-900 border-amber-300">Trilho Não Identificado</span>
+    <h1 class="font-display text-3xl sm:text-4xl font-bold text-pine-900" id="error-title">
+      Percurso Não Encontrado
+    </h1>
+    <p class="text-sm text-parchment-800 max-w-md mx-auto leading-relaxed" id="error-message">
+      O percurso pedestre solicitado não consta no inventário territorial ou o endereço fornecido está incorreto. Podes explorar todos os trilhos confirmados no mapa geral.
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+      <a href="explorar.html" class="px-6 py-3 rounded-full bg-pine-900 text-white font-semibold text-xs tracking-wider uppercase hover:bg-pine-800 transition-all shadow-md">
+        ← Voltar ao Mapa de Exploração
+      </a>
+      <a href="index.html" class="px-6 py-3 rounded-full bg-white border border-pine-900/20 text-pine-900 font-semibold text-xs tracking-wider uppercase hover:bg-parchment-200 transition-all">
+        Página Inicial
+      </a>
+    </div>
+  </div>
+
+  <main id="trail-content" class="hidden flex-grow w-full pb-20">
+
+    <div class="bg-pine-950 text-parchment-300 border-b border-pine-800/80 text-xs py-3.5 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        <nav aria-label="Navegação em trilho de pão" class="flex items-center gap-2">
+          <a href="index.html" class="hover:text-gold transition-colors">Início</a>
+          <span class="text-pine-600">/</span>
+          <a href="explorar.html" class="hover:text-gold transition-colors">Percursos</a>
+          <span class="text-pine-600">/</span>
+          <span id="breadcrumb-title" class="text-white font-semibold truncate max-w-xs sm:max-w-md">...</span>
+        </nav>
+
+        <div id="provenance-badge" class="flex items-center gap-2">
+          
+        </div>
+      </div>
+    </div>
+
+    <header class="relative bg-pine-950 text-white overflow-hidden py-14 sm:py-20 border-b border-pine-800/40">
+      <div class="absolute inset-0 z-0 opacity-25 mix-blend-luminosity">
+        <img id="hero-image" 
+             src="assets/images/alpajares.png" 
+             alt="Percurso Turístico" 
+             class="w-full h-full object-cover object-center transform scale-105 filter blur-[1px]">
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-t from-pine-950 via-pine-950/80 to-transparent z-10"></div>
+
+      <div class="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <span id="hero-category-badge" class="editorial-badge bg-gold text-pine-950 font-bold border-none text-[11px]">
+            Percurso Homologado
+          </span>
+          <span id="hero-geometry-badge" class="editorial-badge bg-emerald-950 text-emerald-300 border-emerald-500/40 text-[11px]">
+            GeoJSON Verificado
+          </span>
+          <span id="hero-difficulty-badge" class="editorial-badge bg-terracotta text-white border-none text-[11px]">
+            Dificuldade: ...
+          </span>
+        </div>
+
+        <div class="space-y-3 max-w-4xl">
+          <h1 id="trail-title" class="font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1]">
+            ...
+          </h1>
+
+          <div class="flex flex-wrap items-center gap-y-2 gap-x-5 text-xs sm:text-sm text-parchment-200 font-medium pt-2">
+            <span class="flex items-center gap-1.5">
+              <span>📏</span> <strong class="text-white" id="meta-distance">...</strong>
+            </span>
+            <span class="text-pine-600 hidden sm:inline">•</span>
+            <span class="flex items-center gap-1.5">
+              <span>⏱️</span> <strong class="text-white" id="meta-duration">...</strong>
+            </span>
+            <span class="text-pine-600 hidden sm:inline">•</span>
+            <span class="flex items-center gap-1.5">
+              <span>🔄</span> <span id="meta-type">Percurso Pedestre</span>
+            </span>
+            <span class="text-pine-600 hidden sm:inline">•</span>
+            <span class="flex items-center gap-1.5">
+              <span>⛰️</span> <span id="meta-elevation">Desnível Verificado</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="sticky top-20 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-pine-800/15 py-3.5 px-4 sm:px-6 lg:px-8 shadow-sm">
+      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <a id="btn-open-explorer-map" 
+             href="explorar.html" 
+             class="px-4 py-2.5 rounded-full bg-pine-900 text-white hover:bg-pine-800 text-xs font-bold tracking-wider uppercase transition-all shadow flex items-center gap-2">
+            <span>🗺️ Ver no Mapa Geral</span>
+            <span class="text-gold">↗</span>
+          </a>
+
+          <button id="btn-share-link" 
+                  type="button" 
+                  class="px-4 py-2.5 rounded-full bg-white border border-pine-900/20 text-pine-900 hover:bg-parchment-200 text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5">
+            <span>🔗 Partilhar Ficha</span>
+          </button>
+        </div>
+
+        <button id="btn-ask-ai" 
+                type="button" 
+                class="px-4 py-2.5 rounded-full bg-gold hover:bg-[#cfa85e] text-pine-950 text-xs font-bold tracking-wider uppercase transition-all shadow flex items-center gap-2">
+          <span>Perguntar ao Freixo AI</span>
+          <span>✨</span>
+        </button>
+      </div>
+    </section>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 space-y-14">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+
+        <div class="lg:col-span-8 space-y-10">
+
+          <div class="bg-[#FAF8F5] p-6 sm:p-8 rounded-3xl border border-pine-800/10 shadow-sm space-y-6">
+            <div class="border-b border-pine-800/10 pb-4 flex items-center justify-between">
+              <div>
+                <span class="editorial-badge bg-pine-800 text-gold mb-1 text-[10px]">Ficha Técnica</span>
+                <h2 class="font-display text-2xl font-bold text-pine-900">Parâmetros & Terreno</h2>
+              </div>
+              <span id="trail-ref-code" class="text-xs font-mono font-bold px-3 py-1 bg-white border border-pine-800/20 rounded-full text-pine-900">
+                PR1 FEC
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div class="p-3.5 rounded-2xl bg-white border border-pine-800/10 space-y-1">
+                <span class="text-[10px] uppercase tracking-wider text-olive font-semibold block">Distância</span>
+                <p id="tech-distance" class="text-base font-bold text-pine-900 font-display">...</p>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-white border border-pine-800/10 space-y-1">
+                <span class="text-[10px] uppercase tracking-wider text-olive font-semibold block">Duração Média</span>
+                <p id="tech-duration" class="text-base font-bold text-pine-900 font-display">...</p>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-white border border-pine-800/10 space-y-1">
+                <span class="text-[10px] uppercase tracking-wider text-olive font-semibold block">Dificuldade</span>
+                <p id="tech-difficulty" class="text-base font-bold text-pine-900 font-display">...</p>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-white border border-pine-800/10 space-y-1">
+                <span class="text-[10px] uppercase tracking-wider text-olive font-semibold block">Tipo de Traçado</span>
+                <p id="tech-type" class="text-base font-bold text-pine-900 font-display">Circular</p>
+              </div>
+            </div>
+
+            <p id="trail-description" class="text-sm sm:text-base text-parchment-900 leading-relaxed font-sans">
+              ...
+            </p>
+          </div>
+
+          <section class="bg-[#FAF8F5] p-6 sm:p-8 rounded-3xl border border-pine-800/10 shadow-sm space-y-6">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <span class="editorial-badge bg-terracotta text-white mb-1 text-[10px]">Cartografia Territorial</span>
+                <h3 class="font-display text-2xl font-bold text-pine-900">
+                  Traçado Cartográfico Oficial (WGS84)
+                </h3>
+              </div>
+              <span id="geojson-nodes-badge" class="text-[10px] font-mono bg-white px-2.5 py-1 rounded-full border border-pine-800/15 text-olive">
+                Coordenadas GeoJSON
+              </span>
+            </div>
+
+            <div class="rounded-2xl overflow-hidden border border-pine-800/20 shadow-md bg-parchment-200">
+              <div id="trail-detail-map" class="h-80 sm:h-96 w-full z-10"></div>
+            </div>
+
+            <div id="geometry-unavailable-alert" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-2">
+              <div class="flex items-center gap-2 font-bold">
+                <span>⚠️</span>
+                <span>Geometria Integral em Levantamento</span>
+              </div>
+              <p id="geometry-unavailable-reason" class="leading-relaxed">
+                Este itinerário não possui traçado contínuo homologado único em fontes cartográficas públicas fiáveis. O Freixo AI não interpola linhas fictícias entre pontos para preservar a segurança dos visitantes.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white border border-pine-800/10 text-xs space-y-3">
+              <div class="flex items-center justify-between border-b border-pine-800/10 pb-2">
+                <span class="font-bold text-pine-900 uppercase tracking-wider text-[10px]">Origem dos Dados Geográficos</span>
+                <span id="carto-status" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-500/40">
+                  Validado
+                </span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-parchment-800">
+                <div>
+                  <span class="text-[10px] text-olive uppercase block">Fonte Oficial</span>
+                  <span id="carto-source" class="font-medium text-pine-900">...</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-olive uppercase block">Data de Consulta</span>
+                  <span id="carto-consulted" class="font-mono text-pine-900">2026-10-12</span>
+                </div>
+              </div>
+              <div id="carto-limitations-container" class="pt-2 border-t border-pine-800/10">
+                <span class="text-[10px] text-olive uppercase block font-semibold">Condições do Terreno & Limitações</span>
+                <p id="carto-limitations" class="text-xs text-parchment-800 mt-1 italic leading-relaxed">
+                  ...
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section class="bg-[#FAF8F5] p-6 sm:p-8 rounded-3xl border border-pine-800/10 shadow-sm space-y-6">
+            <div>
+              <span class="editorial-badge bg-amber-900/15 text-amber-900 border-amber-500/30 mb-1 text-[10px]">Segurança no Terreno</span>
+              <h3 class="font-display text-2xl font-bold text-pine-900">
+                Avisos & Recomendações aos Caminheiros
+              </h3>
+              <p class="text-xs text-parchment-800 mt-1">Normas de conduta no Parque Natural do Douro Internacional e prevenção de acidentes.</p>
+            </div>
+
+            <div id="safety-warnings-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+            </div>
+          </section>
+
+        </div>
+
+        <aside class="lg:col-span-4 space-y-8 lg:sticky lg:top-36">
+
+          <div class="bg-[#FAF8F5] p-6 sm:p-7 rounded-3xl border border-pine-800/15 shadow-md space-y-4">
+            <div>
+              <span class="editorial-badge bg-pine-800 text-gold mb-1 text-[10px]">Paragens Notáveis</span>
+              <h3 class="font-display text-lg font-bold text-pine-900">Locais ao Longo do Percurso</h3>
+              <p class="text-[11px] text-parchment-800 mt-1">Monumentos, miradouros e sítios arqueológicos integrados nesta rota.</p>
+            </div>
+
+            <div id="trail-pois-container" class="space-y-3 pt-2">
+              
+            </div>
+          </div>
+
+          <div class="bg-[#FAF8F5] p-6 rounded-3xl border border-pine-800/10 shadow-sm space-y-4">
+            <h4 class="font-display text-base font-bold text-pine-900">Outros Trilhos no Concelho</h4>
+            <div id="other-trails-container" class="space-y-3">
+              
+            </div>
+          </div>
+
+        </aside>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <div id="footer-mount"></div>
+
+  <div id="ai-chat-mount"></div>
+
+  <script type="module">
+    import { freixoApp } from './js/app.js';
+    import { poiService } from './js/services/poiService.js';
+    import { showToast } from './js/components/Toast.js';
+
+    let currentTrail = null;
+    let trailMap = null;
+    let trailLayer = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await freixoApp.init('explorar');
+
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get('slug') || params.get('id') || params.get('trilho');
+
+      if (!slug) {
+        showError('Identificador Ausente', 'Por favor escolhe um percurso pedestre a partir do mapa de exploração.');
+        return;
+      }
+
+      try {
+        currentTrail = await poiService.getTrailBySlug(slug);
+
+        if (!currentTrail) {
+          showError('Percurso Não Encontrado', `Não encontrámos nenhum trilho com o identificador "${slug}". Confirma se o nome está correto.`);
+          return;
+        }
+
+        renderTrail(currentTrail);
+        initTrailMap(currentTrail);
+        loadAssociatedPois(currentTrail);
+        loadOtherTrails(currentTrail);
+
+      } catch (err) {
+        console.error('[Trilho] Erro ao carregar percurso:', err);
+        showError('Erro de Carregamento', 'Ocorreu um erro ao comunicar com os serviços turísticos de Freixo de Espada à Cinta.');
+      }
+    });
+
+    function showError(title, message) {
+      document.getElementById('loading-state')?.classList.add('hidden');
+      document.getElementById('trail-content')?.classList.add('hidden');
+      const errorEl = document.getElementById('error-state');
+      if (errorEl) {
+        errorEl.classList.remove('hidden');
+        document.getElementById('error-title').textContent = title;
+        document.getElementById('error-message').textContent = message;
+      }
+    }
+
+    function renderTrail(trail) {
+      document.getElementById('loading-state')?.classList.add('hidden');
+      document.getElementById('error-state')?.classList.add('hidden');
+      document.getElementById('trail-content')?.classList.remove('hidden');
+
+      document.title = `${trail.title} — Freixo AI (Trilhos de Freixo de Espada à Cinta)`;
+      document.getElementById('page-title').textContent = `${trail.title} — Freixo AI`;
+      document.getElementById('meta-description').setAttribute('content', trail.description);
+      document.getElementById('breadcrumb-title').textContent = trail.title;
+
+      const heroImg = document.getElementById('hero-image');
+      if (heroImg) heroImg.src = trail.heroImage || trail.hero_image || 'assets/images/alpajares.png';
+
+      document.getElementById('trail-title').textContent = trail.title;
+      document.getElementById('hero-category-badge').textContent = trail.category || 'Percurso Pedestre';
+      document.getElementById('hero-difficulty-badge').textContent = `Dificuldade: ${trail.difficulty || 'Média'}`;
+
+      const distanceText = trail.distance || (trail.distance_km ? `${trail.distance_km} km` : 'Em levantamento');
+      const durationText = trail.duration || 'Várias horas';
+
+      document.getElementById('meta-distance').textContent = distanceText;
+      document.getElementById('meta-duration').textContent = durationText;
+      document.getElementById('tech-distance').textContent = distanceText;
+      document.getElementById('tech-duration').textContent = durationText;
+      document.getElementById('tech-difficulty').textContent = trail.difficulty || 'Moderada';
+      document.getElementById('trail-description').textContent = trail.description;
+
+      const refCode = trail.geojson?.properties?.ref || (trail.id.includes('pr1') ? 'PR1 FEC' : 'ROTA TURÍSTICA');
+      document.getElementById('trail-ref-code').textContent = refCode;
+
+      const provEl = document.getElementById('provenance-badge');
+      if (provEl) {
+        if (trail._provenance === 'api_node') {
+          provEl.innerHTML = '<span class="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 text-[10px] font-mono border border-emerald-500/40">✓ Servido por API Node.js / Supabase</span>';
+        } else {
+          provEl.innerHTML = '<span class="px-2.5 py-0.5 rounded-full bg-pine-800 text-parchment-200 text-[10px] font-mono">Dados Verificados Locais (ICNF/OSM)</span>';
+        }
+      }
+
+      const isGeoConfirmed = trail.geometry_status === 'confirmado' && trail.geojson;
+      const heroGeoBadge = document.getElementById('hero-geometry-badge');
+      if (heroGeoBadge) {
+        if (isGeoConfirmed) {
+          heroGeoBadge.className = 'editorial-badge bg-emerald-950 text-emerald-300 border-emerald-500/40 text-[11px]';
+          heroGeoBadge.textContent = '✓ GeoJSON Oficial Verificado';
+        } else {
+          heroGeoBadge.className = 'editorial-badge bg-amber-950 text-amber-300 border-amber-600/40 text-[11px]';
+          heroGeoBadge.textContent = 'Traçado em Levantamento';
+        }
+      }
+
+      document.getElementById('carto-source').textContent = trail.geometry_source || 'ICNF / Município de Freixo de Espada à Cinta';
+      document.getElementById('carto-consulted').textContent = trail.geometry_consulted_at || '2026-10-12';
+      document.getElementById('carto-status').textContent = isGeoConfirmed ? '✓ Homologado' : 'Em Levantamento';
+
+      if (trail.geometry_limitations) {
+        document.getElementById('carto-limitations').textContent = trail.geometry_limitations;
+      } else {
+        document.getElementById('carto-limitations-container')?.classList.add('hidden');
+      }
+
+      renderSafetyWarnings(trail);
+
+      setupActions(trail);
+    }
+
+    function renderSafetyWarnings(trail) {
+      const container = document.getElementById('safety-warnings-grid');
+      if (!container) return;
+
+      const warnings = [
+        {
+          icon: '🥾',
+          title: 'Calçado de Caminhada Aderente',
+          desc: 'Piso rochoso de granito e xisto com desníveis acentuados. É estritamente desaconselhado o uso de calçado urbano liso.'
+        },
+        {
+          icon: '💧',
+          title: 'Hidratação Autónoma (Mínimo 1.5L)',
+          desc: 'Não existem pontos de água potável no fundo dos desfiladeiros. Leva reserva suficiente de líquidos para toda a duração.'
+        },
+        {
+          icon: '☀️',
+          title: 'Exposição Solar & Clima Duriense',
+          desc: 'Microclima de verões muito quentes (frequentemente > 35°C). Evita caminhadas no meio do dia e usa proteção solar.'
+        },
+        {
+          icon: '📶',
+          title: 'Sombra de Rede Móvel',
+          desc: 'Algumas gargantas escarpadas e arribas possuem zonas sem cobertura celular. Descarrega o percurso previamente.'
+        }
+      ];
+
+      container.innerHTML = warnings.map(w => `
+        <div class="p-4 rounded-2xl bg-white border border-pine-800/10 shadow-sm flex items-start gap-3">
+          <span class="text-xl flex-shrink-0 mt-0.5">${w.icon}</span>
+          <div>
+            <h4 class="font-display font-bold text-xs text-pine-900">${w.title}</h4>
+            <p class="text-[11px] text-parchment-800 leading-relaxed mt-0.5">${w.desc}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setupActions(trail) {
+      const btnMap = document.getElementById('btn-open-explorer-map');
+      if (btnMap) {
+        btnMap.href = `explorar.html?trilho=${encodeURIComponent(trail.slug || trail.id)}`;
+      }
+
+      const shareBtn = document.getElementById('btn-share-link');
+      shareBtn?.addEventListener('click', async () => {
+        const canonicalUrl = `${window.location.origin}/trilho.html?slug=${trail.slug || trail.id}`;
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(canonicalUrl);
+            showToast('Link da ficha do percurso copiado para a área de transferência!', 'success');
+          } else {
+            showToast(`Link: ${canonicalUrl}`, 'info');
+          }
+        } catch {
+          showToast(`Link: ${canonicalUrl}`, 'info');
+        }
+      });
+
+      const askAiBtn = document.getElementById('btn-ask-ai');
+      askAiBtn?.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('freixo:openAiChat', {
+          detail: { prompt: `Dá-me conselhos detalhados de visita, altimetria e história para percorrer o "${trail.title}" em Freixo de Espada à Cinta.` }
+        }));
+      });
+    }
+
+    function initTrailMap(trail) {
+      const container = document.getElementById('trail-detail-map');
+      if (!container || typeof L === 'undefined') return;
+
+      if (trailMap) {
+        trailMap.remove();
+        trailMap = null;
+      }
+
+      trailMap = L.map('trail-detail-map', {
+        center: [41.050, -6.905],
+        zoom: 13,
+        zoomControl: true,
+        scrollWheelZoom: false
+      });
+
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18
+      }).addTo(trailMap);
+
+      const isGeoConfirmed = trail.geometry_status === 'confirmado' && trail.geojson;
+
+      if (isGeoConfirmed) {
+        try {
+          trailLayer = L.geoJSON(trail.geojson, {
+            style: {
+              color: '#B65737',
+              weight: 5,
+              opacity: 0.9,
+              dashArray: '8, 6',
+              lineCap: 'round',
+              lineJoin: 'round'
+            }
+          }).addTo(trailMap);
+
+          trailLayer.bindTooltip(trail.title, {
+            sticky: true,
+            className: 'trail-leaflet-tooltip'
+          });
+
+          const bounds = trailLayer.getBounds();
+          if (bounds.isValid()) {
+            trailMap.fitBounds(bounds, { padding: [30, 30] });
+          }
+
+          const coords = trail.geojson.geometry?.coordinates || trail.geojson.coordinates;
+          if (Array.isArray(coords) && coords.length > 0) {
+            const firstSegment = Array.isArray(coords[0][0]) ? coords[0][0] : coords[0];
+            if (firstSegment && firstSegment.length >= 2) {
+              const startIcon = L.divIcon({
+                className: 'custom-start-pin',
+                html: `<div class="w-7 h-7 rounded-full bg-[#182E22] text-[#DFBA71] border-2 border-white flex items-center justify-center text-xs font-bold shadow-lg">🏁</div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+              });
+              L.marker([firstSegment[1], firstSegment[0]], { icon: startIcon })
+                .addTo(trailMap)
+                .bindPopup(`<strong>Início Oficial do Percurso</strong><br>${trail.title}`);
+            }
+          }
+
+        } catch (err) {
+          console.warn('[Trilho] Erro ao desenhar GeoJSON:', err);
+        }
+      } else {
+        // Geometria não confirmada: mostrar alerta explícito e não desenhar linhas fictícias
+        document.getElementById('geometry-unavailable-alert')?.classList.remove('hidden');
+        document.getElementById('geojson-nodes-badge').textContent = 'Traçado em Levantamento';
+
+        // Plotar pontos de passagem conhecidos se existirem
+        if (Array.isArray(trail.stops)) {
+          const markers = [];
+          trail.stops.forEach((stop, idx) => {
+            if (stop.lat && stop.lng) {
+              const stopIcon = L.divIcon({
+                className: 'stop-pin',
+                html: `<div class="w-6 h-6 rounded-full bg-terracotta text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow">${idx + 1}</div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+              });
+              const m = L.marker([stop.lat, stop.lng], { icon: stopIcon })
+                .addTo(trailMap)
+                .bindPopup(`<strong>Paragem ${idx + 1}: ${stop.title || ''}</strong>`);
+              markers.push(m);
+            }
+          });
+          if (markers.length > 0) {
+            const group = L.featureGroup(markers);
+            trailMap.fitBounds(group.getBounds(), { padding: [40, 40] });
+          }
+        }
+      }
+    }
+
+    async function loadAssociatedPois(trail) {
+      const container = document.getElementById('trail-pois-container');
+      if (!container) return;
+
+      try {
+        const allPois = await poiService.getAllPois();
+        
+        // Extrair IDs de POIs associados ao trilho
+        const stopIds = [];
+        if (Array.isArray(trail.stops)) {
+          trail.stops.forEach(s => {
+            const id = typeof s === 'string' ? s : (s.poiId || s.poi_id || s.id || s.slug);
+            if (id) stopIds.push(String(id).toLowerCase());
+          });
+        }
+
+        // Se for o PR1 Alpajares, garantir vínculo ao local do Castelo Velho / Calçada
+        if (trail.id.includes('alpajares') || trail.slug.includes('alpajares')) {
+          if (!stopIds.includes('calcada-alpajares')) stopIds.push('calcada-alpajares');
+        }
+
+        const matchedPois = allPois.filter(p => 
+          stopIds.includes(String(p.id).toLowerCase()) || 
+          stopIds.includes(String(p.slug).toLowerCase())
+        );
+
+        if (matchedPois.length > 0) {
+          container.innerHTML = matchedPois.map(poi => `
+            <a href="detalhe.html?slug=${poi.slug || poi.id}" 
+               class="block p-3.5 rounded-2xl bg-white border border-pine-800/10 hover:border-terracotta transition-all shadow-sm group">
+              <div class="flex items-center gap-3">
+                <img src="${poi.image || 'assets/images/penedo-durao.png'}" 
+                     alt="${poi.title}" 
+                     class="w-12 h-12 rounded-xl object-cover flex-shrink-0 group-hover:scale-105 transition-transform" />
+                <div class="min-w-0 flex-grow">
+                  <h4 class="font-display font-bold text-xs text-pine-900 group-hover:text-terracotta transition-colors truncate">
+                    ${poi.title}
+                  </h4>
+                  <p class="text-[10px] text-olive truncate">${poi.location || 'Freixo de Espada à Cinta'}</p>
+                  <span class="text-[10px] font-semibold text-terracotta inline-flex items-center gap-0.5 mt-0.5">
+                    Ver Ficha do Local →
+                  </span>
+                </div>
+              </div>
+            </a>
+          `).join('');
+        } else {
+          container.innerHTML = `
+            <div class="p-3.5 rounded-2xl bg-white border border-pine-800/10 text-xs text-parchment-800">
+              Este percurso percorre a paisagem natural e arribas. Consulta o <a href="explorar.html" class="text-terracotta font-semibold hover:underline">Mapa de Locais</a> para ver monumentos na proximidade.
+            </div>
+          `;
+        }
+      } catch (err) {
+        container.innerHTML = '<p class="text-xs text-parchment-800">Sem locais adicionais disponíveis no momento.</p>';
+      }
+    }
+
+    async function loadOtherTrails(current) {
+      const container = document.getElementById('other-trails-container');
+      if (!container) return;
+
+      try {
+        const allTrails = await poiService.getTrails();
+        const others = allTrails.filter(t => t.id !== current.id && t.slug !== current.slug).slice(0, 2);
+
+        if (others.length > 0) {
+          container.innerHTML = others.map(t => `
+            <a href="trilho.html?slug=${t.slug || t.id}" 
+               class="block p-3 rounded-2xl bg-white border border-pine-800/10 hover:border-pine-800/30 transition-all group">
+              <span class="editorial-badge bg-pine-800 text-gold text-[9px] mb-1">${t.category || 'Trilho'}</span>
+              <h5 class="font-display font-bold text-xs text-pine-900 group-hover:text-terracotta transition-colors">
+                ${t.title}
+              </h5>
+              <div class="flex items-center justify-between text-[10px] text-olive mt-1">
+                <span>📏 ${t.distance || (t.distance_km ? t.distance_km + ' km' : '')}</span>
+                <span>⏱️ ${t.duration || ''}</span>
+              </div>
+            </a>
+          `).join('');
+        }
+      } catch {
+      }
+    }
+  </script>
+</body>
+</html>

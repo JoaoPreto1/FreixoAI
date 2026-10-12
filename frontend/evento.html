@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Evento & Tradição — Freixo AI</title>
+  <meta id="meta-description" name="description" content="Informações verificadas, datas oficiais, enquadramento histórico e localização dos eventos tradicionais de Freixo de Espada à Cinta.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              100: '#E6EFE9',
+              600: '#315843',
+              700: '#234332',
+              800: '#182E22',
+              900: '#122419',
+              950: '#0C1811'
+            },
+            parchment: {
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#EBE4DA',
+              300: '#DDD4C7',
+              800: '#3D3830',
+              900: '#24211D',
+            },
+            terracotta: '#B65737',
+            gold: '#DFBA71',
+            olive: '#7E9283'
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            editorial: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            monument: ['"Cinzel"', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎪</text></svg>">
+
+  <script src="env.js"></script>
+
+  <link rel="stylesheet" href="assets/css/editorial.css">
+</head>
+<body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain selection:bg-terracotta selection:text-white">
+
+  <div id="navbar-mount"></div>
+
+  <div id="loading-state" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow w-full space-y-8 animate-pulse">
+    <div class="h-6 bg-pine-800/10 rounded w-1/4"></div>
+    <div class="h-80 bg-pine-800/20 rounded-3xl"></div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="md:col-span-2 space-y-4">
+        <div class="h-8 bg-pine-800/15 rounded w-3/4"></div>
+        <div class="h-4 bg-pine-800/10 rounded w-full"></div>
+        <div class="h-4 bg-pine-800/10 rounded w-5/6"></div>
+      </div>
+      <div class="h-64 bg-pine-800/10 rounded-2xl"></div>
+    </div>
+  </div>
+
+  <div id="error-state" class="hidden max-w-4xl mx-auto px-4 py-20 text-center flex-grow flex flex-col items-center justify-center space-y-6">
+    <div class="w-20 h-20 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-4xl shadow-inner">
+      🎪
+    </div>
+    <span class="editorial-badge bg-amber-100 text-amber-900 border-amber-300">Evento Não Identificado</span>
+    <h1 class="font-display text-3xl sm:text-4xl font-bold text-pine-900" id="error-title">
+      Evento Não Encontrado
+    </h1>
+    <p class="text-sm text-parchment-800 max-w-md mx-auto leading-relaxed" id="error-message">
+      O evento ou festividade solicitada não consta no calendário municipal ou o endereço está incorreto. Podes consultar toda a agenda cultural na secção de Património.
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+      <a href="patrimonio.html" class="px-6 py-3 rounded-full bg-pine-900 text-white font-semibold text-xs tracking-wider uppercase hover:bg-pine-800 transition-all shadow-md">
+        ← Voltar à Agenda Cultural
+      </a>
+      <a href="index.html" class="px-6 py-3 rounded-full bg-white border border-pine-900/20 text-pine-900 font-semibold text-xs tracking-wider uppercase hover:bg-parchment-200 transition-all">
+        Página Inicial
+      </a>
+    </div>
+  </div>
+
+  <main id="event-content" class="hidden flex-grow w-full pb-20">
+
+    <div class="bg-pine-950 text-parchment-300 border-b border-pine-800/80 text-xs py-3.5 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        <nav aria-label="Navegação em trilho de pão" class="flex items-center gap-2">
+          <a href="index.html" class="hover:text-gold transition-colors">Início</a>
+          <span class="text-pine-600">/</span>
+          <a href="patrimonio.html" class="hover:text-gold transition-colors">Património & Tradições</a>
+          <span class="text-pine-600">/</span>
+          <span id="breadcrumb-title" class="text-white font-semibold truncate max-w-xs sm:max-w-md">...</span>
+        </nav>
+
+        <div id="provenance-badge" class="flex items-center gap-2">
+          
+        </div>
+      </div>
+    </div>
+
+    <header class="relative bg-pine-950 text-white overflow-hidden py-14 sm:py-20 border-b border-pine-800/40">
+      <div class="absolute inset-0 z-0 opacity-25 mix-blend-luminosity">
+        <img id="hero-image" 
+             src="assets/images/seda-loom.png" 
+             alt="Evento de Freixo de Espada à Cinta" 
+             class="w-full h-full object-cover object-center transform scale-105 filter blur-[1px]">
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-t from-pine-950 via-pine-950/80 to-transparent z-10"></div>
+
+      <div class="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <span id="hero-category-badge" class="editorial-badge bg-gold text-pine-950 font-bold border-none text-[11px]">
+            Feira Tradicional
+          </span>
+          <span id="hero-periodicity-badge" class="editorial-badge bg-pine-800 text-parchment-200 border-pine-700 text-[11px]">
+            Periodicidade: Anual
+          </span>
+        </div>
+
+        <div class="space-y-3 max-w-4xl">
+          <h1 id="event-title" class="font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1]">
+            ...
+          </h1>
+
+          <div class="flex flex-wrap items-center gap-y-2 gap-x-5 text-xs sm:text-sm text-parchment-200 font-medium pt-2">
+            <span class="flex items-center gap-1.5">
+              <span>📍</span> <span id="meta-location">...</span>
+            </span>
+            <span class="text-pine-600 hidden sm:inline">•</span>
+            <span class="flex items-center gap-1.5">
+              <span>📅</span> <strong class="text-white" id="meta-periodicity">...</strong>
+            </span>
+            <span class="text-pine-600 hidden sm:inline">•</span>
+            <span class="flex items-center gap-1.5">
+              <span>🎟️</span> <span id="meta-pricing">Entrada Livre</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="sticky top-20 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-pine-800/15 py-3.5 px-4 sm:px-6 lg:px-8 shadow-sm">
+      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <a id="btn-directions-gps" 
+             href="#" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             class="px-4 py-2.5 rounded-full bg-pine-900 text-white hover:bg-pine-800 text-xs font-bold tracking-wider uppercase transition-all shadow flex items-center gap-2">
+            <span>🧭 Como Chegar (GPS)</span>
+            <span class="text-gold">↗</span>
+          </a>
+
+          <button id="btn-share-link" 
+                  type="button" 
+                  class="px-4 py-2.5 rounded-full bg-white border border-pine-900/20 text-pine-900 hover:bg-parchment-200 text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5">
+            <span>🔗 Partilhar Ficha</span>
+          </button>
+        </div>
+
+        <button id="btn-ask-ai" 
+                type="button" 
+                class="px-4 py-2.5 rounded-full bg-gold hover:bg-[#cfa85e] text-pine-950 text-xs font-bold tracking-wider uppercase transition-all shadow flex items-center gap-2">
+          <span>Perguntar ao Freixo AI</span>
+          <span>✨</span>
+        </button>
+      </div>
+    </section>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 space-y-14">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+
+        <div class="lg:col-span-8 space-y-10">
+
+          <div class="bg-[#FAF8F5] p-6 sm:p-8 rounded-3xl border border-pine-800/10 shadow-sm space-y-6">
+            <div class="border-b border-pine-800/10 pb-4">
+              <span class="editorial-badge bg-pine-800 text-gold mb-1 text-[10px]">Informação Factual</span>
+              <h2 class="font-display text-2xl font-bold text-pine-900">Enquadramento Temporal & Acesso</h2>
+              <p class="text-xs text-parchment-800 mt-1">Distinção rigorosa entre a periodicidade habitual histórica e as datas da edição corrente.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-2xl bg-white border border-pine-800/10 space-y-1">
+                <span class="text-[10px] uppercase tracking-wider text-olive font-semibold block">Periodicidade Habitual</span>
+                <p id="fact-periodicity" class="text-sm font-bold text-pine-900 font-display">...</p>
+                <span class="text-[10px] text-parchment-800 block">Cadência secular do calendário festivo de Freixo.</span>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-white border border-pine-800/10 space-y-1">
+                <span class="text-[10px] uppercase tracking-wider text-olive font-semibold block">Datas da Edição Corrente</span>
+                <p id="fact-edition-dates" class="text-sm font-bold text-terracotta font-display">...</p>
+                <span id="fact-edition-status" class="text-[10px] text-parchment-800 block">...</span>
+              </div>
+            </div>
+
+            <div class="space-y-3 pt-2">
+              <h3 class="font-display text-lg font-bold text-pine-900">Resumo da Celebração</h3>
+              <p id="event-description" class="text-sm sm:text-base text-parchment-900 leading-relaxed font-sans">
+                ...
+              </p>
+            </div>
+          </div>
+
+          <section class="bg-[#FAF8F5] p-6 sm:p-8 rounded-3xl border border-pine-800/10 shadow-sm space-y-5">
+            <div class="border-b border-pine-800/10 pb-3">
+              <span class="editorial-badge bg-terracotta text-white mb-1 text-[10px]">Memória Coletiva</span>
+              <h3 class="font-display text-2xl font-bold text-pine-900">
+                Origem Histórica & Tradição Comunitária
+              </h3>
+            </div>
+            
+            <p id="historical-context-text" class="text-sm sm:text-base text-parchment-900 leading-relaxed font-sans">
+              ...
+            </p>
+          </section>
+
+          <section class="bg-[#FAF8F5] p-6 sm:p-8 rounded-3xl border border-pine-800/10 shadow-sm space-y-5">
+            <div class="border-b border-pine-800/10 pb-3">
+              <span class="editorial-badge bg-pine-800 text-gold mb-1 text-[10px]">Guia do Visitante</span>
+              <h3 class="font-display text-2xl font-bold text-pine-900">
+                Horários, Programa & Condições de Entrada
+              </h3>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div class="p-4 rounded-2xl bg-white border border-pine-800/10 space-y-1.5">
+                <span class="font-bold text-pine-900 text-xs block">🎟️ Condições de Acesso & Preço</span>
+                <p id="practical-pricing" class="text-parchment-800 leading-relaxed">
+                  Entrada livre e gratuita no recinto da feira e espaços públicos.
+                </p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-white border border-pine-800/10 space-y-1.5">
+                <span class="font-bold text-pine-900 text-xs block">⏱️ Programa & Atuações</span>
+                <p id="practical-schedule" class="text-parchment-800 leading-relaxed">
+                  Programa diário detalhado e horários de espetáculos divulgados pelo Município.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section class="bg-[#FAF8F5] p-6 sm:p-8 rounded-3xl border border-pine-800/10 shadow-sm space-y-5">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <span class="editorial-badge bg-pine-800 text-gold mb-1 text-[10px]">Georreferenciação</span>
+                <h3 class="font-display text-2xl font-bold text-pine-900">
+                  Localização do Recinto
+                </h3>
+              </div>
+              <span id="map-location-label" class="text-[10px] font-mono text-olive bg-white px-2.5 py-1 rounded-full border border-pine-800/15">
+                Freixo de Espada à Cinta
+              </span>
+            </div>
+
+            <div class="rounded-2xl overflow-hidden border border-pine-800/20 shadow-md bg-parchment-200">
+              <div id="event-detail-map" class="h-72 sm:h-80 w-full z-10"></div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white border border-pine-800/10 text-xs space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-pine-900 text-[10px] uppercase tracking-wider">Entidade Responsável & Fonte</span>
+                <span id="doc-status" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-500/40">
+                  Confirmado
+                </span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-parchment-800 text-[11px]">
+                <div>
+                  <span class="text-olive text-[10px] block">Fonte Oficial</span>
+                  <span id="doc-source" class="font-medium text-pine-900">Município de Freixo de Espada à Cinta</span>
+                </div>
+                <div>
+                  <span class="text-olive text-[10px] block">Data de Consulta</span>
+                  <span id="doc-consulted" class="font-mono text-pine-900">2026-10-12</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <aside class="lg:col-span-4 space-y-8 lg:sticky lg:top-36">
+
+          <div class="bg-[#FAF8F5] p-6 sm:p-7 rounded-3xl border border-pine-800/15 shadow-md space-y-4">
+            <div>
+              <span class="editorial-badge bg-pine-800 text-gold mb-1 text-[10px]">Património Associado</span>
+              <h3 class="font-display text-lg font-bold text-pine-900">Locais Recomendados</h3>
+              <p class="text-[11px] text-parchment-800 mt-1">Pontos turísticos diretamente ligados à temática desta festividade.</p>
+            </div>
+
+            <div id="related-pois-container" class="space-y-3 pt-2">
+              
+            </div>
+          </div>
+
+          <div class="bg-[#FAF8F5] p-6 rounded-3xl border border-pine-800/10 shadow-sm space-y-4">
+            <h4 class="font-display text-base font-bold text-pine-900">Outros Eventos Tradicionais</h4>
+            <div id="other-events-container" class="space-y-3">
+              
+            </div>
+          </div>
+
+        </aside>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <div id="footer-mount"></div>
+
+  <div id="ai-chat-mount"></div>
+
+  <script type="module">
+    import { freixoApp } from './js/app.js';
+    import { poiService } from './js/services/poiService.js';
+    import { showToast } from './js/components/Toast.js';
+
+    let currentEvent = null;
+    let eventMap = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await freixoApp.init('patrimonio');
+
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get('slug') || params.get('id') || params.get('evento');
+
+      if (!slug) {
+        showError('Identificador Ausente', 'Por favor escolhe um evento a partir da agenda de património e tradições.');
+        return;
+      }
+
+      try {
+        currentEvent = await poiService.getEventBySlug(slug);
+
+        if (!currentEvent) {
+          showError('Evento Não Encontrado', `Não encontrámos nenhum evento com o identificador "${slug}". Confirma se o nome está correto.`);
+          return;
+        }
+
+        renderEvent(currentEvent);
+        initEventMap(currentEvent);
+        loadRelatedPois(currentEvent);
+        loadOtherEvents(currentEvent);
+
+      } catch (err) {
+        console.error('[Evento] Erro ao carregar evento:', err);
+        showError('Erro de Carregamento', 'Ocorreu um erro ao comunicar com os serviços turísticos de Freixo de Espada à Cinta.');
+      }
+    });
+
+    function showError(title, message) {
+      document.getElementById('loading-state')?.classList.add('hidden');
+      document.getElementById('event-content')?.classList.add('hidden');
+      const errorEl = document.getElementById('error-state');
+      if (errorEl) {
+        errorEl.classList.remove('hidden');
+        document.getElementById('error-title').textContent = title;
+        document.getElementById('error-message').textContent = message;
+      }
+    }
+
+    function renderEvent(event) {
+      document.getElementById('loading-state')?.classList.add('hidden');
+      document.getElementById('error-state')?.classList.add('hidden');
+      document.getElementById('event-content')?.classList.remove('hidden');
+
+      document.title = `${event.title} — Freixo AI (Eventos e Tradições)`;
+      document.getElementById('page-title').textContent = `${event.title} — Freixo AI`;
+      document.getElementById('meta-description').setAttribute('content', event.description);
+      document.getElementById('breadcrumb-title').textContent = event.title;
+
+      const heroImg = document.getElementById('hero-image');
+      if (heroImg) heroImg.src = event.image || event.image_url || 'assets/images/seda-loom.png';
+
+      document.getElementById('event-title').textContent = event.title;
+      document.getElementById('hero-category-badge').textContent = event.category || 'Tradição Concelhia';
+      document.getElementById('hero-periodicity-badge').textContent = `Periodicidade: ${event.periodicity || 'Anual'}`;
+
+      document.getElementById('meta-location').textContent = event.location || 'Freixo de Espada à Cinta';
+      document.getElementById('meta-periodicity').textContent = event.periodicity || 'Anual';
+      document.getElementById('meta-pricing').textContent = event.pricing || 'Entrada Livre';
+
+      document.getElementById('fact-periodicity').textContent = event.periodicity || 'Anual';
+      document.getElementById('fact-edition-dates').textContent = event.edition_dates || (event.start_date ? `${event.start_date} a ${event.end_date}` : 'Consulte o calendário municipal');
+      document.getElementById('fact-edition-status').textContent = event.edition_status || 'Previsão de calendário cultural';
+
+      document.getElementById('event-description').textContent = event.description;
+      document.getElementById('historical-context-text').textContent = event.historical_context || 
+        'Esta celebração é um testemunho vivo das práticas comunitárias e ancestrais de Freixo de Espada à Cinta, transmitida de geração em geração com grande apego identitário.';
+
+      if (event.pricing) document.getElementById('practical-pricing').textContent = event.pricing;
+      if (event.schedule_info) document.getElementById('practical-schedule').textContent = event.schedule_info;
+
+      document.getElementById('map-location-label').textContent = event.location || 'Freixo de Espada à Cinta';
+      document.getElementById('doc-source').textContent = event.verification_source || 'Município de Freixo de Espada à Cinta';
+      document.getElementById('doc-consulted').textContent = event.consulted_at || '2026-10-12';
+      document.getElementById('doc-status').textContent = event.verification_status === 'confirmado' ? '✓ Confirmado' : 'Validação Municipal';
+
+      const provEl = document.getElementById('provenance-badge');
+      if (provEl) {
+        if (event._provenance === 'api_node') {
+          provEl.innerHTML = '<span class="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 text-[10px] font-mono border border-emerald-500/40">✓ Servido por API Node.js / Supabase</span>';
+        } else {
+          provEl.innerHTML = '<span class="px-2.5 py-0.5 rounded-full bg-pine-800 text-parchment-200 text-[10px] font-mono">Dados Verificados Locais</span>';
+        }
+      }
+
+      setupActions(event);
+    }
+
+    function setupActions(event) {
+      const lat = event.coordinates?.lat || 41.0922;
+      const lng = event.coordinates?.lng || -6.8078;
+
+      const btnGps = document.getElementById('btn-directions-gps');
+      if (btnGps) {
+        btnGps.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+      }
+
+      const shareBtn = document.getElementById('btn-share-link');
+      shareBtn?.addEventListener('click', async () => {
+        const canonicalUrl = `${window.location.origin}/evento.html?slug=${event.slug || event.id}`;
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(canonicalUrl);
+            showToast('Link da ficha do evento copiado para a área de transferência!', 'success');
+          } else {
+            showToast(`Link: ${canonicalUrl}`, 'info');
+          }
+        } catch {
+          showToast(`Link: ${canonicalUrl}`, 'info');
+        }
+      });
+
+      const askAiBtn = document.getElementById('btn-ask-ai');
+      askAiBtn?.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('freixo:openAiChat', {
+          detail: { prompt: `Explica-me as origens, tradições e o que não posso perder na "${event.title}" em Freixo de Espada à Cinta.` }
+        }));
+      });
+    }
+
+    function initEventMap(event) {
+      const container = document.getElementById('event-detail-map');
+      if (!container || typeof L === 'undefined') return;
+
+      if (eventMap) {
+        eventMap.remove();
+        eventMap = null;
+      }
+
+      const lat = event.coordinates?.lat || 41.0922;
+      const lng = event.coordinates?.lng || -6.8078;
+
+      eventMap = L.map('event-detail-map', {
+        center: [lat, lng],
+        zoom: 14,
+        zoomControl: true,
+        scrollWheelZoom: false
+      });
+
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18
+      }).addTo(eventMap);
+
+      const customIcon = L.divIcon({
+        className: 'custom-event-pin',
+        html: `
+          <div class="w-9 h-9 rounded-full bg-[#182E22] text-[#DFBA71] border-2 border-white flex items-center justify-center text-sm font-bold shadow-xl ring-4 ring-[#DFBA71]/40">
+            🎪
+          </div>
+        `,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -18]
+      });
+
+      L.marker([lat, lng], { icon: customIcon })
+        .addTo(eventMap)
+        .bindPopup(`
+          <div class="p-1 max-w-[200px]">
+            <strong class="font-display block text-sm text-[#182E22] mb-1">${event.title}</strong>
+            <span class="text-[10px] text-[#7E9283] block mb-2">${event.location || 'Freixo'}</span>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" class="w-full py-1 px-2 rounded bg-[#182E22] text-white text-[10px] font-semibold uppercase tracking-wider block text-center">
+              Como Chegar ↗
+            </a>
+          </div>
+        `).openPopup();
+    }
+
+    async function loadRelatedPois(event) {
+      const container = document.getElementById('related-pois-container');
+      if (!container) return;
+
+      try {
+        const allPois = await poiService.getAllPois();
+        const relatedIds = Array.isArray(event.related_pois) ? event.related_pois.map(id => String(id).toLowerCase()) : [];
+
+        const matchedPois = allPois.filter(p => 
+          relatedIds.includes(String(p.id).toLowerCase()) || 
+          relatedIds.includes(String(p.slug).toLowerCase())
+        );
+
+        if (matchedPois.length > 0) {
+          container.innerHTML = matchedPois.map(poi => `
+            <a href="detalhe.html?slug=${poi.slug || poi.id}" 
+               class="block p-3.5 rounded-2xl bg-white border border-pine-800/10 hover:border-terracotta transition-all shadow-sm group">
+              <div class="flex items-center gap-3">
+                <img src="${poi.image || 'assets/images/penedo-durao.png'}" 
+                     alt="${poi.title}" 
+                     class="w-12 h-12 rounded-xl object-cover flex-shrink-0 group-hover:scale-105 transition-transform" />
+                <div class="min-w-0 flex-grow">
+                  <h4 class="font-display font-bold text-xs text-pine-900 group-hover:text-terracotta transition-colors truncate">
+                    ${poi.title}
+                  </h4>
+                  <p class="text-[10px] text-olive truncate">${poi.location || 'Freixo'}</p>
+                  <span class="text-[10px] font-semibold text-terracotta inline-flex items-center gap-0.5 mt-0.5">
+                    Ver Ponto Turístico →
+                  </span>
+                </div>
+              </div>
+            </a>
+          `).join('');
+        } else {
+          container.innerHTML = `
+            <div class="p-3.5 rounded-2xl bg-white border border-pine-800/10 text-xs text-parchment-800">
+              Podes visitar outros monumentos na vila através da página <a href="explorar.html" class="text-terracotta font-semibold hover:underline">Explorar</a>.
+            </div>
+          `;
+        }
+      } catch (err) {
+        container.innerHTML = '<p class="text-xs text-parchment-800">Sem pontos turísticos adicionais no momento.</p>';
+      }
+    }
+
+    async function loadOtherEvents(current) {
+      const container = document.getElementById('other-events-container');
+      if (!container) return;
+
+      try {
+        const allEvents = await poiService.getEvents();
+        const others = allEvents.filter(e => e.id !== current.id && e.slug !== current.slug).slice(0, 2);
+
+        if (others.length > 0) {
+          container.innerHTML = others.map(e => `
+            <a href="evento.html?slug=${e.slug || e.id}" 
+               class="block p-3 rounded-2xl bg-white border border-pine-800/10 hover:border-pine-800/30 transition-all group">
+              <span class="editorial-badge bg-pine-800 text-gold text-[9px] mb-1">${e.category || 'Evento'}</span>
+              <h5 class="font-display font-bold text-xs text-pine-900 group-hover:text-terracotta transition-colors">
+                ${e.title}
+              </h5>
+              <div class="flex items-center justify-between text-[10px] text-olive mt-1">
+                <span>📅 ${e.periodicity || 'Anual'}</span>
+                <span>📍 ${e.location?.split(' ')[0] || 'Freixo'}</span>
+              </div>
+            </a>
+          `).join('');
+        }
+      } catch {
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Modal Imersivo de Ponto de Interesse (POI)
- * Detalhes aprofundados, identificação rigorosa de fontes e leitor demonstrativo de áudio
- */
-
 import { storageService } from '../services/storageService.js';
 import { showToast } from './Toast.js';
 
@@ -33,17 +28,14 @@ export function openPoiModal(poi) {
          aria-modal="true" 
          aria-labelledby="poi-modal-title">
       
-      <!-- Cabeçalho com Imagem e Fechar -->
       <div class="relative h-64 sm:h-72 w-full bg-[#182E22] overflow-hidden flex-shrink-0">
         <img src="${poi.image}" alt="${poi.title}" class="w-full h-full object-cover opacity-90 transition-transform duration-700 hover:scale-105" />
         <div class="absolute inset-0 bg-gradient-to-t from-[#122419] via-black/30 to-black/20"></div>
 
-        <!-- Botão Fechar -->
         <button id="modal-close-btn" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors backdrop-blur-sm" aria-label="Fechar janela de detalhes">
           ✕
         </button>
 
-        <!-- Categoria e Badges -->
         <div class="absolute top-4 left-4 flex flex-wrap items-center gap-2">
           <span class="editorial-badge bg-[#FAF8F5]/90 text-[#182E22] font-semibold border-none">
             ${poi.categoryLabel}
@@ -53,7 +45,6 @@ export function openPoiModal(poi) {
           </span>
         </div>
 
-        <!-- Título e Subtítulo sobre a imagem -->
         <div class="absolute bottom-4 left-4 right-4 text-[#FAF8F5]">
           <h2 id="poi-modal-title" class="font-display text-2xl sm:text-3xl font-bold tracking-tight leading-snug">${poi.title}</h2>
           <p class="text-xs text-[#EBE4DA] flex flex-wrap items-center gap-2 mt-1">
@@ -66,10 +57,8 @@ export function openPoiModal(poi) {
         </div>
       </div>
 
-      <!-- Conteúdo do Modal com Scroll -->
       <div class="p-6 sm:p-8 overflow-y-auto space-y-6">
         
-        <!-- Descrição Principal -->
         <div>
           <h3 class="text-xs uppercase tracking-[0.16em] font-bold text-[#B65737] mb-2">Narrativa & Contexto Histórico</h3>
           <p class="text-base text-[#24211D] leading-relaxed font-sans">
@@ -77,7 +66,6 @@ export function openPoiModal(poi) {
           </p>
         </div>
 
-        <!-- Nota de Rigor e Fonte Documental -->
         <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/70 text-xs text-emerald-900 flex items-start gap-2.5">
           <span class="text-sm">🏛️</span>
           <div>
@@ -88,7 +76,6 @@ export function openPoiModal(poi) {
           </div>
         </div>
 
-        <!-- Leitor de Áudio-Guia Simulado -->
         ${poi.audioGuide ? `
           <div class="p-4 rounded-xl bg-[#182E22] text-[#FAF8F5] shadow-inner space-y-3">
             <div class="flex items-center justify-between">
@@ -107,12 +94,10 @@ export function openPoiModal(poi) {
               <span id="audio-timer" class="text-xs font-mono text-[#DFBA71]">00:00 / ${poi.audioGuide.duration}</span>
             </div>
 
-            <!-- Barra de Progresso do Áudio -->
             <div class="w-full bg-[#234332] h-1.5 rounded-full overflow-hidden" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
               <div id="audio-progress-bar" class="bg-[#DFBA71] h-full w-0 transition-all duration-300"></div>
             </div>
 
-            <!-- Transcrição Opcional -->
             <div class="pt-1">
               <details class="text-xs text-[#DDD4C7] cursor-pointer">
                 <summary class="hover:text-[#FAF8F5] font-medium text-[11px] tracking-wide uppercase text-[#DFBA71]">Ver transcrição completa da narração</summary>
@@ -124,7 +109,6 @@ export function openPoiModal(poi) {
           </div>
         ` : ''}
 
-        <!-- Destaques -->
         ${poi.highlights && poi.highlights.length ? `
           <div>
             <h3 class="text-xs uppercase tracking-[0.16em] font-bold text-[#182E22] mb-3">Destaques da Visita</h3>
@@ -139,7 +123,6 @@ export function openPoiModal(poi) {
           </div>
         ` : ''}
 
-        <!-- Informações Práticas & Avisos de Validação -->
         <div class="p-4 rounded-xl bg-[#EBE4DA]/60 border border-[#182E22]/10 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
             <span class="font-bold text-[#182E22] block mb-1">Horário & Acesso:</span>
@@ -159,24 +142,30 @@ export function openPoiModal(poi) {
 
       </div>
 
-      <!-- Barra de Ações Inferior -->
       <div class="p-4 bg-[#F4EFEA] border-t border-[#182E22]/10 flex flex-wrap items-center justify-between gap-3">
-        <button id="modal-fav-btn" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#182E22]/20 hover:border-[#182E22] text-xs font-semibold tracking-wide transition-all ${
-          isFav ? 'bg-[#B65737] text-white border-[#B65737]' : 'bg-white text-[#182E22]'
-        }" type="button">
-          <span>${isFav ? '❤️ Nos Meus Favoritos' : '🤍 Guardar nos Favoritos'}</span>
-        </button>
+        <div class="flex items-center gap-2">
+          <button id="modal-fav-btn" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#182E22]/20 hover:border-[#182E22] text-xs font-semibold tracking-wide transition-all ${
+            isFav ? 'bg-[#B65737] text-white border-[#B65737]' : 'bg-white text-[#182E22]'
+          }" type="button">
+            <span>${isFav ? '❤️ Nos Meus Favoritos' : '🤍 Guardar nos Favoritos'}</span>
+          </button>
 
-        <a href="roteiro.html" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#182E22] text-[#FAF8F5] text-xs font-semibold tracking-wider uppercase hover:bg-[#234332] transition-colors shadow">
-          <span>Incluir no Roteiro AI</span>
-          <span>→</span>
-        </a>
+          <button id="modal-share-btn" class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-[#182E22]/20 hover:border-[#182E22] bg-white text-[#182E22] text-xs font-medium transition-colors" type="button" title="Copiar link direto para este local">
+            <span>🔗 Partilhar</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="detalhe.html?slug=${poi.slug || poi.id}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#182E22] text-[#FAF8F5] hover:bg-[#234332] text-xs font-semibold tracking-wider uppercase transition-colors shadow">
+            <span>Ver Ficha Completa</span>
+            <span>↗</span>
+          </a>
+        </div>
       </div>
 
     </div>
   `;
 
-  // Animar abertura
   modalOverlay.classList.remove('pointer-events-none');
   requestAnimationFrame(() => {
     modalOverlay.classList.remove('opacity-0');
@@ -188,7 +177,6 @@ export function openPoiModal(poi) {
     }
   });
 
-  // Função para fechar o modal
   const closeModal = () => {
     if (activeAudioInterval) {
       clearInterval(activeAudioInterval);
@@ -202,16 +190,13 @@ export function openPoiModal(poi) {
     }, 300);
   };
 
-  // Botão fechar
   const closeBtn = document.getElementById('modal-close-btn');
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
 
-  // Fechar ao clicar fora do cartão
   modalOverlay.addEventListener('click', (e) => {
     if (e.target === modalOverlay) closeModal();
   });
 
-  // Fechar com ESC
   const onKeyDown = (e) => {
     if (e.key === 'Escape') {
       closeModal();
@@ -220,7 +205,6 @@ export function openPoiModal(poi) {
   };
   document.addEventListener('keydown', onKeyDown);
 
-  // Toggle Favorito dentro do Modal
   const favBtn = document.getElementById('modal-fav-btn');
   if (favBtn) {
     favBtn.addEventListener('click', () => {
@@ -237,7 +221,23 @@ export function openPoiModal(poi) {
     });
   }
 
-  // Simulação Interativa do Leitor de Áudio
+  const shareBtn = document.getElementById('modal-share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      const shareUrl = `${window.location.origin}/detalhe.html?slug=${poi.slug || poi.id}`;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(shareUrl);
+          showToast('Link do local copiado para a área de transferência!', 'success');
+        } else {
+          showToast(`Link: ${shareUrl}`, 'info');
+        }
+      } catch {
+        showToast(`Link: ${shareUrl}`, 'info');
+      }
+    });
+  }
+
   const playBtn = document.getElementById('audio-play-btn');
   const playIcon = document.getElementById('audio-play-icon');
   const progressBar = document.getElementById('audio-progress-bar');

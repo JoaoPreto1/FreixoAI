@@ -1,9 +1,3 @@
-/**
- * FREIXO AI — Configuração Central de Integração de APIs
- * Utiliza variáveis de ambiente públicas resolvidas por env.js.
- * Todas as chaves secretas residem estritamente no backend.
- */
-
 import { FRONTEND_ENV } from './env.js';
 
 export const API_CONFIG = {
@@ -23,7 +17,9 @@ export const API_CONFIG = {
       FREGUESIAS: '/freguesias',
       TRAILS: '/trails',
       ROUTES: '/trails',
+      TRAIL_DETAIL: (slugOrId) => `/trails/${slugOrId}`,
       EVENTS: '/events',
+      EVENT_DETAIL: (slugOrId) => `/events/${slugOrId}`,
       GASTRONOMY: '/gastronomy',
       HERITAGE: '/heritage',
       FAVORITES: '/favorites',

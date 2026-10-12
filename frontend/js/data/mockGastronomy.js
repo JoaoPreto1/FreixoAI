@@ -1,7 +1,3 @@
-/**
- * FREIXO AI — Gastronomia, Sabores e Vinhos de Freixo de Espada à Cinta
- */
-
 export const GASTRONOMY_DATA = {
   dishes: [
     {

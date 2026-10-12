@@ -1,9 +1,3 @@
-/**
- * FREIXO AI — Serviço de Inteligência Artificial
- * Comunica preferencialmente com o gateway Node.js (que encaminha para o FastAPI)
- * Fornece fallback transparente e rigoroso para conhecimento local demonstrativo
- */
-
 import { apiService } from './apiService.js';
 import { API_CONFIG } from '../config/apiConfig.js';
 import { AI_KNOWLEDGE_BASE, generateSmartItinerary } from '../data/mockAiData.js';
@@ -19,8 +13,6 @@ class AiService {
 
     const cleanPrompt = prompt.trim();
 
-    // 1. TENTATIVA PRIMÁRIA: Gateway Node.js Express (Porta 5000)
-    // O backend Node.js é o único ponto de entrada que orquestra com o FastAPI com segurança
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.CHAT}`;
       const payload = {
@@ -46,7 +38,6 @@ class AiService {
         };
       }
     } catch (err) {
-      // Se o backend Node.js devolveu erro estruturado de serviço indisponível (HTTP 503)
       if (err.status === 503) {
         return {
           reply: 'O microserviço de inteligência artificial (FastAPI/Ollama) encontra-se temporariamente indisponível. Por favor, verifica se os serviços de IA estão em execução ou tenta novamente dentro de momentos.',
@@ -60,13 +51,10 @@ class AiService {
       console.warn('[AiService] Gateway Node.js indisponível:', err.message);
     }
 
-    // 2. FALLBACK DE DEMONSTRAÇÃO LOCAL RIGOROSO
-    // Utilizado apenas se o backend estiver totalmente inacessível
     await new Promise(resolve => setTimeout(resolve, 300));
 
     const lower = cleanPrompt.toLowerCase();
 
-    // Procurar correspondência de tópicos na base documental local
     let matchedItem = null;
     let highestScore = 0;
 
@@ -89,7 +77,6 @@ class AiService {
       };
     }
 
-    // Resposta de acolhimento e sugestão temática
     return {
       reply: `Olá! Sou o **Freixo AI**, o teu guia inteligente para Freixo de Espada à Cinta.
 
@@ -115,34 +102,39 @@ Como te posso ajudar hoje?`,
    * Gera um itinerário inteligente com base em preferências
    */
   async generateItinerary(params = {}) {
-    // 1. Tentar gateway Node.js
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.ITINERARY}`;
       const result = await apiService.request(url, {
         method: 'POST',
         body: JSON.stringify(params)
-      }, 3500);
+      }, 12000);
 
-      if (result && result.days) {
+      const planData = result?.data || result;
+      if (planData && planData.days) {
         return {
-          ...result,
-          source: 'backend_node',
-          isDemo: false
+          ...planData,
+          source: planData.meta?.source || 'backend_node',
+          isDemo: Boolean(planData.summary?.isDemonstration)
         };
       }
-    } catch {
-      // Fallback para gerador algorítmico local
+    } catch (err) {
+      console.warn('[AiService] Erro ao chamar /itinerary/generate:', err.message);
+      if (err.status) {
+        throw err;
+      }
     }
 
-    // Simulação do cálculo
-    await new Promise(resolve => setTimeout(resolve, 450));
+    if (API_CONFIG.USE_MOCK_FALLBACK) {
+      await new Promise(resolve => setTimeout(resolve, 450));
+      const plan = generateSmartItinerary(params);
+      return {
+        ...plan,
+        source: 'demonstracao_algoritmica_offline',
+        isDemo: true
+      };
+    }
 
-    const plan = generateSmartItinerary(params);
-    return {
-      ...plan,
-      source: 'demonstracao_algoritmica',
-      isDemo: true
-    };
+    throw new Error('Serviço de itinerários indisponível.');
   }
 
   /**

@@ -1,8 +1,3 @@
-/**
- * FREIXO AI — Freguesias Oficiais de Freixo de Espada à Cinta (Dados Locais Verificados)
- * Fonte: CAOP / INE Censos 2021
- */
-
 export const FREGUESIAS_DATA = [
   {
     id: 'freixo-mazouco',
