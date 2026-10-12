@@ -146,7 +146,12 @@ async def chat(request: ChatRequest):
             },
         ).execute()
 
-        chunks = search_result.data or []
+        raw_chunks = search_result.data or []
+        # Filtrar fragmentos que atinjam o limiar mínimo de relevância semântica (bge-m3)
+        chunks = [
+            chunk for chunk in raw_chunks
+            if chunk.get("similarity", 0) >= 0.38
+        ]
 
         if not chunks:
             return {
@@ -429,25 +434,62 @@ async def ingest_knowledge(request: IngestRequest):
 
         supabase = get_supabase_client()
 
-        source_result = (
-            supabase.table("sources")
-            .insert({
+        # Garantir idempotência: verificar se a fonte já existe (por URL ou título)
+        existing_source = None
+        if request.source_url:
+            existing_query = (
+                supabase.table("sources")
+                .select("id")
+                .eq("source_url", request.source_url)
+                .limit(1)
+                .execute()
+            )
+            if existing_query.data:
+                existing_source = existing_query.data[0]
+
+        if not existing_source:
+            existing_query = (
+                supabase.table("sources")
+                .select("id")
+                .eq("title", request.title)
+                .limit(1)
+                .execute()
+            )
+            if existing_query.data:
+                existing_source = existing_query.data[0]
+
+        if existing_source:
+            source_id = existing_source["id"]
+            supabase.table("sources").update({
                 "title": request.title,
                 "institution": request.institution,
                 "source_url": request.source_url,
                 "source_type": request.source_type,
                 "reliability_notes": request.reliability_notes,
-            })
-            .execute()
-        )
+            }).eq("id", source_id).execute()
 
-        if not source_result.data:
-            raise HTTPException(
-                status_code=502,
-                detail="Não foi possível guardar a fonte.",
+            # Remove os fragmentos anteriores para substituir pelos novos sem duplicar
+            supabase.table("knowledge_chunks").delete().eq("source_id", source_id).execute()
+        else:
+            source_result = (
+                supabase.table("sources")
+                .insert({
+                    "title": request.title,
+                    "institution": request.institution,
+                    "source_url": request.source_url,
+                    "source_type": request.source_type,
+                    "reliability_notes": request.reliability_notes,
+                })
+                .execute()
             )
 
-        source_id = source_result.data[0]["id"]
+            if not source_result.data:
+                raise HTTPException(
+                    status_code=502,
+                    detail="Não foi possível guardar a fonte.",
+                )
+
+            source_id = source_result.data[0]["id"]
 
         rows = [
             {
