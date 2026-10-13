@@ -92,23 +92,7 @@
 
   <main id="poi-content" class="hidden flex-grow w-full pb-20">
 
-    <div class="bg-pine-950 text-parchment-300 border-b border-pine-800/80 text-xs py-3.5 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
-        <nav aria-label="Navegação em trilho de pão" class="flex items-center gap-2">
-          <a href="index.html" class="hover:text-gold transition-colors">Início</a>
-          <span class="text-pine-600">/</span>
-          <a href="explorar.html" class="hover:text-gold transition-colors">Explorar</a>
-          <span class="text-pine-600">/</span>
-          <span id="breadcrumb-title" class="text-white font-semibold truncate max-w-xs sm:max-w-md">...</span>
-        </nav>
-
-        <div id="provenance-badge" class="flex items-center gap-2">
-          
-        </div>
-      </div>
-    </div>
-
-    <header class="relative min-h-[50vh] sm:min-h-[58vh] bg-pine-900 text-white overflow-hidden flex items-end">
+    <header class="relative min-h-[50vh] sm:min-h-[58vh] bg-pine-900 text-white overflow-hidden flex flex-col justify-between">
       
       <div class="absolute inset-0 z-0">
         <img id="hero-image" 
@@ -116,6 +100,22 @@
              alt="Fotografia do Ponto de Interesse" 
              class="w-full h-full object-cover object-center scale-100 transition-transform duration-1000 ease-out hover:scale-105 opacity-80" />
         <div class="absolute inset-0 bg-gradient-to-t from-pine-950 via-pine-950/50 to-black/30"></div>
+      </div>
+
+      <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 w-full">
+        <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-parchment-300">
+          <nav aria-label="Navegação em trilho de pão" class="flex items-center gap-2">
+            <a href="index.html" class="hover:text-gold transition-colors">Início</a>
+            <span class="text-pine-400">/</span>
+            <a href="explorar.html" class="hover:text-gold transition-colors">Explorar</a>
+            <span class="text-pine-400">/</span>
+            <span id="breadcrumb-title" class="text-white font-semibold truncate max-w-xs sm:max-w-md">...</span>
+          </nav>
+
+          <div id="provenance-badge" class="flex items-center gap-2">
+            
+          </div>
+        </div>
       </div>
 
       <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 w-full">
@@ -157,7 +157,7 @@
       </div>
     </header>
 
-    <section class="sticky top-20 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-pine-800/15 py-3.5 px-4 sm:px-6 lg:px-8 shadow-sm transition-all">
+    <section class="relative bg-[#FAF8F5] border-b border-pine-800/15 py-3.5 px-4 sm:px-6 lg:px-8 shadow-sm">
       <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
         
         <div class="flex flex-wrap items-center gap-2.5">
@@ -169,6 +169,13 @@
              class="px-4 py-2.5 rounded-full bg-pine-900 text-white hover:bg-pine-800 text-xs font-bold tracking-wider uppercase transition-all shadow flex items-center gap-2 group">
             <span>🧭 Como Chegar (GPS)</span>
             <span class="text-gold group-hover:translate-x-0.5 transition-transform">↗</span>
+          </a>
+
+          <a id="btn-view-on-map"
+             href="explorar.html"
+             class="px-4 py-2.5 rounded-full bg-white border border-pine-900/20 text-pine-900 hover:bg-parchment-200 text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5"
+             title="Ver e centrar este local no mapa interactivo">
+            <span>🗺️ Ver no Mapa</span>
           </a>
 
           <button id="btn-toggle-favorite" 
@@ -545,6 +552,11 @@
         btnGps.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(poi.title + ', Freixo de Espada a Cinta')}`;
       }
 
+      const btnViewMap = document.getElementById('btn-view-on-map');
+      if (btnViewMap) {
+        btnViewMap.href = `explorar.html?slug=${encodeURIComponent(poi.slug || poi.id)}`;
+      }
+
       const favBtn = document.getElementById('btn-toggle-favorite');
       const favIcon = document.getElementById('fav-icon');
       const favText = document.getElementById('fav-text');
@@ -564,7 +576,12 @@
       updateFavUi(storageService.isFavorite(poi.id));
 
       favBtn?.addEventListener('click', () => {
-        const nowFav = storageService.toggleFavorite(poi.id);
+        const nowFav = storageService.toggleFavorite(poi.id, {
+          type: 'place',
+          title: poi.title,
+          category: poi.categoryLabel || poi.category || 'Património',
+          image: poi.image || 'assets/images/penedo-durao.png'
+        });
         updateFavUi(nowFav);
         if (nowFav) {
           showToast(`"${poi.title}" guardado nos teus favoritos!`, 'success');

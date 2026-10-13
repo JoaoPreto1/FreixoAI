@@ -50,8 +50,14 @@ class AiService {
       }
     } catch (err) {
       if (err.status === 503) {
+        const errorReply = targetLang === 'en'
+          ? 'The AI microservice (FastAPI/Ollama) is temporarily unavailable. Please check that local AI services are running.'
+          : targetLang === 'es'
+          ? 'El microservicio de IA (FastAPI/Ollama) no está disponible temporalmente. Comprueba que los servicios de IA estén en ejecución.'
+          : 'O microserviço de inteligência artificial (FastAPI/Ollama) encontra-se temporariamente indisponível. Por favor, verifica se os serviços de IA estão em execução ou tenta novamente dentro de momentos.';
+
         return {
-          reply: 'O microserviço de inteligência artificial (FastAPI/Ollama) encontra-se temporariamente indisponível. Por favor, verifica se os serviços de IA estão em execução ou tenta novamente dentro de momentos.',
+          reply: errorReply,
           source: 'backend_node',
           isConfirmed: false,
           isDemo: false,
@@ -78,18 +84,55 @@ class AiService {
     }
 
     if (matchedItem && highestScore > 0) {
+      const disclaimer = targetLang === 'en'
+        ? 'Response in local demonstration mode. The AI service (FastAPI/Ollama) is currently offline.'
+        : targetLang === 'es'
+        ? 'Respuesta en modo de demostración local. El servicio de IA (FastAPI/Ollama) está actualmente desconectado.'
+        : 'Resposta em modo de demonstração local. O serviço de IA (FastAPI/Ollama) encontra-se temporariamente offline.';
+
       return {
         reply: matchedItem.response,
         source: 'demonstracao_local',
         isConfirmed: false,
         isDemo: true,
-        disclaimer: "Resposta em modo de demonstração local. O serviço de IA (FastAPI/Ollama) encontra-se temporariamente offline.",
+        disclaimer,
         timestamp: new Date().toISOString()
       };
     }
 
-    return {
-      reply: `Olá! Sou o **Freixo AI**, o teu guia inteligente para Freixo de Espada à Cinta.
+    let defaultGreeting = '';
+    let defaultDisclaimer = '';
+
+    if (targetLang === 'en') {
+      defaultGreeting = `Hello! I am **Freixo AI**, your intelligent guide to Freixo de Espada à Cinta.
+
+*(Note: Operating in local demonstration mode while backend services are offline).*
+
+I can provide verified information on:
+• **Living Silk Heritage:** Traditional handloom weavers and the biological cycle at the Silk Museum;
+• **Douro Viewpoints:** Penedo Durão, Colado and observing wild griffon vultures;
+• **Manueline Portals:** Historic walking circuit with 40+ 16th-century stone carvings;
+• **Congida River Beach:** Scenic swimming in the Douro basin and river boat trips;
+• **Gastronomy & Wine:** Traditional dishes and Montes Ermos D.O.C. Douro wines.
+
+How may I assist you today?`;
+      defaultDisclaimer = 'Local demonstration mode active.';
+    } else if (targetLang === 'es') {
+      defaultGreeting = `¡Hola! Soy **Freixo AI**, tu guía inteligente para Freixo de Espada à Cinta.
+
+*(Nota: Operando en modo de demostración local mientras los servicios backend están desconectados).*
+
+Puedo informarte sobre:
+• **El Ciclo Vivo de la Seda:** Tejedoras tradicionales y el ciclo biológico en el Museo de la Seda;
+• **Miradores del Duero:** Penedo Durão, Colado y observación de buitres leonados;
+• **Portales Manuelinos:** Circuito urbano histórico con más de 40 portales de cantería;
+• **Playa Fluvial de Congida:** Baño en el embalse de Saucelle y paseos en barco;
+• **Gastronomía y Vinos:** Platos tradicionales y vinos Montes Ermos D.O.C. Douro.
+
+¿En qué te puedo ayudar hoy?`;
+      defaultDisclaimer = 'Modo de demostración local activo.';
+    } else {
+      defaultGreeting = `Olá! Sou o **Freixo AI**, o teu guia inteligente para Freixo de Espada à Cinta.
 
 *(Nota: O assistente está a funcionar em modo de demonstração local enquanto o backend estiver offline).*
 
@@ -100,11 +143,16 @@ Posso apresentar-te informações e sugestões sobre:
 • **Praia Fluvial da Congida:** Banhar-te na albufeira de Saucelle ou fazer passeios fluviais;
 • **Gastronomia & Vinhos:** Posta, sopas de tomate e vinhos Montes Ermos D.O.C. Douro.
 
-Como te posso ajudar hoje?`,
+Como te posso ajudar hoje?`;
+      defaultDisclaimer = 'Modo de demonstração local ativo.';
+    }
+
+    return {
+      reply: defaultGreeting,
       source: 'demonstracao_fallback',
       isConfirmed: false,
       isDemo: true,
-      disclaimer: "Modo de demonstração local ativo.",
+      disclaimer: defaultDisclaimer,
       timestamp: new Date().toISOString()
     };
   }

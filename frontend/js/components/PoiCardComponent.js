@@ -85,11 +85,12 @@ export function createPoiCard(poi, onCardClick = null) {
         </a>
 
         <div class="flex items-center gap-2">
-          <button class="text-[11px] text-[#7E9283] hover:text-[#182E22] transition-colors font-medium px-2 py-1 rounded hover:bg-[#182E22]/5" 
-                  data-action="open-modal" 
+          <button class="text-[11px] text-[#7E9283] hover:text-[#182E22] transition-colors font-medium px-2 py-1 rounded hover:bg-[#182E22]/5 flex items-center gap-1" 
+                  data-action="focus-map" 
                   type="button"
-                  title="Pré-visualização rápida">
-            <span>👁️ Ver no Mapa</span>
+                  title="Centrar e ver localização no mapa interativo">
+            <span>🗺️</span>
+            <span>Ver no Mapa</span>
           </button>
         </div>
       </div>
@@ -106,15 +107,23 @@ export function createPoiCard(poi, onCardClick = null) {
   card.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
     if (!target) {
-      if (typeof onCardClick === 'function') onCardClick(poi);
-      openPoiModal(poi);
+      if (typeof onCardClick === 'function') {
+        onCardClick(poi);
+      } else {
+        openPoiModal(poi);
+      }
       return;
     }
 
     const action = target.dataset.action;
     if (action === 'toggle-fav') {
       e.stopPropagation();
-      const nowFav = storageService.toggleFavorite(poi.id);
+      const nowFav = storageService.toggleFavorite(poi.id, {
+        type: 'place',
+        title: poi.title,
+        category: poi.categoryLabel || poi.category || 'Património',
+        image: poi.image || 'assets/images/penedo-durao.png'
+      });
       const svg = target.querySelector('svg');
       if (nowFav) {
         target.classList.add('text-[#B65737]');
@@ -125,9 +134,19 @@ export function createPoiCard(poi, onCardClick = null) {
         if (svg) svg.setAttribute('fill', 'none');
         showToast(`"${poi.title}" removido dos favoritos.`, 'info');
       }
+    } else if (action === 'focus-map') {
+      e.stopPropagation();
+      if (typeof onCardClick === 'function') {
+        onCardClick(poi);
+        const mapEl = document.getElementById('freixo-map-container');
+        if (mapEl) {
+          mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } else {
+        window.location.href = `explorar.html?slug=${encodeURIComponent(poi.slug || poi.id)}`;
+      }
     } else if (action === 'open-modal') {
       e.stopPropagation();
-      if (typeof onCardClick === 'function') onCardClick(poi);
       openPoiModal(poi);
     }
   });

@@ -84,6 +84,8 @@ export function renderFooter() {
               <li><a href="index.html" class="hover:text-[#FAF8F5] transition-colors">Página Inicial</a></li>
               <li><a href="explorar.html" class="hover:text-[#FAF8F5] transition-colors">Lugares & Mapa Interativo</a></li>
               <li><a href="roteiro.html" class="hover:text-[#FAF8F5] transition-colors">Planeador de Roteiro AI</a></li>
+              <li><a href="trilho.html?slug=pr1-calcada-alpajares" class="hover:text-[#FAF8F5] transition-colors">Trilhos & Arribas do Douro</a></li>
+              <li><a href="evento.html?slug=feira-da-terra-seda" class="hover:text-[#FAF8F5] transition-colors">Eventos & Tradições Vivas</a></li>
               <li><a href="patrimonio.html" class="hover:text-[#FAF8F5] transition-colors">Ciclo da Seda & Portais</a></li>
               <li><a href="gastronomia.html" class="hover:text-[#FAF8F5] transition-colors">Vinhos Montes Ermos & Sabores</a></li>
             </ul>

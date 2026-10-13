@@ -23,6 +23,7 @@ export const API_CONFIG = {
       GASTRONOMY: '/gastronomy',
       HERITAGE: '/heritage',
       FAVORITES: '/favorites',
+      SEARCH: '/search',
       CHAT: '/chat', // Gateway Node.js que orquestra com o FastAPI
       ITINERARY: '/itinerary/generate'
     }

@@ -357,7 +357,12 @@ Podes perguntar-me sobre a **arte da seda**, os **miradouros do Douro**, o **cir
 
   formatMarkdown(text) {
     if (!text) return '';
-    return text
+    const safe = String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+    return safe
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/\n• (.*?)(?=\n|$)/g, '<br/>• $1')

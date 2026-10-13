@@ -17,6 +17,30 @@ export class ItineraryPlanner {
 
     this.render(container);
     this.bindEvents();
+    this.updateSavedBadge();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const rawDays = urlParams.get('dias') || urlParams.get('days');
+    const rawInterest = urlParams.get('interesse') || urlParams.get('interest');
+    const rawPace = urlParams.get('ritmo') || urlParams.get('pace');
+    const rawMobility = urlParams.get('mobilidade') || urlParams.get('mobility');
+    const rawSeed = urlParams.get('semente') || urlParams.get('seed');
+
+    if (rawDays || rawInterest || rawSeed || rawPace || rawMobility) {
+      const parsedDays = rawDays ? parseInt(rawDays, 10) : 2;
+      const days = Number.isInteger(parsedDays) ? Math.min(4, Math.max(1, parsedDays)) : 2;
+      const validInterests = ['cultura', 'natureza', 'enogastronomia', 'familia', 'geral'];
+      const interest = validInterests.includes(rawInterest) ? rawInterest : 'cultura';
+      const validPaces = ['tranquilo', 'equilibrado', 'dinamico'];
+      const pace = validPaces.includes(rawPace) ? rawPace : 'equilibrado';
+      const validMobilities = ['carro', 'a-pe'];
+      const mobility = validMobilities.includes(rawMobility) ? rawMobility : 'carro';
+      const parsedSeed = rawSeed ? parseInt(rawSeed, 10) : undefined;
+      const seed = Number.isInteger(parsedSeed) ? parsedSeed : undefined;
+
+      this.applyUrlConfigAndGenerate({ days, interest, pace, mobility, seed });
+      return;
+    }
 
     if (this.currentPlan && this.currentPlan.days) {
       this.renderPlanResults(this.currentPlan);
@@ -27,12 +51,18 @@ export class ItineraryPlanner {
     container.innerHTML = `
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
-        <div class="lg:col-span-4 bg-[#FAF8F5] p-6 sm:p-7 rounded-2xl border border-[#182E22]/15 shadow-lg space-y-6">
-          <div>
-            <span class="editorial-badge bg-[#182E22]/5 text-[#182E22] mb-2">Motor Territorial & IA</span>
-            <h3 class="font-display text-2xl font-bold text-[#182E22]">Configurar Roteiro</h3>
-            <p class="text-xs text-[#7E9283] mt-1 font-sans">Personaliza a tua visita a Freixo de Espada à Cinta com base em dados turísticos oficiais e IA local.</p>
+        <div id="itinerary-form-col" class="lg:col-span-4 bg-[#FAF8F5] p-6 sm:p-7 rounded-2xl border border-[#182E22]/15 shadow-lg space-y-6">
+          <div class="flex items-start justify-between gap-2 pb-2 border-b border-[#182E22]/10">
+            <div>
+              <span class="editorial-badge bg-[#182E22]/5 text-[#182E22] mb-1">Motor Territorial & IA</span>
+              <h3 class="font-display text-2xl font-bold text-[#182E22]">Configurar Roteiro</h3>
+            </div>
+            <button type="button" id="open-saved-itins-modal-btn" class="px-2.5 py-1.5 rounded-xl border border-[#182E22]/20 hover:border-[#182E22] bg-white text-xs font-semibold text-[#182E22] flex items-center gap-1.5 transition-colors shadow-sm" title="Consultar roteiros guardados">
+              <span>📚</span>
+              <span>Guardados (<span id="saved-itins-badge">0</span>)</span>
+            </button>
           </div>
+          <p class="text-xs text-[#7E9283] font-sans -mt-2">Personaliza a tua visita a Freixo de Espada à Cinta com base em dados turísticos oficiais e IA local.</p>
 
           <form id="itinerary-form" class="space-y-5">
             
@@ -160,6 +190,28 @@ export class ItineraryPlanner {
         </div>
 
       </div>
+
+      <!-- Modal de Roteiros Guardados -->
+      <div id="saved-itins-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 animate-fade-in" role="dialog" aria-modal="true" aria-label="Roteiros Guardados">
+        <div class="bg-[#FAF8F5] rounded-3xl border border-[#182E22]/15 shadow-2xl max-w-xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+          <div class="p-5 border-b border-[#182E22]/10 bg-white flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="text-xl">📚</span>
+              <div>
+                <h4 class="font-display text-lg font-bold text-[#182E22]">Os Teus Roteiros Guardados</h4>
+                <p class="text-[11px] text-[#7E9283]">Consulta, recupera ou remove roteiros anteriores.</p>
+              </div>
+            </div>
+            <button id="close-saved-itins-modal-btn" class="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 text-xs text-[#7E9283] hover:text-[#182E22] flex items-center justify-center transition-colors">✕</button>
+          </div>
+          <div id="saved-itins-list" class="p-5 overflow-y-auto space-y-3 flex-grow">
+          </div>
+          <div class="p-4 bg-[#F4EFEA] border-t border-[#182E22]/10 flex items-center justify-between text-xs text-[#7E9283]">
+            <span>Armazenamento local seguro e privado</span>
+            <button id="clear-saved-itins-btn" class="text-terracotta hover:underline font-semibold" type="button">Limpar Histórico</button>
+          </div>
+        </div>
+      </div>
     `;
   }
 
@@ -235,9 +287,41 @@ export class ItineraryPlanner {
         await this.handleGenerate();
       });
     }
+
+    const openSavedModalBtn = document.getElementById('open-saved-itins-modal-btn');
+    const closeSavedModalBtn = document.getElementById('close-saved-itins-modal-btn');
+    const clearSavedBtn = document.getElementById('clear-saved-itins-btn');
+    const savedModal = document.getElementById('saved-itins-modal');
+
+    if (openSavedModalBtn) {
+      openSavedModalBtn.addEventListener('click', () => this.openSavedModal());
+    }
+
+    if (closeSavedModalBtn) {
+      closeSavedModalBtn.addEventListener('click', () => this.closeSavedModal());
+    }
+
+    if (savedModal) {
+      savedModal.addEventListener('click', (e) => {
+        if (e.target === savedModal) this.closeSavedModal();
+      });
+    }
+
+    if (clearSavedBtn) {
+      clearSavedBtn.addEventListener('click', () => {
+        storageService.clearSavedItineraries();
+        this.renderSavedList();
+        this.updateSavedBadge();
+        showToast('Histórico de roteiros limpo.', 'info');
+      });
+    }
+
+    window.addEventListener('freixo:itinerariesUpdated', () => {
+      this.updateSavedBadge();
+    });
   }
 
-  async handleGenerate({ isRegenerate = false } = {}) {
+  async handleGenerate({ isRegenerate = false, seed } = {}) {
     if (this.isLoading) return;
 
     const days = parseInt(document.getElementById('input-days')?.value || '2', 10);
@@ -245,7 +329,7 @@ export class ItineraryPlanner {
     const pace = document.getElementById('input-pace')?.value || 'equilibrado';
     const mobility = document.getElementById('input-mobility')?.value || 'carro';
 
-    const seed = isRegenerate ? Math.floor(Math.random() * 1000000) : undefined;
+    const chosenSeed = seed !== undefined ? seed : (isRegenerate ? Math.floor(Math.random() * 1000000) : undefined);
 
     const btn = document.getElementById('generate-plan-btn');
     const formRegenerateBtn = document.getElementById('form-regenerate-btn');
@@ -268,9 +352,10 @@ export class ItineraryPlanner {
     if (errorBox) errorBox.classList.add('hidden');
 
     try {
-      const plan = await aiService.generateItinerary({ days, interest, pace, mobility, seed });
+      const plan = await aiService.generateItinerary({ days, interest, pace, mobility, seed: chosenSeed });
       this.currentPlan = plan;
       storageService.saveItinerary(plan);
+      this.updateSavedBadge();
       this.renderPlanResults(plan);
       showToast(isRegenerate ? 'Nova versão gerada com sucesso!' : 'Roteiro gerado com sucesso!', 'success');
     } catch (err) {
@@ -365,6 +450,12 @@ export class ItineraryPlanner {
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
+            <button id="save-plan-btn" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-colors flex items-center gap-1.5" type="button" title="Guardar este roteiro no histórico">
+              💾 <span>Guardar</span>
+            </button>
+            <button id="share-plan-btn" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-colors flex items-center gap-1.5" type="button" title="Copiar link partilhável reproduzível">
+              🔗 <span>Partilhar</span>
+            </button>
             <button id="regenerate-plan-btn" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-colors flex items-center gap-1.5" type="button" title="Gerar Outra Versão mantendo as preferências">
               🎲 <span>Gerar outra versão</span>
             </button>
@@ -436,7 +527,9 @@ export class ItineraryPlanner {
                 const detailUrl = isTrail
                   ? `trilho.html?slug=${encodeURIComponent(stop.poiSlug || stop.poiId)}`
                   : `detalhe.html?slug=${encodeURIComponent(stop.poiSlug || stop.poiId)}`;
-                const mapUrl = `explorar.html?slug=${encodeURIComponent(stop.poiSlug || stop.poiId)}`;
+                const mapUrl = isTrail
+                  ? `explorar.html?trilho=${encodeURIComponent(stop.poiSlug || stop.poiId)}`
+                  : `explorar.html?slug=${encodeURIComponent(stop.poiSlug || stop.poiId)}`;
 
                 return `
                 <div class="flex items-start gap-4 pb-6 border-b border-[#182E22]/10 last:border-none last:pb-0">
@@ -548,6 +641,41 @@ export class ItineraryPlanner {
       });
     }
 
+    const saveBtn = document.getElementById('save-plan-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        storageService.saveItinerary(plan);
+        this.updateSavedBadge();
+        showToast('Roteiro guardado com sucesso no histórico!', 'success');
+      });
+    }
+
+    const shareBtn = document.getElementById('share-plan-btn');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('dias', summary.days || 2);
+        url.searchParams.set('interesse', summary.interest || document.getElementById('input-interest')?.value || 'cultura');
+        url.searchParams.set('ritmo', summary.pace || 'equilibrado');
+        url.searchParams.set('mobilidade', summary.mobility || 'carro');
+        if (meta.seed != null) {
+          url.searchParams.set('semente', meta.seed);
+        }
+        const shareUrl = url.toString();
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(shareUrl);
+          } else {
+            prompt('Copia o link de partilha do roteiro:', shareUrl);
+          }
+          showToast('Link de partilha copiado! O roteiro é reproduzido com a mesma semente.', 'success');
+        } catch {
+          prompt('Copia o link de partilha do roteiro:', shareUrl);
+        }
+      });
+    }
+
     const printBtn = document.getElementById('print-plan-btn');
     if (printBtn) {
       printBtn.addEventListener('click', () => {
@@ -628,4 +756,160 @@ export class ItineraryPlanner {
       showToast('Não foi possível copiar automaticamente o roteiro.', 'warning');
     }
   }
+
+  updateSavedBadge() {
+    const badge = document.getElementById('saved-itins-badge');
+    if (!badge) return;
+    const list = storageService.getSavedItineraries();
+    badge.textContent = list.length;
+  }
+
+  openSavedModal() {
+    const modal = document.getElementById('saved-itins-modal');
+    if (!modal) return;
+    this.renderSavedList();
+    modal.classList.remove('hidden');
+  }
+
+  closeSavedModal() {
+    const modal = document.getElementById('saved-itins-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  renderSavedList() {
+    const container = document.getElementById('saved-itins-list');
+    if (!container) return;
+    const list = storageService.getSavedItineraries();
+
+    if (list.length === 0) {
+      container.innerHTML = `
+        <div class="p-8 text-center text-xs text-[#7E9283] space-y-2">
+          <p class="text-2xl">🗺️</p>
+          <p class="font-medium">Ainda não tens nenhum roteiro guardado.</p>
+          <p class="text-[11px]">Gera um itinerário e clica em "Guardar" para o consultar mais tarde.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = list.map(item => {
+      const summary = item.summary || {};
+      const meta = item.meta || {};
+      const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      const days = summary.days || item.daysCount || item.days?.length || 1;
+      const stops = summary.totalStops || (item.days ? item.days.reduce((acc, d) => acc + (d.stops?.length || 0), 0) : 0);
+
+      const escapedId = escapeHtml(item.id);
+      const interestText = escapeHtml(summary.interest || item.interest || 'Geral');
+      const overviewText = escapeHtml(summary.overview || (item.days && item.days[0] ? item.days[0].title : 'Roteiro em Freixo de Espada à Cinta'));
+
+      return `
+        <div class="p-4 rounded-2xl bg-white border border-[#182E22]/10 hover:border-[#182E22]/30 shadow-sm transition-all flex items-center justify-between gap-3">
+          <div class="space-y-1 min-w-0 flex-grow cursor-pointer load-saved-item-btn" data-id="${escapedId}">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#182E22]/10 text-[#182E22]">
+                ${days} ${days === 1 ? 'Dia' : 'Dias'}
+              </span>
+              <span class="text-xs font-bold text-[#182E22] truncate">${interestText} • ${stops} Paragens</span>
+            </div>
+            <p class="text-[11px] text-[#7E9283] truncate">
+              ${overviewText}
+            </p>
+            <div class="flex items-center gap-2 text-[10px] text-[#7E9283]">
+              ${dateStr ? `<span>🕒 ${dateStr}</span>` : ''}
+              ${meta.seed != null || item.seed != null ? `<span>• Semente #${meta.seed || item.seed}</span>` : ''}
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <button type="button" class="load-saved-item-btn px-3 py-1.5 rounded-xl bg-[#182E22] text-[#FAF8F5] text-xs font-semibold hover:bg-[#234332] transition-colors" data-id="${escapedId}" title="Carregar este roteiro">
+              Abrir
+            </button>
+            <button type="button" class="delete-saved-item-btn p-1.5 rounded-xl hover:bg-red-50 text-[#7E9283] hover:text-red-600 transition-colors" data-id="${escapedId}" title="Eliminar este roteiro" aria-label="Eliminar roteiro">
+              🗑️
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.querySelectorAll('.load-saved-item-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        this.loadSavedPlan(id);
+      });
+    });
+
+    container.querySelectorAll('.delete-saved-item-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        storageService.deleteSavedItinerary(id);
+        this.renderSavedList();
+        this.updateSavedBadge();
+        showToast('Roteiro removido dos guardados.', 'info');
+      });
+    });
+  }
+
+  loadSavedPlan(id) {
+    const plan = storageService.getSavedItineraryById(id);
+    if (!plan) {
+      showToast('Roteiro não encontrado.', 'warning');
+      return;
+    }
+    this.currentPlan = plan;
+    this.renderPlanResults(plan);
+    this.closeSavedModal();
+    showToast('Roteiro carregado com sucesso!', 'success');
+  }
+
+  async applyUrlConfigAndGenerate(config) {
+    const inputDays = document.getElementById('input-days');
+    if (inputDays) inputDays.value = config.days || 2;
+    document.querySelectorAll('.day-btn').forEach(b => {
+      const isSelected = parseInt(b.dataset.days, 10) === (config.days || 2);
+      b.className = isSelected
+        ? 'day-btn py-2.5 text-xs font-semibold rounded-xl border border-[#182E22] bg-[#182E22] text-[#FAF8F5] transition-all text-center'
+        : 'day-btn py-2.5 text-xs font-semibold rounded-xl border border-[#182E22]/20 bg-white text-[#24211D] hover:border-[#182E22] transition-all text-center';
+      b.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    });
+
+    const selectInterest = document.getElementById('input-interest');
+    if (selectInterest && config.interest) {
+      selectInterest.value = config.interest;
+    }
+
+    const inputPace = document.getElementById('input-pace');
+    if (inputPace) inputPace.value = config.pace || 'equilibrado';
+    document.querySelectorAll('.pace-btn').forEach(b => {
+      const isSelected = b.dataset.pace === (config.pace || 'equilibrado');
+      b.className = isSelected
+        ? 'pace-btn py-2 text-[11px] font-semibold rounded-xl border border-[#182E22] bg-[#182E22] text-[#FAF8F5]'
+        : 'pace-btn py-2 text-[11px] font-medium rounded-xl border border-[#182E22]/20 bg-white text-[#24211D]';
+      b.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    });
+
+    const inputMobility = document.getElementById('input-mobility');
+    if (inputMobility) inputMobility.value = config.mobility || 'carro';
+    document.querySelectorAll('.mobility-btn').forEach(b => {
+      const isSelected = b.dataset.mobility === (config.mobility || 'carro');
+      b.className = isSelected
+        ? 'mobility-btn py-2 text-xs font-semibold rounded-xl border border-[#182E22] bg-[#182E22] text-[#FAF8F5]'
+        : 'mobility-btn py-2 text-xs font-medium rounded-xl border border-[#182E22]/20 bg-white text-[#24211D]';
+      b.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    });
+
+    await this.handleGenerate({ seed: config.seed });
+  }
 }
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+

@@ -392,6 +392,65 @@ class TourismService {
       source: 'demonstracao_local'
     };
   }
+
+  /**
+   * Pesquisa unificada em locais, trilhos, eventos e freguesias
+   */
+  async search({ query = '', includeDemo = true } = {}) {
+    const q = (query || '').trim().toLowerCase();
+    if (!q) {
+      return {
+        query: '',
+        total: 0,
+        results: { places: [], trails: [], events: [], freguesias: [] },
+        source: 'local'
+      };
+    }
+
+    const [placesRes, trailsRes, eventsRes, freguesiasRes] = await Promise.all([
+      this.getPlaces({ search: q, includeDemo }),
+      this.getTrails({ includeDemo }),
+      this.getEvents({ includeDemo }),
+      this.getFreguesias()
+    ]);
+
+    const places = placesRes?.items || [];
+
+    const trails = (trailsRes?.items || []).filter(t =>
+      (t.title && t.title.toLowerCase().includes(q)) ||
+      (t.description && t.description.toLowerCase().includes(q)) ||
+      (t.category && t.category.toLowerCase().includes(q)) ||
+      (t.stops && t.stops.some(s => (s.title && s.title.toLowerCase().includes(q)) || (s.description && s.description.toLowerCase().includes(q))))
+    );
+
+    const events = (eventsRes?.items || []).filter(e =>
+      (e.title && e.title.toLowerCase().includes(q)) ||
+      (e.description && e.description.toLowerCase().includes(q)) ||
+      (e.category && e.category.toLowerCase().includes(q)) ||
+      (e.location && e.location.toLowerCase().includes(q)) ||
+      (e.historical_context && e.historical_context.toLowerCase().includes(q))
+    );
+
+    const freguesias = (freguesiasRes?.items || []).filter(f =>
+      (f.name && f.name.toLowerCase().includes(q)) ||
+      (f.description && f.description.toLowerCase().includes(q)) ||
+      (f.id && f.id.toLowerCase().includes(q))
+    );
+
+    const total = places.length + trails.length + events.length + freguesias.length;
+
+    return {
+      query: q,
+      total,
+      results: {
+        places,
+        trails,
+        events,
+        freguesias
+      },
+      source: placesRes?.source || 'demonstracao_local'
+    };
+  }
 }
 
 export const tourismService = new TourismService();

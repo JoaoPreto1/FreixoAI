@@ -46,13 +46,22 @@ export function renderNavbar(activePage = 'index') {
             }).join('')}
           </nav>
 
-          <div class="flex items-center gap-2.5 sm:gap-4">
+          <div class="flex items-center gap-2 sm:gap-3">
             
-            <a href="explorar.html?view=favorites" 
+            <button id="nav-search-btn"
+                    class="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs text-[#3D3830] hover:text-[#182E22] bg-[#182E22]/5 hover:bg-[#182E22]/10 transition-colors"
+                    title="Pesquisar património, trilhos e eventos (Ctrl+K)"
+                    aria-label="Abrir pesquisa global">
+              <span>🔍</span>
+              <span class="hidden lg:inline text-[11px] font-medium text-[#7E9283]">Pesquisar</span>
+              <kbd class="hidden lg:inline text-[9px] font-mono bg-white px-1.5 py-0.5 rounded border border-[#182E22]/15 text-[#7E9283]">Ctrl+K</kbd>
+            </button>
+
+            <a href="favoritos.html" 
                id="nav-fav-link" 
                class="relative p-2 text-[#24211D] hover:text-[#B65737] transition-colors rounded-full hover:bg-black/5" 
-               title="Ver Lugares Guardados nos Favoritos"
-               aria-label="Ver ${favCount} lugares guardados nos favoritos">
+               title="Ver Lugares, Trilhos e Eventos Guardados nos Favoritos"
+               aria-label="Ver ${favCount} itens guardados nos favoritos">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
@@ -83,6 +92,16 @@ export function renderNavbar(activePage = 'index') {
 
       <div id="mobile-menu-drawer" class="hidden md:hidden border-t border-[#182E22]/10 bg-[#FAF8F5] px-4 pt-3 pb-6 shadow-xl transition-all" role="navigation" aria-label="Menu Mobile">
         <div class="flex flex-col gap-2">
+          <button id="mobile-search-btn" class="w-full px-4 py-3 rounded-lg text-sm font-semibold bg-[#182E22]/5 text-[#182E22] flex items-center justify-between">
+            <span>🔍 Pesquisa Global</span>
+            <span class="text-xs text-[#7E9283]">Abrir</span>
+          </button>
+          
+          <a href="favoritos.html" class="px-4 py-3 rounded-lg text-base font-medium flex items-center justify-between text-[#24211D] hover:bg-[#182E22]/5">
+            <span>❤️ Os Meus Favoritos</span>
+            <span class="text-xs font-bold bg-[#B65737] text-white px-2 py-0.5 rounded-full">${favCount}</span>
+          </a>
+
           ${navLinks.map(link => {
             const isActive = activePage === link.id;
             return `
@@ -118,6 +137,19 @@ export function renderNavbar(activePage = 'index') {
     });
   }
 
+  const searchBtn = document.getElementById('nav-search-btn');
+  const mobileSearchBtn = document.getElementById('mobile-search-btn');
+  const triggerSearch = () => {
+    window.dispatchEvent(new CustomEvent('freixo:openSearch'));
+    if (drawer && !drawer.classList.contains('hidden')) {
+      drawer.classList.add('hidden');
+      if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+  };
+
+  if (searchBtn) searchBtn.addEventListener('click', triggerSearch);
+  if (mobileSearchBtn) mobileSearchBtn.addEventListener('click', triggerSearch);
+
   storageService.onFavoritesChange((favs) => {
     const badge = document.getElementById('nav-fav-badge');
     const link = document.getElementById('nav-fav-link');
@@ -127,7 +159,7 @@ export function renderNavbar(activePage = 'index') {
       setTimeout(() => badge.classList.remove('scale-125'), 200);
     }
     if (link) {
-      link.setAttribute('aria-label', `Ver ${favs.length} lugares guardados nos favoritos`);
+      link.setAttribute('aria-label', `Ver ${favs.length} itens guardados nos favoritos`);
     }
   });
 

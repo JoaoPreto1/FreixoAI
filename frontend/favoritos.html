@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Os Meus Favoritos — Freixo AI</title>
+  <meta name="description" content="Consulte e gira os seus locais, percursos pedestres e eventos favoritos guardados em Freixo de Espada à Cinta.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              100: '#E6EFE9',
+              600: '#315843',
+              700: '#234332',
+              800: '#182E22',
+              900: '#122419',
+            },
+            parchment: {
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#EBE4DA',
+              300: '#DDD4C7',
+              800: '#3D3830',
+              900: '#24211D',
+            },
+            terracotta: '#B65737',
+            gold: '#DFBA71',
+            olive: '#7E9283'
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            editorial: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+  <script src="env.js"></script>
+  <link rel="stylesheet" href="assets/css/editorial.css">
+</head>
+<body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain">
+
+  <div id="navbar-mount"></div>
+
+  <!-- Hero Header -->
+  <section class="bg-pine-900 text-parchment-100 py-14 px-4 sm:px-6 lg:px-8 border-b border-pine-800">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div class="space-y-3 max-w-2xl">
+        <span class="editorial-badge bg-pine-800 text-gold border-pine-700">A Tua Seleção Pessoal</span>
+        <h1 class="font-display text-3xl sm:text-5xl font-bold text-[#FAF8F5] leading-tight flex items-center gap-3">
+          <span>Os Meus Favoritos</span>
+          <span id="header-fav-count-badge" class="text-sm font-sans font-bold bg-terracotta text-white px-3 py-1 rounded-full shadow-sm">
+            0
+          </span>
+        </h1>
+        <p class="text-sm sm:text-base text-parchment-300 font-sans">
+          Reúne e gere os teus pontos de interesse, percursos pedestres e festividades guardados para a tua estadia em Freixo.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="clear-all-favs-btn" 
+                class="hidden px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-parchment-200 hover:text-white transition-all flex items-center gap-2 border border-white/20"
+                type="button">
+          <span>🗑️</span>
+          <span>Limpar Todos</span>
+        </button>
+        <a href="roteiro.html" class="px-5 py-2.5 rounded-full bg-gold hover:bg-[#cfa85e] text-pine-900 text-xs font-bold uppercase tracking-wider transition-all shadow flex items-center gap-2">
+          <span>Criar Roteiro AI</span>
+          <span>→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Conteúdo Principal -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full space-y-8">
+
+    <!-- Barra de Filtros por Categoria -->
+    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-pine-800/10">
+      <div class="flex flex-wrap items-center gap-2" id="fav-filter-tabs">
+        <button type="button" class="fav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all bg-[#182E22] text-[#FAF8F5]" data-type="all">
+          Todos (<span id="tab-count-all">0</span>)
+        </button>
+        <button type="button" class="fav-tab px-4 py-2 rounded-xl text-xs font-medium transition-all bg-white hover:bg-parchment-50 border border-pine-800/10 text-pine-900" data-type="place">
+          🏛️ Locais (<span id="tab-count-places">0</span>)
+        </button>
+        <button type="button" class="fav-tab px-4 py-2 rounded-xl text-xs font-medium transition-all bg-white hover:bg-parchment-50 border border-pine-800/10 text-pine-900" data-type="trail">
+          🥾 Trilhos (<span id="tab-count-trails">0</span>)
+        </button>
+        <button type="button" class="fav-tab px-4 py-2 rounded-xl text-xs font-medium transition-all bg-white hover:bg-parchment-50 border border-pine-800/10 text-pine-900" data-type="event">
+          🎪 Eventos (<span id="tab-count-events">0</span>)
+        </button>
+      </div>
+
+      <span class="text-xs text-olive font-mono">
+        Persistência Local Autónoma
+      </span>
+    </div>
+
+    <!-- Indicador de Carregamento -->
+    <div id="favs-loading" class="text-center py-16 space-y-3">
+      <div class="w-8 h-8 rounded-full border-3 border-[#182E22] border-t-transparent animate-spin mx-auto"></div>
+      <p class="text-xs text-[#7E9283] font-medium">A carregar os teus itens guardados...</p>
+    </div>
+
+    <!-- Estado Vazio -->
+    <div id="favs-empty" class="hidden text-center py-16 bg-parchment-50 rounded-3xl border border-pine-800/10 space-y-5">
+      <div class="w-16 h-16 rounded-full bg-pine-100 text-pine-800 flex items-center justify-center mx-auto text-3xl">
+        ❤️
+      </div>
+      <div class="space-y-2">
+        <h3 class="font-display text-2xl font-bold text-pine-900">
+          Ainda não guardaste nenhum favorito
+        </h3>
+        <p class="text-xs sm:text-sm text-parchment-800 max-w-md mx-auto leading-relaxed">
+          Explora os locais históricos, percursos no Douro e festividades de Freixo e clica no coração para guardar os teus favoritos.
+        </p>
+      </div>
+      <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
+        <a href="explorar.html" class="px-5 py-2.5 rounded-full bg-pine-800 text-[#FAF8F5] text-xs font-semibold hover:bg-pine-700 transition-colors">
+          Explorar Locais no Mapa →
+        </a>
+        <a href="trilho.html?slug=pr1-calcada-alpajares" class="px-5 py-2.5 rounded-full bg-white border border-pine-800/20 text-pine-900 text-xs font-semibold hover:bg-parchment-100 transition-colors">
+          Ver Trilhos Pedestres
+        </a>
+      </div>
+    </div>
+
+    <!-- Grelha de Favoritos -->
+    <div id="favs-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    </div>
+
+  </main>
+
+  <div id="footer-mount"></div>
+  <div id="ai-chat-mount"></div>
+
+  <script type="module">
+    import { freixoApp } from './js/app.js';
+    import { storageService } from './js/services/storageService.js';
+    import { poiService } from './js/services/poiService.js';
+    import { showToast } from './js/components/Toast.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await freixoApp.init('favoritos');
+
+      const grid = document.getElementById('favs-grid');
+      const loadingEl = document.getElementById('favs-loading');
+      const emptyEl = document.getElementById('favs-empty');
+      const clearBtn = document.getElementById('clear-all-favs-btn');
+      const countBadge = document.getElementById('header-fav-count-badge');
+
+      let currentItems = [];
+      let activeFilter = 'all';
+
+      await loadFavorites();
+
+      clearBtn.addEventListener('click', () => {
+        if (confirm('Tens a certeza de que desejas remover todos os teus favoritos guardados?')) {
+          storageService.clearFavorites();
+          loadFavorites();
+          showToast('Favoritos limpos com sucesso.', 'info');
+        }
+      });
+
+      document.querySelectorAll('.fav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.fav-tab').forEach(t => {
+            t.className = 'fav-tab px-4 py-2 rounded-xl text-xs font-medium transition-all bg-white hover:bg-parchment-50 border border-pine-800/10 text-pine-900';
+          });
+          tab.className = 'fav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all bg-[#182E22] text-[#FAF8F5]';
+          activeFilter = tab.dataset.type;
+          renderGrid();
+        });
+      });
+
+      window.addEventListener('freixo:favoritesUpdated', () => {
+        loadFavorites();
+      });
+
+      async function loadFavorites() {
+        loadingEl.classList.remove('hidden');
+        grid.classList.add('hidden');
+        emptyEl.classList.add('hidden');
+
+        const records = storageService.getFavoriteRecords();
+        countBadge.textContent = records.length;
+        clearBtn.classList.toggle('hidden', records.length === 0);
+
+        if (records.length === 0) {
+          loadingEl.classList.add('hidden');
+          emptyEl.classList.remove('hidden');
+          updateTabCounts({ all: 0, places: 0, trails: 0, events: 0 });
+          return;
+        }
+
+        // Resolução paralela de metadados a partir do catálogo
+        const resolved = await Promise.all(records.map(async (rec) => {
+          try {
+            if (rec.type === 'trail') {
+              const trail = await poiService.getTrailBySlug(rec.id);
+              if (trail) {
+                return {
+                  id: trail.slug || trail.id,
+                  type: 'trail',
+                  title: trail.title,
+                  category: trail.category || 'Percurso Pedestre',
+                  image: trail.heroImage || trail.image_url || 'assets/images/alpajares.png',
+                  detailUrl: `trilho.html?slug=${trail.slug || trail.id}`,
+                  metaText: `📏 ${trail.distance || 'Percurso'} • ${trail.difficulty || 'Homologado'}`,
+                  available: true
+                };
+              }
+            } else if (rec.type === 'event') {
+              const ev = await poiService.getEventBySlug(rec.id);
+              if (ev) {
+                return {
+                  id: ev.slug || ev.id,
+                  type: 'event',
+                  title: ev.title,
+                  category: ev.category || 'Tradição',
+                  image: ev.image_url || 'assets/images/seda-loom.png',
+                  detailUrl: `evento.html?slug=${ev.slug || ev.id}`,
+                  metaText: `📅 ${ev.edition_dates || ev.periodicity || 'Agenda Anual'}`,
+                  available: true
+                };
+              }
+            } else {
+              // Local / POI
+              const poi = await poiService.getPoiBySlug(rec.id);
+              if (poi) {
+                return {
+                  id: poi.slug || poi.id,
+                  type: 'place',
+                  title: poi.title,
+                  category: poi.categoryLabel || poi.category || 'Património',
+                  image: poi.image || 'assets/images/penedo-durao.png',
+                  detailUrl: `detalhe.html?slug=${poi.slug || poi.id}`,
+                  metaText: `📍 ${poi.location || 'Freixo'}`,
+                  available: true
+                };
+              }
+            }
+
+            // Registo indisponível ou removido do catálogo
+            return {
+              id: rec.id,
+              type: rec.type || 'place',
+              title: rec.title || `Item #${rec.id}`,
+              category: 'Indisponível no Catálogo',
+              image: 'assets/images/penedo-durao.png',
+              detailUrl: null,
+              metaText: 'Registo atualmente não disponível',
+              available: false
+            };
+          } catch {
+            return {
+              id: rec.id,
+              type: rec.type || 'place',
+              title: `Item #${rec.id}`,
+              category: 'Indisponível',
+              image: 'assets/images/penedo-durao.png',
+              detailUrl: null,
+              metaText: 'Erro ao carregar detalhes',
+              available: false
+            };
+          }
+        }));
+
+        currentItems = resolved;
+        loadingEl.classList.add('hidden');
+
+        const counts = {
+          all: currentItems.length,
+          places: currentItems.filter(i => i.type === 'place').length,
+          trails: currentItems.filter(i => i.type === 'trail').length,
+          events: currentItems.filter(i => i.type === 'event').length
+        };
+        updateTabCounts(counts);
+
+        renderGrid();
+      }
+
+      function updateTabCounts(counts) {
+        document.getElementById('tab-count-all').textContent = counts.all;
+        document.getElementById('tab-count-places').textContent = counts.places;
+        document.getElementById('tab-count-trails').textContent = counts.trails;
+        document.getElementById('tab-count-events').textContent = counts.events;
+      }
+
+      function renderGrid() {
+        const filtered = activeFilter === 'all'
+          ? currentItems
+          : currentItems.filter(i => i.type === activeFilter);
+
+        if (filtered.length === 0) {
+          grid.classList.add('hidden');
+          emptyEl.classList.remove('hidden');
+          return;
+        }
+
+        emptyEl.classList.add('hidden');
+        grid.classList.remove('hidden');
+
+        grid.innerHTML = filtered.map(item => `
+          <article class="bg-white rounded-2xl border border-pine-800/10 shadow overflow-hidden flex flex-col justify-between group hover:shadow-lg transition-all" data-fav-id="${item.id}">
+            <div class="relative h-44 bg-[#182E22] overflow-hidden">
+              <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-95" />
+              
+              <div class="absolute top-3 left-3">
+                <span class="editorial-badge bg-[#FAF8F5]/90 text-[#182E22] shadow-sm text-[10px]">
+                  ${item.category}
+                </span>
+              </div>
+
+              <button class="remove-fav-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-terracotta flex items-center justify-center transition-transform hover:scale-110 shadow" 
+                      data-id="${item.id}" 
+                      title="Remover dos favoritos"
+                      aria-label="Remover ${item.title} dos favoritos">
+                ✕
+              </button>
+            </div>
+
+            <div class="p-5 flex flex-col flex-grow justify-between space-y-4">
+              <div class="space-y-1">
+                <h3 class="font-display font-bold text-base text-pine-900 group-hover:text-terracotta transition-colors leading-snug">
+                  ${item.title}
+                </h3>
+                <p class="text-xs text-olive font-mono">
+                  ${item.metaText}
+                </p>
+                ${!item.available ? `
+                  <span class="inline-block text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-medium mt-1">
+                    ⚠️ Não encontrado no catálogo atual
+                  </span>
+                ` : ''}
+              </div>
+
+              <div class="pt-3 border-t border-pine-800/10 flex items-center justify-between">
+                ${item.available && item.detailUrl ? `
+                  <a href="${item.detailUrl}" class="text-xs font-bold text-pine-900 hover:text-terracotta transition-colors flex items-center gap-1">
+                    <span>Ver Detalhes</span>
+                    <span>→</span>
+                  </a>
+                ` : `
+                  <button class="remove-fav-btn text-xs font-semibold text-terracotta hover:underline" data-id="${item.id}">
+                    Remover dos favoritos
+                  </button>
+                `}
+
+                <span class="text-[11px] text-[#7E9283]">
+                  ${item.type === 'trail' ? '🥾 Trilho' : item.type === 'event' ? '🎪 Evento' : '🏛️ Local'}
+                </span>
+              </div>
+            </div>
+          </article>
+        `).join('');
+
+        grid.querySelectorAll('.remove-fav-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            storageService.removeFavorite(id);
+            showToast('Item removido dos favoritos.', 'info');
+            loadFavorites();
+          });
+        });
+      }
+    });
+  </script>
+</body>
+</html>

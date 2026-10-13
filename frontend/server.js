@@ -21,7 +21,13 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  let reqPath = decodeURI(req.url.split('?')[0]);
+  let rawPath = req.url.split('?')[0];
+  let reqPath;
+  try {
+    reqPath = decodeURIComponent(rawPath);
+  } catch {
+    reqPath = decodeURI(rawPath);
+  }
   if (reqPath === '/') reqPath = '/index.html';
 
   if (reqPath === '/favicon.ico') {
@@ -43,7 +49,12 @@ const server = http.createServer((req, res) => {
     return res.end(`window.__ENV__ = Object.freeze(${JSON.stringify(publicConfig)});`);
   }
 
-  const filePath = path.join(__dirname, reqPath);
+  const filePath = path.normalize(path.join(__dirname, reqPath));
+  if (!filePath.startsWith(__dirname)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+    return res.end('403 Forbidden');
+  }
+
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 

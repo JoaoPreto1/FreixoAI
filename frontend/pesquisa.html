@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesquisa Global — Freixo AI</title>
+  <meta name="description" content="Pesquise em todo o catálogo turístico de Freixo de Espada à Cinta: miradouros, património, rota da seda, percursos pedestres e festividades.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              100: '#E6EFE9',
+              600: '#315843',
+              700: '#234332',
+              800: '#182E22',
+              900: '#122419',
+            },
+            parchment: {
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#EBE4DA',
+              300: '#DDD4C7',
+              800: '#3D3830',
+              900: '#24211D',
+            },
+            terracotta: '#B65737',
+            gold: '#DFBA71',
+            olive: '#7E9283'
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            editorial: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+  <script src="env.js"></script>
+  <link rel="stylesheet" href="assets/css/editorial.css">
+</head>
+<body class="bg-parchment-100 text-parchment-900 min-h-screen flex flex-col font-sans antialiased editorial-grain">
+
+  <div id="navbar-mount"></div>
+
+  <!-- Header de Pesquisa -->
+  <section class="bg-pine-900 text-parchment-100 py-14 px-4 sm:px-6 lg:px-8 border-b border-pine-800">
+    <div class="max-w-4xl mx-auto space-y-6">
+      <div class="space-y-2">
+        <span class="editorial-badge bg-pine-800 text-gold border-pine-700">Catálogo Concelhio Unificado</span>
+        <h1 class="font-display text-3xl sm:text-5xl font-bold text-[#FAF8F5] leading-tight">
+          Pesquisa Global
+        </h1>
+        <p class="text-sm sm:text-base text-parchment-300 font-sans">
+          Encontra locais, miradouros, percursos no Douro Internacional, eventos e freguesias a partir de uma única interface.
+        </p>
+      </div>
+
+      <!-- Barra de Pesquisa -->
+      <div class="relative w-full">
+        <input type="text"
+               id="page-search-input"
+               placeholder="Pesquisar por nome, seda, grifos, amendoeiras, portais..."
+               class="w-full pl-12 pr-12 py-4 rounded-2xl bg-white text-sm sm:text-base text-[#182E22] placeholder:text-[#7E9283] shadow-xl border border-pine-700 focus:outline-none focus:ring-2 focus:ring-gold font-medium"
+               aria-label="Campo de pesquisa" />
+        <span class="absolute left-4 top-4 text-lg text-[#182E22]/60 select-none">🔍</span>
+        
+        <button id="page-search-clear" class="hidden absolute right-4 top-4 text-xs bg-black/10 hover:bg-black/20 text-[#182E22] w-6 h-6 rounded-full flex items-center justify-center transition-colors" aria-label="Limpar pesquisa">✕</button>
+      </div>
+
+      <!-- Sugestões Rápidas -->
+      <div class="flex flex-wrap items-center gap-2 text-xs text-parchment-300">
+        <span class="text-gold font-semibold">Sugestões:</span>
+        <button type="button" class="search-tag px-3 py-1 rounded-full bg-pine-800 hover:bg-pine-700 border border-pine-700 text-parchment-200 transition-colors">Penedo Durão</button>
+        <button type="button" class="search-tag px-3 py-1 rounded-full bg-pine-800 hover:bg-pine-700 border border-pine-700 text-parchment-200 transition-colors">Seda</button>
+        <button type="button" class="search-tag px-3 py-1 rounded-full bg-pine-800 hover:bg-pine-700 border border-pine-700 text-parchment-200 transition-colors">Alpajares</button>
+        <button type="button" class="search-tag px-3 py-1 rounded-full bg-pine-800 hover:bg-pine-700 border border-pine-700 text-parchment-200 transition-colors">Amendoeiras em Flor</button>
+        <button type="button" class="search-tag px-3 py-1 rounded-full bg-pine-800 hover:bg-pine-700 border border-pine-700 text-parchment-200 transition-colors">Mazouco</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Área Principal de Conteúdo -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full space-y-8">
+    
+    <!-- Filtros de Agrupamento -->
+    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-pine-800/10">
+      <div class="flex flex-wrap items-center gap-2" id="filter-tabs">
+        <button type="button" class="filter-tab px-4 py-2 rounded-xl text-xs font-bold transition-all bg-[#182E22] text-[#FAF8F5]" data-type="all">
+          Todos (<span id="count-all">0</span>)
+        </button>
+        <button type="button" class="filter-tab px-4 py-2 rounded-xl text-xs font-medium transition-all bg-white hover:bg-parchment-50 border border-pine-800/10 text-pine-900" data-type="places">
+          🏛️ Locais (<span id="count-places">0</span>)
+        </button>
+        <button type="button" class="filter-tab px-4 py-2 rounded-xl text-xs font-medium transition-all bg-white hover:bg-parchment-50 border border-pine-800/10 text-pine-900" data-type="trails">
+          🥾 Trilhos (<span id="count-trails">0</span>)
+        </button>
+        <button type="button" class="filter-tab px-4 py-2 rounded-xl text-xs font-medium transition-all bg-white hover:bg-parchment-50 border border-pine-800/10 text-pine-900" data-type="events">
+          🎪 Eventos (<span id="count-events">0</span>)
+        </button>
+        <button type="button" class="filter-tab px-4 py-2 rounded-xl text-xs font-medium transition-all bg-white hover:bg-parchment-50 border border-pine-800/10 text-pine-900" data-type="freguesias">
+          📍 Freguesias (<span id="count-freguesias">0</span>)
+        </button>
+      </div>
+
+      <span id="search-source-badge" class="text-[11px] font-mono text-[#7E9283]">
+        Pronto a pesquisar
+      </span>
+    </div>
+
+    <!-- Indicador de Carregamento -->
+    <div id="search-loading" class="hidden text-center py-16 space-y-3">
+      <div class="w-8 h-8 rounded-full border-3 border-[#182E22] border-t-transparent animate-spin mx-auto"></div>
+      <p class="text-xs text-[#7E9283] font-medium">A consultar catálogo territorial...</p>
+    </div>
+
+    <!-- Estado de Erro -->
+    <div id="search-error" class="hidden p-6 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-3">
+      <div class="flex items-center gap-2 font-bold text-sm">
+        <span>⚠️</span>
+        <span>Ocorreu uma falha na pesquisa</span>
+      </div>
+      <p class="text-xs text-amber-800" id="search-error-msg">Não foi possível processar a consulta.</p>
+      <button type="button" id="search-retry-btn" class="px-4 py-2 bg-[#182E22] text-[#FAF8F5] rounded-xl text-xs font-semibold hover:bg-[#234332] transition-colors">
+        Tentar novamente
+      </button>
+    </div>
+
+    <!-- Estado Vazio -->
+    <div id="search-empty" class="text-center py-16 bg-parchment-50 rounded-3xl border border-pine-800/10 space-y-4">
+      <div class="w-14 h-14 rounded-full bg-pine-100 text-pine-800 flex items-center justify-center mx-auto text-2xl">
+        🔍
+      </div>
+      <h3 class="font-display text-xl font-bold text-pine-900" id="search-empty-title">
+        Inicia a tua pesquisa
+      </h3>
+      <p class="text-xs sm:text-sm text-parchment-800 max-w-md mx-auto leading-relaxed" id="search-empty-desc">
+        Escreve um termo na barra superior para pesquisar locais, miradouros, percursos no Douro e festividades.
+      </p>
+    </div>
+
+    <!-- Contentores de Resultados -->
+    <div id="search-results-container" class="hidden space-y-12">
+      
+      <!-- Secção Locais -->
+      <section id="section-places" class="space-y-4">
+        <div class="flex items-center justify-between border-b border-pine-800/10 pb-2">
+          <h2 class="font-display text-xl sm:text-2xl font-bold text-pine-900 flex items-center gap-2">
+            <span>🏛️</span> Locais de Interesse
+          </h2>
+          <span class="text-xs text-olive font-mono" id="label-count-places">0 locais</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="grid-places"></div>
+      </section>
+
+      <!-- Secção Trilhos -->
+      <section id="section-trails" class="space-y-4">
+        <div class="flex items-center justify-between border-b border-pine-800/10 pb-2">
+          <h2 class="font-display text-xl sm:text-2xl font-bold text-pine-900 flex items-center gap-2">
+            <span>🥾</span> Trilhos & Percursos Pedestres
+          </h2>
+          <span class="text-xs text-olive font-mono" id="label-count-trails">0 percursos</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="grid-trails"></div>
+      </section>
+
+      <!-- Secção Eventos -->
+      <section id="section-events" class="space-y-4">
+        <div class="flex items-center justify-between border-b border-pine-800/10 pb-2">
+          <h2 class="font-display text-xl sm:text-2xl font-bold text-pine-900 flex items-center gap-2">
+            <span>🎪</span> Eventos & Tradições Vivas
+          </h2>
+          <span class="text-xs text-olive font-mono" id="label-count-events">0 eventos</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="grid-events"></div>
+      </section>
+
+      <!-- Secção Freguesias -->
+      <section id="section-freguesias" class="space-y-4">
+        <div class="flex items-center justify-between border-b border-pine-800/10 pb-2">
+          <h2 class="font-display text-xl sm:text-2xl font-bold text-pine-900 flex items-center gap-2">
+            <span>📍</span> Freguesias do Concelho
+          </h2>
+          <span class="text-xs text-olive font-mono" id="label-count-freguesias">0 freguesias</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="grid-freguesias"></div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <div id="footer-mount"></div>
+  <div id="ai-chat-mount"></div>
+
+  <script type="module">
+    import { freixoApp } from './js/app.js';
+    import { searchService } from './js/services/searchService.js';
+    import { createPoiCard } from './js/components/PoiCardComponent.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await freixoApp.init('pesquisa');
+
+      const input = document.getElementById('page-search-input');
+      const clearBtn = document.getElementById('page-search-clear');
+      const loadingEl = document.getElementById('search-loading');
+      const errorEl = document.getElementById('search-error');
+      const errorMsg = document.getElementById('search-error-msg');
+      const retryBtn = document.getElementById('search-retry-btn');
+      const emptyEl = document.getElementById('search-empty');
+      const emptyTitle = document.getElementById('search-empty-title');
+      const emptyDesc = document.getElementById('search-empty-desc');
+      const resultsContainer = document.getElementById('search-results-container');
+      const sourceBadge = document.getElementById('search-source-badge');
+
+      let currentData = { places: [], trails: [], events: [], freguesias: [] };
+      let activeFilter = 'all';
+      let debounceTimer = null;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const initialQuery = urlParams.get('q') || urlParams.get('query') || '';
+
+      if (initialQuery) {
+        input.value = initialQuery;
+        clearBtn.classList.remove('hidden');
+        executeSearch(initialQuery);
+      }
+
+      input.addEventListener('input', () => {
+        const q = input.value.trim();
+        clearBtn.classList.toggle('hidden', !q);
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          updateUrlQuery(q);
+          executeSearch(q);
+        }, 220);
+      });
+
+      clearBtn.addEventListener('click', () => {
+        input.value = '';
+        clearBtn.classList.add('hidden');
+        input.focus();
+        updateUrlQuery('');
+        executeSearch('');
+      });
+
+      document.querySelectorAll('.search-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+          const text = tag.textContent.trim();
+          input.value = text;
+          clearBtn.classList.remove('hidden');
+          updateUrlQuery(text);
+          executeSearch(text);
+        });
+      });
+
+      retryBtn?.addEventListener('click', () => {
+        executeSearch(input.value.trim());
+      });
+
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.filter-tab').forEach(t => {
+            t.className = 'filter-tab px-4 py-2 rounded-xl text-xs font-medium transition-all bg-white hover:bg-parchment-50 border border-pine-800/10 text-pine-900';
+          });
+          tab.className = 'filter-tab px-4 py-2 rounded-xl text-xs font-bold transition-all bg-[#182E22] text-[#FAF8F5]';
+          activeFilter = tab.dataset.type;
+          applyTabFilter();
+        });
+      });
+
+      function updateUrlQuery(q) {
+        const url = new URL(window.location);
+        if (q) url.searchParams.set('q', q);
+        else url.searchParams.delete('q');
+        window.history.replaceState({}, '', url);
+      }
+
+      async function executeSearch(query) {
+        if (!query) {
+          loadingEl.classList.add('hidden');
+          errorEl.classList.add('hidden');
+          resultsContainer.classList.add('hidden');
+          emptyEl.classList.remove('hidden');
+          emptyTitle.textContent = 'Inicia a tua pesquisa';
+          emptyDesc.textContent = 'Escreve um termo na barra superior para pesquisar locais, miradouros, percursos no Douro e festividades.';
+          updateCounts({ places: [], trails: [], events: [], freguesias: [] });
+          sourceBadge.textContent = 'Pronto a pesquisar';
+          return;
+        }
+
+        loadingEl.classList.remove('hidden');
+        errorEl.classList.add('hidden');
+        emptyEl.classList.add('hidden');
+        resultsContainer.classList.add('hidden');
+
+        try {
+          const res = await searchService.search(query);
+          loadingEl.classList.add('hidden');
+
+          currentData = res.results || { places: [], trails: [], events: [], freguesias: [] };
+          updateCounts(currentData);
+
+          if (res.total === 0) {
+            emptyEl.classList.remove('hidden');
+            emptyTitle.textContent = `Nenhum resultado para «${query}»`;
+            emptyDesc.textContent = 'Não encontrámos registos correspondentes. Tenta palavras mais gerais ou uma categoria diferente.';
+            resultsContainer.classList.add('hidden');
+            sourceBadge.textContent = '0 resultados';
+            return;
+          }
+
+          sourceBadge.textContent = `${res.total} resultados • ${res.source === 'api_node' ? 'API Node.js' : 'Catálogo Local'}`;
+          renderData(currentData);
+          resultsContainer.classList.remove('hidden');
+          applyTabFilter();
+
+        } catch (err) {
+          loadingEl.classList.add('hidden');
+          errorEl.classList.remove('hidden');
+          errorMsg.textContent = err.message || 'Falha ao comunicar com os serviços de pesquisa.';
+        }
+      }
+
+      function updateCounts(data) {
+        const pLen = data.places?.length || 0;
+        const tLen = data.trails?.length || 0;
+        const eLen = data.events?.length || 0;
+        const fLen = data.freguesias?.length || 0;
+        const total = pLen + tLen + eLen + fLen;
+
+        document.getElementById('count-all').textContent = total;
+        document.getElementById('count-places').textContent = pLen;
+        document.getElementById('count-trails').textContent = tLen;
+        document.getElementById('count-events').textContent = eLen;
+        document.getElementById('count-freguesias').textContent = fLen;
+
+        document.getElementById('label-count-places').textContent = `${pLen} locais`;
+        document.getElementById('label-count-trails').textContent = `${tLen} percursos`;
+        document.getElementById('label-count-events').textContent = `${eLen} eventos`;
+        document.getElementById('label-count-freguesias').textContent = `${fLen} freguesias`;
+      }
+
+      function renderData(data) {
+        // 1. Locais
+        const placesGrid = document.getElementById('grid-places');
+        placesGrid.innerHTML = '';
+        data.places.forEach(poi => {
+          const card = createPoiCard(poi);
+          placesGrid.appendChild(card);
+        });
+
+        // 2. Trilhos
+        const trailsGrid = document.getElementById('grid-trails');
+        trailsGrid.innerHTML = data.trails.map(trail => `
+          <div class="bg-white rounded-2xl border border-pine-800/10 shadow overflow-hidden flex flex-col justify-between group hover:shadow-lg transition-all">
+            <div class="relative h-44 bg-[#182E22] overflow-hidden">
+              <img src="${trail.heroImage || trail.image_url || 'assets/images/alpajares.png'}" alt="${trail.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div class="absolute top-3 left-3">
+                <span class="editorial-badge bg-[#FAF8F5]/90 text-[#182E22] shadow-sm">${trail.difficulty || 'Percurso'}</span>
+              </div>
+            </div>
+            <div class="p-5 flex flex-col flex-grow justify-between space-y-4">
+              <div class="space-y-1.5">
+                <h3 class="font-display font-bold text-lg text-pine-900 group-hover:text-terracotta transition-colors leading-snug">
+                  ${trail.title}
+                </h3>
+                <p class="text-xs text-parchment-800 line-clamp-2 leading-relaxed">
+                  ${trail.description || ''}
+                </p>
+              </div>
+              <div class="pt-3 border-t border-pine-800/10 flex items-center justify-between text-xs">
+                <span class="text-olive font-mono">📏 ${trail.distance || '7.5 km'} • ⏱️ ${trail.duration || '3h30'}</span>
+                <a href="trilho.html?slug=${trail.slug || trail.id}" class="font-bold text-pine-900 hover:text-terracotta transition-colors">
+                  Ficha →
+                </a>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        // 3. Eventos
+        const eventsGrid = document.getElementById('grid-events');
+        eventsGrid.innerHTML = data.events.map(ev => `
+          <div class="bg-white rounded-2xl border border-pine-800/10 shadow overflow-hidden flex flex-col justify-between group hover:shadow-lg transition-all">
+            <div class="p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="editorial-badge bg-pine-100 text-pine-900">${ev.category || 'Tradição'}</span>
+                <span class="text-[11px] font-mono text-olive">${ev.periodicity || 'Anual'}</span>
+              </div>
+              <h3 class="font-display font-bold text-lg text-pine-900 group-hover:text-terracotta transition-colors leading-snug">
+                ${ev.title}
+              </h3>
+              <p class="text-xs text-parchment-800 line-clamp-3 leading-relaxed">
+                ${ev.description || ''}
+              </p>
+              <div class="bg-parchment-100/80 p-2.5 rounded-xl text-xs space-y-1">
+                <p><span class="text-olive font-semibold">📅 Datas:</span> <span class="font-bold text-pine-900">${ev.edition_dates || 'Consulte calendário'}</span></p>
+                <p><span class="text-olive font-semibold">📍 Local:</span> <span>${ev.location || 'Freixo'}</span></p>
+              </div>
+            </div>
+            <div class="p-4 bg-parchment-50 border-t border-pine-800/10 flex justify-end">
+              <a href="evento.html?slug=${ev.slug || ev.id}" class="text-xs font-bold text-pine-900 hover:text-terracotta transition-colors flex items-center gap-1">
+                <span>Ver Ficha do Evento</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+        `).join('');
+
+        // 4. Freguesias
+        const freguesiasGrid = document.getElementById('grid-freguesias');
+        freguesiasGrid.innerHTML = data.freguesias.map(f => `
+          <a href="explorar.html?freguesia=${f.id}" class="p-4 rounded-2xl bg-white border border-pine-800/10 shadow hover:shadow-md transition-all group flex flex-col justify-between">
+            <div>
+              <span class="text-xs text-olive font-mono">📍 Freguesia</span>
+              <h4 class="font-display font-bold text-base text-pine-900 group-hover:text-terracotta transition-colors mt-1">
+                ${f.name}
+              </h4>
+              <p class="text-[11px] text-parchment-800 mt-1 line-clamp-2">
+                ${f.description || 'Explorar pontos de interesse e património desta freguesia.'}
+              </p>
+            </div>
+            <span class="text-xs font-semibold text-pine-800 group-hover:translate-x-1 transition-transform inline-block mt-3">
+              Ver no Mapa →
+            </span>
+          </a>
+        `).join('');
+      }
+
+      function applyTabFilter() {
+        const secPlaces = document.getElementById('section-places');
+        const secTrails = document.getElementById('section-trails');
+        const secEvents = document.getElementById('section-events');
+        const secFreguesias = document.getElementById('section-freguesias');
+
+        if (activeFilter === 'all') {
+          secPlaces.classList.toggle('hidden', currentData.places.length === 0);
+          secTrails.classList.toggle('hidden', currentData.trails.length === 0);
+          secEvents.classList.toggle('hidden', currentData.events.length === 0);
+          secFreguesias.classList.toggle('hidden', currentData.freguesias.length === 0);
+        } else {
+          secPlaces.classList.toggle('hidden', activeFilter !== 'places' || currentData.places.length === 0);
+          secTrails.classList.toggle('hidden', activeFilter !== 'trails' || currentData.trails.length === 0);
+          secEvents.classList.toggle('hidden', activeFilter !== 'events' || currentData.events.length === 0);
+          secFreguesias.classList.toggle('hidden', activeFilter !== 'freguesias' || currentData.freguesias.length === 0);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

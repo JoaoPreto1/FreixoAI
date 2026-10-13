@@ -291,3 +291,92 @@ body {
   color: var(--color-parchment-900);
 }
 
+/* ==========================================================================
+   VISTA DE IMPRESSÃO LIMPA (A4) PARA ROTEIROS TURÍSTICOS
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm 14mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #111111 !important;
+    font-size: 10.5pt !important;
+  }
+
+  /* Ocultar elementos de navegação, flutuantes e controlos interativos */
+  header,
+  footer,
+  .editorial-header,
+  #navbar-mount,
+  #footer-mount,
+  #ai-chat-bubble,
+  #ai-chat-btn,
+  #ai-chat-drawer,
+  #ai-chat-mount,
+  #freixo-search-modal,
+  #freixo-toast-container,
+  #itinerary-form-col,
+  button,
+  .no-print,
+  #regenerate-plan-btn,
+  #form-regenerate-btn,
+  #copy-plan-btn,
+  #print-plan-btn,
+  #share-plan-btn,
+  #save-plan-btn,
+  #ask-ai-plan-btn,
+  #saved-itineraries-btn,
+  #saved-itineraries-drawer {
+    display: none !important;
+  }
+
+  /* Expandir contentor do roteiro para ocupar toda a largura da folha */
+  #itinerary-output-wrapper,
+  #itinerary-planner-container,
+  #itinerary-days-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  /* Contrastes e fundos claros para poupança de tinta e legibilidade perfeita */
+  .bg-\[\#182E22\],
+  .bg-pine-900,
+  .bg-pine-800 {
+    background-color: #f7f6f4 !important;
+    color: #111111 !important;
+    border: 1px solid #dcd8d1 !important;
+    box-shadow: none !important;
+  }
+
+  .text-\[\#FAF8F5\],
+  .text-white {
+    color: #111111 !important;
+  }
+
+  .text-\[\#DFBA71\],
+  .text-gold {
+    color: #8c6d23 !important;
+  }
+
+  /* Evitar quebras de página a meio de paragens */
+  #itinerary-days-container > div,
+  .border-b {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-only-header {
+    display: block !important;
+    border-bottom: 2px solid #182E22;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+  }
+}
+
+

@@ -92,23 +92,7 @@
 
   <main id="event-content" class="hidden flex-grow w-full pb-20">
 
-    <div class="bg-pine-950 text-parchment-300 border-b border-pine-800/80 text-xs py-3.5 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
-        <nav aria-label="Navegação em trilho de pão" class="flex items-center gap-2">
-          <a href="index.html" class="hover:text-gold transition-colors">Início</a>
-          <span class="text-pine-600">/</span>
-          <a href="patrimonio.html" class="hover:text-gold transition-colors">Património & Tradições</a>
-          <span class="text-pine-600">/</span>
-          <span id="breadcrumb-title" class="text-white font-semibold truncate max-w-xs sm:max-w-md">...</span>
-        </nav>
-
-        <div id="provenance-badge" class="flex items-center gap-2">
-          
-        </div>
-      </div>
-    </div>
-
-    <header class="relative bg-pine-950 text-white overflow-hidden py-14 sm:py-20 border-b border-pine-800/40">
+    <header class="relative bg-pine-950 text-white overflow-hidden pt-8 pb-14 sm:pb-20 border-b border-pine-800/40">
       <div class="absolute inset-0 z-0 opacity-25 mix-blend-luminosity">
         <img id="hero-image" 
              src="assets/images/seda-loom.png" 
@@ -117,6 +101,22 @@
       </div>
       <div class="absolute inset-0 bg-gradient-to-t from-pine-950 via-pine-950/80 to-transparent z-10"></div>
 
+      <div class="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-parchment-300">
+          <nav aria-label="Navegação em trilho de pão" class="flex items-center gap-2">
+            <a href="index.html" class="hover:text-gold transition-colors">Início</a>
+            <span class="text-pine-500">/</span>
+            <a href="patrimonio.html" class="hover:text-gold transition-colors">Património & Tradições</a>
+            <span class="text-pine-500">/</span>
+            <span id="breadcrumb-title" class="text-white font-semibold truncate max-w-xs sm:max-w-md">...</span>
+          </nav>
+
+          <div id="provenance-badge" class="flex items-center gap-2">
+            
+          </div>
+        </div>
+      </div>
+
       <div class="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div class="flex flex-wrap items-center gap-2.5">
           <span id="hero-category-badge" class="editorial-badge bg-gold text-pine-950 font-bold border-none text-[11px]">
@@ -124,6 +124,9 @@
           </span>
           <span id="hero-periodicity-badge" class="editorial-badge bg-pine-800 text-parchment-200 border-pine-700 text-[11px]">
             Periodicidade: Anual
+          </span>
+          <span id="hero-date-type-badge" class="editorial-badge text-[11px]">
+            ...
           </span>
         </div>
 
@@ -149,7 +152,7 @@
       </div>
     </header>
 
-    <section class="sticky top-20 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-pine-800/15 py-3.5 px-4 sm:px-6 lg:px-8 shadow-sm">
+    <section class="relative bg-[#FAF8F5] border-b border-pine-800/15 py-3.5 px-4 sm:px-6 lg:px-8 shadow-sm">
       <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-2.5">
           <a id="btn-directions-gps" 
@@ -160,6 +163,19 @@
             <span>🧭 Como Chegar (GPS)</span>
             <span class="text-gold">↗</span>
           </a>
+
+          <a href="patrimonio.html#eventos-section"
+             class="px-4 py-2.5 rounded-full bg-white border border-pine-900/20 text-pine-900 hover:bg-parchment-200 text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5"
+             title="Voltar à agenda completa de tradições">
+            <span>🎪 Agenda Cultural</span>
+          </a>
+
+          <button id="btn-toggle-favorite" 
+                  type="button" 
+                  class="px-4 py-2.5 rounded-full bg-white border border-pine-900/20 text-pine-900 hover:border-terracotta hover:text-terracotta text-xs font-semibold transition-all shadow-sm flex items-center gap-2">
+            <span id="fav-icon">🤍</span>
+            <span id="fav-text">Guardar nos Favoritos</span>
+          </button>
 
           <button id="btn-share-link" 
                   type="button" 
@@ -290,7 +306,7 @@
 
         </div>
 
-        <aside class="lg:col-span-4 space-y-8 lg:sticky lg:top-36">
+        <aside class="lg:col-span-4 space-y-8">
 
           <div class="bg-[#FAF8F5] p-6 sm:p-7 rounded-3xl border border-pine-800/15 shadow-md space-y-4">
             <div>
@@ -326,6 +342,7 @@
   <script type="module">
     import { freixoApp } from './js/app.js';
     import { poiService } from './js/services/poiService.js';
+    import { storageService } from './js/services/storageService.js';
     import { showToast } from './js/components/Toast.js';
 
     let currentEvent = null;
@@ -389,6 +406,22 @@
       document.getElementById('hero-category-badge').textContent = event.category || 'Tradição Concelhia';
       document.getElementById('hero-periodicity-badge').textContent = `Periodicidade: ${event.periodicity || 'Anual'}`;
 
+      const isSeasonal = Boolean(event.edition_status?.toLowerCase().includes('sujeit') || event.edition_status?.toLowerCase().includes('biol') || event.slug === 'amendoeiras-em-flor');
+      const hasConfirmedDates = Boolean(event.start_date && !isSeasonal);
+      const dateTypeBadge = document.getElementById('hero-date-type-badge');
+      if (dateTypeBadge) {
+        if (hasConfirmedDates) {
+          dateTypeBadge.className = 'editorial-badge bg-emerald-950 text-emerald-300 border-emerald-500/40 text-[11px]';
+          dateTypeBadge.textContent = '✓ Edição com Datas Confirmadas';
+        } else if (isSeasonal) {
+          dateTypeBadge.className = 'editorial-badge bg-amber-950 text-amber-300 border-amber-600/40 text-[11px]';
+          dateTypeBadge.textContent = '🌿 Condicionado ao Ciclo Natural / Sazonal';
+        } else {
+          dateTypeBadge.className = 'editorial-badge bg-pine-800 text-parchment-200 border-pine-700 text-[11px]';
+          dateTypeBadge.textContent = '📅 Estimativa de Calendário Cultural';
+        }
+      }
+
       document.getElementById('meta-location').textContent = event.location || 'Freixo de Espada à Cinta';
       document.getElementById('meta-periodicity').textContent = event.periodicity || 'Anual';
       document.getElementById('meta-pricing').textContent = event.pricing || 'Entrada Livre';
@@ -444,6 +477,38 @@
           showToast(`Link: ${canonicalUrl}`, 'info');
         }
       });
+
+      const favBtn = document.getElementById('btn-toggle-favorite');
+      const favIcon = document.getElementById('fav-icon');
+      const favText = document.getElementById('fav-text');
+      const eventId = event.slug || event.id;
+
+      const updateFavUi = (isFav) => {
+        if (!favBtn) return;
+        if (isFav) {
+          favBtn.className = 'px-4 py-2.5 rounded-full bg-[#B65737] text-white hover:bg-[#a04a2d] text-xs font-semibold transition-all shadow flex items-center gap-2';
+          if (favIcon) favIcon.textContent = '❤️';
+          if (favText) favText.textContent = 'Nos Meus Favoritos';
+        } else {
+          favBtn.className = 'px-4 py-2.5 rounded-full bg-white border border-pine-900/20 text-pine-900 hover:border-terracotta hover:text-terracotta text-xs font-semibold transition-all shadow-sm flex items-center gap-2';
+          if (favIcon) favIcon.textContent = '🤍';
+          if (favText) favText.textContent = 'Guardar nos Favoritos';
+        }
+      };
+
+      if (favBtn) {
+        updateFavUi(storageService.isFavorite(eventId));
+        favBtn.addEventListener('click', () => {
+          const isNowFav = storageService.toggleFavorite(eventId, {
+            type: 'event',
+            title: event.title,
+            category: event.category || 'Tradição',
+            image: event.image_url
+          });
+          updateFavUi(isNowFav);
+          showToast(isNowFav ? 'Evento guardado nos teus favoritos!' : 'Evento removido dos teus favoritos.', 'info');
+        });
+      }
 
       const askAiBtn = document.getElementById('btn-ask-ai');
       askAiBtn?.addEventListener('click', () => {

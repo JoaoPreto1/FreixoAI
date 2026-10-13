@@ -8,8 +8,10 @@ export class FreixoMap {
     this.pois = [];
     this.trails = [];
     this.trailLayers = new Map();
+    this.waypointsLayer = null;
     this.selectedTrailId = null;
     this.legendControl = null;
+    this.resizeHandler = null;
   }
 
   init(pois = [], defaultCenter = [41.0750, -6.8150], defaultZoom = 12) {
@@ -17,7 +19,6 @@ export class FreixoMap {
     if (!container) return null;
 
     if (typeof L === 'undefined') {
-      console.warn("Leaflet não encontrado no escopo global.");
       container.innerHTML = `
         <div class="h-full flex items-center justify-center p-6 text-center text-sm text-[#7E9283] bg-[#EBE4DA]/40 rounded-xl">
           <p>A carregar motor cartográfico...</p>
@@ -26,11 +27,17 @@ export class FreixoMap {
       return null;
     }
 
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
+
     this.map = L.map(this.containerId, {
       center: defaultCenter,
       zoom: defaultZoom,
       zoomControl: true,
-      scrollWheelZoom: false
+      scrollWheelZoom: false,
+      tap: false
     });
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -38,15 +45,22 @@ export class FreixoMap {
       maxZoom: 18
     }).addTo(this.map);
 
-    this.renderMarkers(pois);
+    this.renderMarkers(pois, { fitBounds: false });
     this.addMapLegend();
+
+    let resizeTimer = null;
+    this.resizeHandler = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (this.map) this.map.invalidateSize();
+      }, 150);
+    };
+    window.addEventListener('resize', this.resizeHandler);
+
     return this.map;
   }
 
-  /**
-   * Renderiza os marcadores dos pontos de interesse
-   */
-  renderMarkers(pois) {
+  renderMarkers(pois, { fitBounds = true } = {}) {
     if (!this.map) return;
     this.pois = pois || [];
 
@@ -57,13 +71,12 @@ export class FreixoMap {
 
     this.pois.forEach(poi => {
       if (!poi.coordinates) return;
-
       const { lat, lng } = poi.coordinates;
 
       const customIcon = L.divIcon({
         className: 'custom-leaflet-pin',
         html: `
-          <div class="custom-map-pin" title="${poi.title}" id="pin-${poi.id}">
+          <div class="custom-map-pin" title="${poi.title}" id="pin-${poi.id}" aria-label="${poi.title}">
             <span>${this.getCategoryEmoji(poi.category)}</span>
           </div>
         `,
@@ -79,9 +92,9 @@ export class FreixoMap {
           <div class="h-24 w-full rounded-md overflow-hidden mb-2 bg-[#182E22]">
             <img src="${poi.image}" alt="${poi.title}" class="w-full h-full object-cover" />
           </div>
-          <span class="text-[9px] font-bold uppercase tracking-wider text-[#B65737] block">${poi.categoryLabel}</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider text-[#B65737] block">${poi.categoryLabel || poi.category}</span>
           <h4 class="font-display font-bold text-sm text-[#182E22] leading-tight mb-1">${poi.title}</h4>
-          <p class="text-[11px] text-[#3D3830] line-clamp-2 leading-relaxed mb-2">${poi.shortDescription}</p>
+          <p class="text-[11px] text-[#3D3830] line-clamp-2 leading-relaxed mb-2">${poi.shortDescription || ''}</p>
           <div class="flex flex-col gap-1.5 mt-2">
             <a href="detalhe.html?slug=${poi.slug || poi.id}" class="w-full py-1.5 px-2 rounded bg-[#182E22] text-[#FAF8F5] text-[10px] uppercase font-semibold tracking-wider hover:bg-[#234332] transition-colors block text-center">
               Ficha Completa ↗
@@ -89,6 +102,9 @@ export class FreixoMap {
             <button class="w-full py-1 px-2 rounded bg-white border border-[#182E22]/20 text-[#182E22] text-[10px] font-medium hover:bg-[#182E22]/5 transition-colors" onclick="window.__openPoiModalById('${poi.id}')">
               Espreitar no Modal
             </button>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" rel="noopener noreferrer" class="text-[10px] text-[#7E9283] hover:text-[#182E22] text-center pt-0.5">
+              Como Chegar (GPS) ↗
+            </a>
           </div>
         </div>
       `;
@@ -103,11 +119,16 @@ export class FreixoMap {
       const targetPoi = this.pois.find(p => p.id === id);
       if (targetPoi) openPoiModal(targetPoi);
     };
+
+    if (fitBounds && group.length > 0) {
+      if (group.length === 1) {
+        this.map.setView(group[0], 14);
+      } else {
+        this.map.fitBounds(L.latLngBounds(group), { padding: [35, 35], maxZoom: 15 });
+      }
+    }
   }
 
-  /**
-   * Renderiza os percursos turísticos com geometrias GeoJSON verificadas
-   */
   renderTrails(trails = []) {
     if (!this.map) return;
     this.trails = trails || [];
@@ -118,6 +139,11 @@ export class FreixoMap {
       }
     });
     this.trailLayers.clear();
+
+    if (this.waypointsLayer) {
+      this.waypointsLayer.remove();
+      this.waypointsLayer = null;
+    }
 
     this.trails.forEach(trail => {
       const geojson = trail.geojson || trail.geometry;
@@ -136,13 +162,6 @@ export class FreixoMap {
         lineJoin: 'round'
       };
 
-      const highlightStyle = {
-        color: '#8E381C',
-        weight: 6,
-        opacity: 1.0,
-        dashArray: null
-      };
-
       try {
         const layer = L.geoJSON(geojson, {
           style: () => ({ ...defaultStyle }),
@@ -150,7 +169,7 @@ export class FreixoMap {
             featureLayer.bindTooltip(`
               <div class="text-xs">
                 <strong>${trail.title}</strong><br>
-                <span>📏 ${trail.distance || trail.distance_km + ' km'} • ⏱️ ${trail.duration}</span>
+                <span>📏 ${trail.distance || trail.distance_km + ' km'} • ⏱️ ${trail.duration || ''}</span>
               </div>
             `, { sticky: true, className: 'trail-leaflet-tooltip' });
 
@@ -163,10 +182,8 @@ export class FreixoMap {
                 <h4 class="font-display font-bold text-sm text-[#182E22] leading-tight mb-1">${trail.title}</h4>
                 <div class="flex flex-wrap items-center gap-2 text-[10px] text-[#7E9283] font-mono mb-2">
                   <span>📏 ${trail.distance || trail.distance_km + ' km'}</span>
-                  <span>•</span>
-                  <span>⏱️ ${trail.duration}</span>
-                  <span>•</span>
-                  <span>Dificuldade: ${trail.difficulty}</span>
+                  ${trail.duration ? `<span>•</span><span>⏱️ ${trail.duration}</span>` : ''}
+                  ${trail.difficulty ? `<span>•</span><span>Dificuldade: ${trail.difficulty}</span>` : ''}
                 </div>
                 <p class="text-[11px] text-[#3D3830] leading-relaxed mb-2 font-sans">${trail.description}</p>
                 ${trail.geometry_limitations ? `
@@ -175,7 +192,7 @@ export class FreixoMap {
                   </div>
                 ` : ''}
                 <div class="text-[9px] text-[#7E9283] font-mono mb-2">
-                  Fonte: ${trail.geometry_source || 'ICNF / OSM'} (${trail.geometry_consulted_at || '2026'})
+                  Fonte: ${trail.geometry_source || 'ICNF / OSM'}
                 </div>
                 <div class="flex flex-col gap-1.5">
                   <a href="trilho.html?slug=${trail.slug || trail.id}" class="w-full py-1.5 px-2 rounded-xl bg-[#182E22] text-[#FAF8F5] text-[10px] uppercase font-semibold tracking-wider hover:bg-[#234332] transition-colors block text-center">
@@ -215,9 +232,6 @@ export class FreixoMap {
     });
   }
 
-  /**
-   * Valida se o objeto fornecido possui estrutura GeoJSON compatível
-   */
   isValidGeoJson(geojson) {
     if (!geojson || typeof geojson !== 'object') return false;
     const geom = geojson.type === 'Feature' ? geojson.geometry : geojson;
@@ -225,9 +239,6 @@ export class FreixoMap {
     return ['LineString', 'MultiLineString'].includes(geom.type) && geom.coordinates.length > 0;
   }
 
-  /**
-   * Destaca e enquadra um percurso no mapa
-   */
   selectTrail(trailId) {
     if (!this.map) return;
 
@@ -244,6 +255,11 @@ export class FreixoMap {
           dashArray: '8, 6'
         });
       }
+    }
+
+    if (this.waypointsLayer) {
+      this.waypointsLayer.remove();
+      this.waypointsLayer = null;
     }
 
     if (layer && typeof layer.getBounds === 'function') {
@@ -263,20 +279,92 @@ export class FreixoMap {
     }
 
     if (trail) {
-      this.selectedTrailId = null;
+      this.selectedTrailId = trail.id;
+      this.renderTrailWaypoints(trail);
+
       window.dispatchEvent(new CustomEvent('freixo:trailGeometryUnavailable', {
         detail: {
           trailId: trail.id,
           title: trail.title,
-          message: trail.geometry_limitations || 'Traçado contínuo em levantamento cartográfico oficial.'
+          message: trail.geometry_limitations || 'Traçado contínuo em levantamento oficial. A apresentar paragens verificadas.'
         }
       }));
     }
   }
 
-  /**
-   * Adiciona legenda cartográfica integrada ao mapa
-   */
+  renderTrailWaypoints(trail) {
+    if (!this.map || !Array.isArray(trail.stops) || trail.stops.length === 0) return;
+
+    const points = [];
+    const markers = [];
+
+    trail.stops.forEach((stop, idx) => {
+      let lat = stop.lat;
+      let lng = stop.lng;
+      let stopPoi = null;
+
+      if ((lat == null || lng == null) && (stop.poiId || stop.poi_id)) {
+        const pId = stop.poiId || stop.poi_id;
+        stopPoi = this.pois.find(p => p.id === pId || p.slug === pId);
+        if (stopPoi?.coordinates) {
+          lat = stopPoi.coordinates.lat;
+          lng = stopPoi.coordinates.lng;
+        }
+      }
+
+      if (lat != null && lng != null) {
+        const pt = [Number(lat), Number(lng)];
+        points.push(pt);
+
+        const waypointIcon = L.divIcon({
+          className: 'trail-waypoint-pin',
+          html: `
+            <div class="w-7 h-7 rounded-full bg-[#182E22] text-[#DFBA71] border-2 border-white flex items-center justify-center text-xs font-bold shadow-lg ring-2 ring-[#B65737]/60">
+              ${idx + 1}
+            </div>
+          `,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        });
+
+        const stopTitle = stop.title || stopPoi?.title || `Paragem ${idx + 1}`;
+        const targetSlug = stop.poiId || stop.poi_id || stopPoi?.slug || stopPoi?.id;
+
+        const m = L.marker(pt, { icon: waypointIcon }).bindPopup(`
+          <div class="custom-popup p-1 max-w-[220px]">
+            <span class="text-[9px] uppercase tracking-wider text-[#B65737] font-bold block">Paragem #${idx + 1} • ${trail.title}</span>
+            <h4 class="font-display font-bold text-sm text-[#182E22] leading-tight mb-1">${stopTitle}</h4>
+            <p class="text-[11px] text-[#3D3830] leading-relaxed mb-2 font-sans">${stop.description || stopPoi?.shortDescription || ''}</p>
+            ${targetSlug ? `
+              <a href="detalhe.html?slug=${targetSlug}" class="w-full py-1.5 px-2 rounded bg-[#182E22] text-[#FAF8F5] text-[10px] uppercase font-semibold tracking-wider hover:bg-[#234332] transition-colors block text-center">
+                Ver Ficha do Local ↗
+              </a>
+            ` : ''}
+          </div>
+        `);
+        markers.push(m);
+      }
+    });
+
+    if (markers.length > 0) {
+      this.waypointsLayer = L.featureGroup(markers).addTo(this.map);
+
+      if (points.length > 1) {
+        L.polyline(points, {
+          color: '#7E9283',
+          weight: 2.5,
+          dashArray: '4, 8',
+          opacity: 0.75
+        }).addTo(this.waypointsLayer);
+      }
+
+      const bounds = this.waypointsLayer.getBounds();
+      if (bounds.isValid()) {
+        this.map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+      }
+    }
+  }
+
   addMapLegend() {
     if (!this.map || this.legendControl) return;
 
@@ -293,7 +381,11 @@ export class FreixoMap {
             </div>
             <div class="flex items-center gap-2">
               <span class="w-4 h-0.5 bg-[#B65737] border-t-2 border-dashed border-[#B65737] inline-block"></span>
-              <span>Trilho Verificado (PR1)</span>
+              <span>Trilho Verificado (GeoJSON)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-[#182E22] text-[#DFBA71] border border-white inline-flex items-center justify-center text-[8px] font-bold">1</span>
+              <span>Paragem de Percurso</span>
             </div>
           </div>
         `;
@@ -323,7 +415,20 @@ export class FreixoMap {
       case 'patrimonio': return '🏛️';
       case 'natureza': return '🏖️';
       case 'trilhos': return '🥾';
+      case 'gastronomia': return '🍷';
       default: return '📍';
     }
   }
+
+  destroy() {
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+      this.resizeHandler = null;
+    }
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
+  }
 }
+

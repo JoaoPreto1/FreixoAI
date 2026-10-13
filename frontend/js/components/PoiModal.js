@@ -208,7 +208,12 @@ export function openPoiModal(poi) {
   const favBtn = document.getElementById('modal-fav-btn');
   if (favBtn) {
     favBtn.addEventListener('click', () => {
-      const nowFav = storageService.toggleFavorite(poi.id);
+      const nowFav = storageService.toggleFavorite(poi.id, {
+        type: 'place',
+        title: poi.title,
+        category: poi.categoryLabel || poi.category || 'Património',
+        image: poi.image || 'assets/images/penedo-durao.png'
+      });
       if (nowFav) {
         favBtn.className = 'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#B65737] bg-[#B65737] text-white text-xs font-semibold tracking-wide transition-all';
         favBtn.innerHTML = '<span>❤️ Nos Meus Favoritos</span>';

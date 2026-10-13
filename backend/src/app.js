@@ -26,6 +26,7 @@ export const createApp = () => {
         'GET /api/trails/:slug',
         'GET /api/events',
         'GET /api/events/:slug',
+        'GET /api/search',
         'POST /api/chat',
         'POST /api/itinerary/generate'
       ],

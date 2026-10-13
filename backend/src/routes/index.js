@@ -6,6 +6,7 @@ import trailsRoutes from './trailsRoutes.js';
 import eventsRoutes from './eventsRoutes.js';
 import aiRoutes from './aiRoutes.js';
 import itineraryRoutes from './itineraryRoutes.js';
+import searchRoutes from './searchRoutes.js';
 
 const apiRouter = Router();
 
@@ -14,6 +15,7 @@ apiRouter.use('/freguesias', freguesiasRoutes);
 apiRouter.use('/places', placesRoutes);
 apiRouter.use('/trails', trailsRoutes);
 apiRouter.use('/events', eventsRoutes);
+apiRouter.use('/search', searchRoutes);
 apiRouter.use('/chat', aiRoutes);
 apiRouter.use('/itinerary', itineraryRoutes);
 
