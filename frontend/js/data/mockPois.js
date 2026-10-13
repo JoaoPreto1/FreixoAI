@@ -286,13 +286,354 @@ export const POIS_DATA = [
     },
     openingHours: "Acesso livre permanente",
     tips: "Visite em fevereiro ou março para presenciar o manto branco das amendoeiras floridas."
+  },
+  {
+    id: "cavalo-do-mazouco",
+    slug: "cavalo-do-mazouco",
+    title: "Estação Arqueológica do Mazouco & Cavalo do Mazouco",
+    category: "patrimonio",
+    categoryLabel: "Arqueologia & Paleolítico",
+    freguesiaId: "freixo-mazouco",
+    verification: {
+      status: "confirmado",
+      source: "Património Cultural, I.P. (SIPA n.º 438) / Decreto n.º 31/83",
+      sourceType: "oficial",
+      isAudioDemo: false,
+      pendingValidation: false,
+      notes: "Monumento de Interesse Público. Primeira estação paleolítica ao ar livre de Portugal."
+    },
+    shortDescription: "Primeira gravura rupestre paleolítica ao ar livre identificada em Portugal, esculpida em xisto vertical.",
+    fullDescription: "Classificada como Imóvel de Interesse Público desde 1983 (Decreto n.º 31/83), a estação arqueológica do Mazouco situa-se no sítio do Carneiro, Cabeço da Vigia, sobranceira à ribeira de Albagueira e ao rio Douro. A gravura principal representa um cavalo finamente picotado e raspado em estilo magdalenense com cerca de 65 cm de comprimento, constituindo um marco na arte rupestre europeia.",
+    location: "Lugar do Carneiro, aldeia de Mazouco, a 12 km a norte de Freixo",
+    coordinates: { lat: 41.1402, lng: -6.7629 },
+    altitude: "280 m",
+    estimatedTime: "1h 00 min",
+    accessibility: "Acesso pedestre por caminho de terra a partir da aldeia de Mazouco; requer calçado confortável",
+    highlights: [
+      "Primeira estação paleolítica ao ar livre de Portugal",
+      "Gravura de cavalo com estilo magdalenense milenar",
+      "Enquadramento paisagístico no vale do Douro Internacional"
+    ],
+    image: "assets/images/alpajares.png",
+    openingHours: "Acesso livre e permanente (melhor visibilidade com luz rasante)",
+    tips: "A iluminação solar rasante matinal ou ao fim da tarde permite apreciar os contornos raspados da cabeça e crina do cavalo."
+  },
+  {
+    id: "museu-casa-junqueiro",
+    slug: "museu-casa-junqueiro",
+    title: "Museu Regional Casa Junqueiro",
+    category: "patrimonio",
+    categoryLabel: "Património & Literatura",
+    freguesiaId: "freixo-mazouco",
+    verification: {
+      status: "confirmado",
+      source: "Município de Freixo de Espada à Cinta / Rede Portuguesa de Museus",
+      sourceType: "oficial",
+      isAudioDemo: false,
+      pendingValidation: false,
+      notes: "Casa natal e museu dedicado ao poeta Abílio Guerra Junqueiro."
+    },
+    shortDescription: "Museu instalado na casa senhorial da família do poeta republicano Guerra Junqueiro.",
+    fullDescription: "Instalado no centro histórico de Freixo, o museu homenageia Abílio Manuel Guerra Junqueiro (1850-1923), figura cimeira da poesia portuguesa, nascido nesta vila. O espaço expõe manuscritos, espólio pessoal do autor de «Os Simples», mobiliário oitocentista e um núcleo etnográfico das vivências transmontanas.",
+    location: "Rua de São Francisco, n.º 5, Centro Histórico",
+    coordinates: { lat: 41.0917, lng: -6.8055 },
+    altitude: "485 m",
+    estimatedTime: "1h 00 min",
+    accessibility: "Acessível no piso térreo; rampa de apoio",
+    highlights: [
+      "Espólio literário e pessoal de Guerra Junqueiro",
+      "Edifício nobre de traça senhorial oitocentista",
+      "Núcleo etnográfico das artes e ofícios raianos"
+    ],
+    image: "assets/images/torre-galo.png",
+    openingHours: "Terça a Sábado: 09h30 - 12h30 / 14h00 - 17h30 (Encerra a Domingo e Segunda)",
+    tips: "Excelente complemento cultural ao Museu da Seda para compreender a identidade literária do concelho."
+  },
+  {
+    id: "adega-cooperativa-montes-ermos",
+    slug: "adega-cooperativa-montes-ermos",
+    title: "Adega Cooperativa de Freixo de Espada à Cinta — Montes Ermos",
+    category: "gastronomia",
+    categoryLabel: "Enoturismo & Sabores",
+    freguesiaId: "freixo-mazouco",
+    verification: {
+      status: "confirmado",
+      source: "IVDP / Adega Cooperativa / Município de Freixo de Espada à Cinta",
+      sourceType: "oficial",
+      isAudioDemo: false,
+      pendingValidation: false,
+      notes: "Cooperativa vinícola fundada em 1963; vinhos DOC Douro Superior."
+    },
+    shortDescription: "Centro vitivinícola e oleícola de Freixo, produtor dos vinhos DOC Douro e azeite virgem Montes Ermos.",
+    fullDescription: "Fundada em 1963, a Adega Cooperativa reúne o fruto do trabalho dos agricultores das quatro freguesias do concelho. Produz vinhos premiados da Região Demarcada do Douro (Douro Superior) e azeite virgem extra com denominação Negrinha de Freixo. Dispõe de loja oficial de produtores e provas de enoturismo.",
+    location: "Avenida dos Combatentes do Ultramar, Freixo de Espada à Cinta",
+    coordinates: { lat: 41.0906, lng: -6.8055 },
+    altitude: "470 m",
+    estimatedTime: "1h 00 min",
+    accessibility: "Acesso universal térreo e estacionamento privativo",
+    highlights: [
+      "Provas de vinhos DOC Douro Superior",
+      "Azeite virgem extra DOP Negrinha de Freixo",
+      "Loja oficial de produtos gastronómicos certificados"
+    ],
+    image: "assets/images/douro-wine.png",
+    openingHours: "Segunda a Sexta: 09h00 - 12h30 / 14h00 - 18h00; Sábados: 09h00 - 13h00",
+    tips: "Prove os vinhos brancos colheita selecionada e o azeite de primeira extração a frio na loja de produtores."
+  },
+  {
+    id: "miradouro-carrascalinho",
+    slug: "miradouro-carrascalinho",
+    title: "Miradouro do Carrascalinho",
+    category: "miradouro",
+    categoryLabel: "Miradouros & Natureza",
+    freguesiaId: "lagoaca-fornos",
+    verification: {
+      status: "confirmado",
+      source: "ICNF / Parque Natural do Douro Internacional / Rota dos Miradouros",
+      sourceType: "oficial",
+      isAudioDemo: false,
+      pendingValidation: false,
+      notes: "Miradouro natural com vista sobre a maior mancha de lodões da Europa."
+    },
+    shortDescription: "Miradouro agreste sobre as escarpas do Douro e a maior mancha natural de lodões da Europa.",
+    fullDescription: "Situado junto à aldeia de Fornos, no Parque Natural do Douro Internacional, o Carrascalinho projeta-se sobre o canhão granítico do rio Douro. Destaca-se por uma panorâmica de beleza pura e por acolher nas suas encostas abrigadas a mais extensa população europeia de lodão-bastardo (Celtis australis).",
+    location: "A 3 km a leste da aldeia de Fornos",
+    coordinates: { lat: 41.1687, lng: -6.7318 },
+    altitude: "600 m",
+    estimatedTime: "1h 15 min",
+    accessibility: "Acesso por caminho rural de terra batida; requer condução cuidada",
+    highlights: [
+      "Maior mancha florestal de lodões da Europa",
+      "Garganta profunda do rio Douro Internacional",
+      "Habitat protegido de aves de rapina"
+    ],
+    image: "assets/images/penedo-durao.png",
+    openingHours: "Acesso livre e permanente",
+    tips: "Recomendado para observadores de natureza e botânica; excelente ponto fotográfico ao meio da manhã."
+  },
+  {
+    id: "miradouro-cruzinha",
+    slug: "miradouro-cruzinha",
+    title: "Miradouro da Cruzinha",
+    category: "miradouro",
+    categoryLabel: "Miradouros & Natureza",
+    freguesiaId: "lagoaca-fornos",
+    verification: {
+      status: "confirmado",
+      source: "ICNF / Parque Natural do Douro Internacional / Município",
+      sourceType: "oficial",
+      isAudioDemo: false,
+      pendingValidation: false,
+      notes: "Observatório panorâmico sobre a albufeira de Aldeadávila."
+    },
+    shortDescription: "Observatório panorâmico setentrional sobre a albufeira de Aldeadávila e os desfiladeiros.",
+    fullDescription: "Localizado no termo da aldeia de Lagoaça, no extremo norte do concelho, a Cruzinha ergue-se numa crista quartzítica sobre o Douro Internacional e a imensa albufeira de Aldeadávila. Proporciona vistas contrastantes entre os socalcos de oliveiras do planalto e as vertentes alcantiladas da fronteira.",
+    location: "A 2,5 km a leste da aldeia de Lagoaça",
+    coordinates: { lat: 41.1910, lng: -6.7139 },
+    altitude: "620 m",
+    estimatedTime: "45 min",
+    accessibility: "Acesso pedonal e viário florestal a partir de Lagoaça",
+    highlights: [
+      "Vistas panorâmicas sobre a albufeira de Aldeadávila",
+      "Trilho de ligação pedestre pelo planalto mirandês",
+      "Tranquilidade absoluta no Douro Selvagem"
+    ],
+    image: "assets/images/colado-view.png",
+    openingHours: "Acesso livre e permanente",
+    tips: "Espaço muito tranquilo, ideal para contemplação meditativa e fotografia de paisagem."
+  },
+  {
+    id: "igreja-lagoaca",
+    slug: "igreja-lagoaca",
+    title: "Igreja Matriz de Lagoaça",
+    category: "patrimonio",
+    categoryLabel: "Património Religioso",
+    freguesiaId: "lagoaca-fornos",
+    verification: {
+      status: "confirmado",
+      source: "Diocese de Bragança-Miranda / Junta de Freguesia de Lagoaça e Fornos",
+      sourceType: "oficial",
+      isAudioDemo: false,
+      pendingValidation: false,
+      notes: "Templo matriz de arquitetura transmontana tradicional."
+    },
+    shortDescription: "Templo barroco rural dedicado à Natividade da Virgem, centro da vida comunitária do planalto.",
+    fullDescription: "A Igreja Matriz de Lagoaça (Nossa Senhora da Natividade) ergue-se no centro da aldeia com a sua torre sineira em cantaria de granito. Apresenta altares de talha dourada de feição barroca rural e teto em madeira policromada, refletindo a piedade e autonomia da antiga freguesia raiana.",
+    location: "Largo da Igreja, Aldeia de Lagoaça",
+    coordinates: { lat: 41.1895, lng: -6.7456 },
+    altitude: "650 m",
+    estimatedTime: "30 min",
+    accessibility: "Acesso pedonal plano no centro da aldeia",
+    highlights: [
+      "Torre sineira e cantaria tradicional transmontana",
+      "Retábulo de talha de inspiração barroca rural",
+      "Espaço comunitário de romarias e festas locais"
+    ],
+    image: "assets/images/igreja-matriz.png",
+    openingHours: "Aberta em horários de culto e celebrações paroquiais",
+    tips: "Aprecie a serenidade do largo da aldeia e a arquitetura das habitações em granito envolventes."
+  },
+  {
+    id: "miradouro-assumadouro",
+    slug: "miradouro-assumadouro",
+    title: "Miradouro do Assumadouro",
+    category: "miradouro",
+    categoryLabel: "Miradouros & Paisagem",
+    freguesiaId: "poia",
+    verification: {
+      status: "confirmado",
+      source: "ICNF / Município de Freixo de Espada à Cinta / Rota dos Miradouros",
+      sourceType: "oficial",
+      isAudioDemo: false,
+      pendingValidation: false,
+      notes: "Varanda panorâmica virada a sul sobre o vale do Douro."
+    },
+    shortDescription: "Varanda panorâmica com perspetiva desafogada sobre as arribas do Douro e a aldeia espanhola de Barca d'Alva.",
+    fullDescription: "Situado na freguesia de Poia, o Miradouro do Assumadouro debruça-se sobre a transição do Douro Internacional para o Alto Douro Vinhateiro. Desfruta de uma panorâmica ampla sobre as curvas do rio, a foz da ribeira do Mosteiro e a fronteira com Salamanca.",
+    location: "A 1,5 km a leste da aldeia de Poiares",
+    coordinates: { lat: 41.0423, lng: -6.8596 },
+    altitude: "470 m",
+    estimatedTime: "45 min",
+    accessibility: "Acesso por estrada asfaltada com pequeno troço final empedrado",
+    highlights: [
+      "Vista aberta sobre o Douro e o relevo montanhoso espanhol",
+      "Local de contemplação do pôr do sol",
+      "Ponto de passagem da rota cénica das arribas de Poia"
+    ],
+    image: "assets/images/penedo-durao.png",
+    openingHours: "Acesso livre e permanente",
+    tips: "Excelente ponto para observar a luz dourada do final de tarde refletida nas escarpas e no rio."
+  },
+  {
+    id: "castelo-de-alva",
+    slug: "castelo-de-alva",
+    title: "Ruínas do Castelo de Alva & Miradouro Histórico",
+    category: "patrimonio",
+    categoryLabel: "Arqueologia & História Militar",
+    freguesiaId: "poia",
+    verification: {
+      status: "confirmado",
+      source: "Património Cultural, I.P. (SIPA n.º 477) / Monumento Nacional",
+      sourceType: "oficial",
+      isAudioDemo: false,
+      pendingValidation: false,
+      notes: "Classificado como Imóvel de Interesse Público (Dec. 38147/1951)."
+    },
+    shortDescription: "Vestígios de fortaleza medieval fundada por D. Dinis e D. Sancho II na crista sobre o Douro.",
+    fullDescription: "Localizado no sítio de Castro de Alva, no termo de Poiares, este castelo medieval foi erguido nos séculos XIII e XIV com foral outorgado por D. Dinis. As ruínas incluem panos de muralha em alvenaria de xisto e granito, dominando um esporão estratégico de vigia sobre a travessia fluvial do rio Douro.",
+    location: "Cabeço de Castelo de Alva, termo de Poiares",
+    coordinates: { lat: 41.0264, lng: -6.8797 },
+    altitude: "385 m",
+    estimatedTime: "1h 30 min",
+    accessibility: "Trilho pedestre acidentado de montanha; calçado com boa aderência",
+    highlights: [
+      "Vestígios de muralhas góticas dionisinas",
+      "Posição estratégica defensiva na confluência do Douro e Águeda",
+      "Paisagem intocada de carrascos e zimbros centenários"
+    ],
+    image: "assets/images/alpajares.png",
+    openingHours: "Acesso livre permanente (aconselhado com boa visibilidade diurna)",
+    tips: "Levar água e bastão de caminhada; evitar em dias chuvosos devido ao terreno xistoso escorregadio."
+  },
+  {
+    id: "igreja-poiares",
+    slug: "igreja-poiares",
+    title: "Igreja Matriz de São Pedro de Poiares",
+    category: "patrimonio",
+    categoryLabel: "Património Religioso",
+    freguesiaId: "poia",
+    verification: {
+      status: "confirmado",
+      source: "Diocese de Bragança-Miranda / Aldeias de Portugal",
+      sourceType: "oficial",
+      isAudioDemo: false,
+      pendingValidation: false,
+      notes: "Início e fim do percurso pedestre homologado PR5 FEC."
+    },
+    shortDescription: "Igreja matriz que marca o início do percurso pedestre homologado PR5 FEC até ao Penedo Durão.",
+    fullDescription: "A Igreja Matriz de São Pedro é o coração comunitário da aldeia de Poiares. Construída em cantaria tradicional com torre sineira e retábulos devocionais em talha, testemunha séculos de história raiana. O seu largo serve de início e fim oficial ao percurso homologado PR5 FEC.",
+    location: "Largo Principal, Aldeia de Poiares",
+    coordinates: { lat: 41.0494, lng: -6.8778 },
+    altitude: "490 m",
+    estimatedTime: "30 min",
+    accessibility: "Acesso plano no centro da aldeia",
+    highlights: [
+      "Ponto de partida do trilho homologado PR5 FEC",
+      "Arquitetura religiosa rural transmontana",
+      "Enquadramento na aldeia típica de Poiares"
+    ],
+    image: "assets/images/igreja-matriz.png",
+    openingHours: "Aberta durante os períodos de celebração e eventos comunitários",
+    tips: "Ponto de apoio ideal para iniciar a caminhada pelo PR5 FEC em direção ao Penedo Durão."
+  },
+  {
+    id: "ponte-ligares-mosteiro",
+    slug: "ponte-ligares-mosteiro",
+    title: "Ponte Velha da Ribeira do Mosteiro & Calçadas de Xisto",
+    category: "patrimonio",
+    categoryLabel: "Engenharia Histórica & Paisagem",
+    freguesiaId: "ligares",
+    verification: {
+      status: "confirmado",
+      source: "Município de Freixo de Espada à Cinta / ICNF / PNDI",
+      sourceType: "oficial",
+      isAudioDemo: false,
+      pendingValidation: false,
+      notes: "Ponte secular de alvenaria de xisto sobre a Ribeira do Mosteiro."
+    },
+    shortDescription: "Ponte secular de xisto de tabuleiro plano sobre a Ribeira do Mosteiro, ligada a rotas monásticas.",
+    fullDescription: "Erguida em alvenaria de xisto argamassado com um arco de volta perfeita e tabuleiro plano, esta ponte antiga situa-se no vale fértil da Ribeira do Mosteiro, junto à histórica Quinta de Santiago. Serviu de ponto de passagem estratégico em antigas ligações entre a freguesia de Ligares, as ermidas medievais e o rio Douro.",
+    location: "Vale da Ribeira do Mosteiro / Quinta de Santiago, Ligares",
+    coordinates: { lat: 41.0556, lng: -6.9011 },
+    altitude: "220 m",
+    estimatedTime: "45 min",
+    accessibility: "Acesso por caminho de campo e ligação a percursos rurais",
+    highlights: [
+      "Construção secular em alvenaria de xisto duriense",
+      "Enquadramento no microclima mediterrânico da Ribeira do Mosteiro",
+      "Ligação histórica às rotas de Ligares e Poiares"
+    ],
+    image: "assets/images/alpajares.png",
+    openingHours: "Acesso livre e permanente",
+    tips: "Local bucólico com vegetação ribeirinha mediterrânica, amendoais e pomares de laranjeiras."
+  },
+  {
+    id: "igreja-matriz-ligares",
+    slug: "igreja-matriz-ligares",
+    title: "Igreja Paroquial de São Lourenço de Ligares",
+    category: "patrimonio",
+    categoryLabel: "Património Religioso",
+    freguesiaId: "ligares",
+    verification: {
+      status: "confirmado",
+      source: "Diocese de Bragança-Miranda / Junta de Freguesia de Ligares",
+      sourceType: "oficial",
+      isAudioDemo: false,
+      pendingValidation: false,
+      notes: "Adro histórico com vestígios de sepulturas rupestres medievais."
+    },
+    shortDescription: "Igreja matriz com adro histórico e vestígios de sepulturas rupestres medievais.",
+    fullDescription: "A Igreja Matriz de Ligares, dedicada a São Lourenço, destaca-se pelo seu enquadramento na pacata aldeia de Ligares. A envolvente do templo e o adro guardam vestígios arqueológicos de sepulturas antropomórficas escavadas na rocha, atestando o povoamento contínuo desde a Idade Média. A freguesia é célebre pela produção de azeite e amêndoa.",
+    location: "Largo da Igreja, Aldeia de Ligares",
+    coordinates: { lat: 41.0867, lng: -6.9653 },
+    altitude: "520 m",
+    estimatedTime: "35 min",
+    accessibility: "Acesso pedonal no centro da aldeia",
+    highlights: [
+      "Adro com vestígios de sepulturas medievais escavadas na rocha",
+      "Património de aldeia de grande tradição olivícola",
+      "Arquitetura religiosa popular transmontana"
+    ],
+    image: "assets/images/igreja-matriz.png",
+    openingHours: "Aberta durante serviços litúrgicos e festividades paroquiais",
+    tips: "Visite as capelas vizinhas da aldeia e os olivais centenários que caracterizam a paisagem."
   }
 ];
 
 export const CATEGORIES = [
-  { id: "all", label: "Todos os Lugares", count: 8 },
-  { id: "miradouro", label: "Miradouros & Natureza", count: 3 },
-  { id: "patrimonio", label: "Património & Tradição", count: 3 },
-  { id: "natureza", label: "Rios & Praias Fluviais", count: 1 },
-  { id: "trilhos", label: "Trilhos & Arqueologia", count: 1 }
+  { id: "all", label: "Todos os Lugares", count: 19 },
+  { id: "miradouro", label: "Miradouros & Natureza", count: 5 },
+  { id: "patrimonio", label: "Património & Tradição", count: 12 },
+  { id: "gastronomia", label: "Enoturismo & Sabores", count: 1 },
+  { id: "natureza", label: "Rios & Praias Fluviais", count: 1 }
 ];

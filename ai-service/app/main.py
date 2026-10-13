@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 from app.database import get_supabase_client
 import logging
 
+logger = logging.getLogger("freixo-ai")
+
 from app.ingestion import split_text
 
 from app.config import (
@@ -275,7 +277,7 @@ de tentares adivinhar.
             },
         }
 
-        async with httpx.AsyncClient(timeout=45) as client:
+        async with httpx.AsyncClient(timeout=60) as client:
             response = await client.post(
                 f"{OLLAMA_BASE_URL}/api/chat",
                 json=payload,
@@ -283,8 +285,12 @@ de tentares adivinhar.
             response.raise_for_status()
             data = response.json()
 
+        answer_content = data.get("message", {}).get("content", "").strip()
+        if "</think>" in answer_content:
+            answer_content = answer_content.split("</think>")[-1].strip()
+
         return {
-            "answer": data["message"]["content"],
+            "answer": answer_content,
             "language": request.language,
             "model": data.get("model", CHAT_MODEL),
             "sources": list(used_sources.values()),
@@ -600,3 +606,304 @@ async def search_knowledge(request: KnowledgeSearchRequest):
             status_code=500,
             detail="A pesquisa falhou. Consulta o terminal do servidor.",
         )
+
+
+class ItineraryCandidateItem(BaseModel):
+    id: str = Field(min_length=1, max_length=100)
+    title: str = Field(min_length=1, max_length=200)
+    category: str = Field(default="patrimonio", max_length=100)
+    estimated_time: str | None = Field(default=None, max_length=100)
+    location: str | None = Field(default=None, max_length=250)
+    short_description: str | None = Field(default=None, max_length=1000)
+    accessibility: str | None = Field(default=None, max_length=300)
+    is_trail: bool = False
+    duration: str | None = Field(default=None, max_length=100)
+    difficulty: str | None = Field(default=None, max_length=100)
+
+
+class ItineraryPlanRequest(BaseModel):
+    days: int = Field(ge=1, le=4)
+    interest: Literal["cultura", "natureza", "enogastronomia", "familia", "geral"] = "geral"
+    pace: Literal["tranquilo", "equilibrado", "dinamico"] = "equilibrado"
+    mobility: Literal["carro", "a-pe"] = "carro"
+    candidates: list[ItineraryCandidateItem] = Field(min_length=1)
+    seed: int | None = None
+    language: Literal["pt", "en", "es"] = "pt"
+
+
+@app.post("/itinerary/plan")
+async def plan_itinerary(request: ItineraryPlanRequest):
+    """
+    Gera uma proposta estruturada de itinerário com seleção e ordenação
+    de paragens através do modelo local Ollama (qwen3:4b).
+    A seleção referencia estritamente os candidatos confirmados fornecidos.
+    """
+    import json
+
+    valid_ids = {c.id for c in request.candidates}
+
+    candidates_formatted = []
+    for c in request.candidates:
+        if c.is_trail:
+            candidates_formatted.append(
+                f"- ID: \"{c.id}\" | Trilho: \"{c.title}\" | Dificuldade: {c.difficulty or 'Moderada'} | "
+                f"Duração: {c.duration or '2h'} | Local: {c.location or 'Freixo de Espada à Cinta'}"
+            )
+        else:
+            candidates_formatted.append(
+                f"- ID: \"{c.id}\" | Local: \"{c.title}\" | Categoria: {c.category} | "
+                f"Visita: {c.estimated_time or '1h'} | Localização: {c.location or 'Freixo de Espada à Cinta'}"
+            )
+
+    candidates_block = "\n".join(candidates_formatted)
+
+    pace_rules = {
+        "tranquilo": "2 paragens por dia (visitas calmas com tempo generoso)",
+        "equilibrado": "2 a 3 paragens por dia (ritmo equilibrado com intervalos)",
+        "dinamico": "3 a 4 paragens por dia ou inclusão de caminhada ativa"
+    }.get(request.pace, "2 a 3 paragens por dia")
+
+    mobility_rule = (
+        "MODO PEDONAL: Prioriza locais situados no centro histórico da vila. "
+        "Se incluíres miradouros ou praias fluviais distantes (Penedo Durão, Congida, Alpajares), nota que distam vários quilómetros e exigem viatura ou táxi."
+        if request.mobility == "a-pe"
+        else "MODO CARRO: Permite deslocações fluídas entre o centro histórico, o Penedo Durão, a Praia da Congida e os vales."
+    )
+
+    system_prompt = f"""És o motor de inteligência artificial de Freixo AI para planeamento turístico.
+A tua tarefa é selecionar e sequenciar paragens turísticas oficiais em Freixo de Espada à Cinta.
+
+REGRAS RÍGIDAS DE FACTUALIDADE E INTEGRIDADE:
+1. SELEÇÃO EXCLUSIVA DE CANDIDATOS: Podes escolher APENAS IDs que estejam expressamente listados na lista de candidatos abaixo. É estritamente proibido inventar IDs, atrações, restaurantes ou museus fictícios.
+2. NÚMERO DE DIAS: Deves preencher exatamente {request.days} dia(s) (Dia 1 até Dia {request.days}).
+3. RITMO: Respeita o ritmo pretendido: {pace_rules}.
+4. INTERESSE: Foca a seleção no perfil '{request.interest}'.
+5. MOBILIDADE: {mobility_rule}
+6. COERÊNCIA TERRITORIAL: Agrupa no mesmo dia locais geograficamente contíguos (ex.: património no centro histórico num dia, arribas do Douro e margem fluvial noutro). Evita duplicar a mesma atração no mesmo dia.
+7. FORMATO DE SAÍDA: Responde ESTRITAMENTE num único objeto JSON válido, sem texto introdutório nem conclusivo:
+{{
+  "overview": "Texto introdutório de 2 frases sobre o roteiro em Freixo de Espada à Cinta.",
+  "days": [
+    {{
+      "day": 1,
+      "title": "Título temático do dia",
+      "theme": "Tema do dia",
+      "stops": [
+        {{
+          "id": "ID_EXATO_DO_CANDIDATO",
+          "reason": "1 frase curta e factual justificando a paragem para este perfil"
+        }}
+      ]
+    }}
+  ]
+}}
+Sê conciso e direto. Não inventes outras cidades além de Freixo de Espada à Cinta."""
+
+    user_prompt = f"""CANDIDATOS CONFIRMADOS:
+{candidates_block}
+
+PEDIDO:
+Gera o plano para {request.days} dia(s), perfil de interesse '{request.interest}', ritmo '{request.pace}', mobilidade '{request.mobility}'.
+Responde estritamente no esquema JSON solicitado usando apenas os IDs da lista acima."""
+
+    # Configuração otimizada para qwen3:4b
+    # Supressão direta do bloco <think> para evitar 20-30s de monólogo interno
+    full_prompt = (
+        f"<|im_start|>system\n{system_prompt.strip()}<|im_end|>\n"
+        f"<|im_start|>user\n{user_prompt.strip()}<|im_end|>\n"
+        f"<|im_start|>assistant\n<think>\n</think>\n"
+    )
+
+    generate_payload = {
+        "model": CHAT_MODEL,
+        "prompt": full_prompt,
+        "raw": True,
+        "stream": False,
+        "format": "json",
+        "options": {
+            "temperature": 0.25,
+            "top_p": 0.9,
+            "num_predict": 800,
+            "stop": ["<|im_end|>", "<|im_start|>"]
+        }
+    }
+    if request.seed is not None:
+        generate_payload["options"]["seed"] = int(request.seed)
+
+    raw_content = ""
+    data = {}
+
+    try:
+        async with httpx.AsyncClient(timeout=35) as client:
+            try:
+                # Tentar primeiro endpoint /api/generate com prompt raw (otimizado, ~2-4s)
+                response = await client.post(
+                    f"{OLLAMA_BASE_URL}/api/generate",
+                    json=generate_payload
+                )
+                response.raise_for_status()
+                data = response.json()
+                raw_content = data.get("response", "").strip()
+            except (httpx.HTTPStatusError, httpx.RequestError) as raw_exc:
+                logger.warning("Falha em /api/generate raw, tentando fallback /api/chat: %s", raw_exc)
+                chat_payload = {
+                    "model": CHAT_MODEL,
+                    "messages": [
+                        {"role": "system", "content": system_prompt.strip()},
+                        {"role": "user", "content": user_prompt.strip()}
+                    ],
+                    "stream": False,
+                    "format": "json",
+                    "options": {
+                        "temperature": 0.25,
+                        "num_predict": 800
+                    }
+                }
+                if request.seed is not None:
+                    chat_payload["options"]["seed"] = int(request.seed)
+                response = await client.post(
+                    f"{OLLAMA_BASE_URL}/api/chat",
+                    json=chat_payload
+                )
+                response.raise_for_status()
+                data = response.json()
+                raw_content = data.get("message", {}).get("content", "").strip()
+
+        # Limpar blocos de código markdown se o modelo tiver incluído
+        if raw_content.startswith("```"):
+            lines = raw_content.splitlines()
+            if lines and lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            raw_content = "\n".join(lines).strip()
+
+        # Extrair métricas detalhadas de inferência
+        total_duration_ns = data.get("total_duration", 0)
+        eval_duration_ns = data.get("eval_duration", 0)
+        prompt_eval_duration_ns = data.get("prompt_eval_duration", 0)
+        eval_count = data.get("eval_count", 0)
+        prompt_eval_count = data.get("prompt_eval_count", 0)
+
+        inference_metrics = {
+            "ollama_total_ms": round(total_duration_ns / 1_000_000, 2) if total_duration_ns else None,
+            "ollama_eval_ms": round(eval_duration_ns / 1_000_000, 2) if eval_duration_ns else None,
+            "ollama_prompt_eval_ms": round(prompt_eval_duration_ns / 1_000_000, 2) if prompt_eval_duration_ns else None,
+            "prompt_tokens": prompt_eval_count,
+            "eval_tokens": eval_count
+        }
+
+        try:
+            parsed_plan = json.loads(raw_content)
+        except json.JSONDecodeError as exc:
+            logger.warning("Modelo devolveu JSON inválido no planeador: %s", raw_content[:200])
+            raise HTTPException(
+                status_code=502,
+                detail=f"O modelo não devolveu JSON válido: {str(exc)}"
+            ) from exc
+
+        # Suportar se o modelo aninhar dentro de "plan", "itinerary" ou "roteiro"
+        if isinstance(parsed_plan, dict):
+            for wrapper_key in ("plan", "itinerary", "roteiro"):
+                if wrapper_key in parsed_plan and isinstance(parsed_plan[wrapper_key], dict) and "days" in parsed_plan[wrapper_key]:
+                    parsed_plan = parsed_plan[wrapper_key]
+                    break
+
+        # Suportar se o modelo estruturar com chaves por dia: {"day1": [...], "day2": [...]} ou {"dia1": [...]}
+        if isinstance(parsed_plan, dict) and "days" not in parsed_plan:
+            extracted_days = []
+            for day_idx in range(1, request.days + 1):
+                keys_to_try = [f"day{day_idx}", f"day_{day_idx}", f"dia{day_idx}", f"dia_{day_idx}", str(day_idx)]
+                found_key = next((k for k in keys_to_try if k in parsed_plan), None)
+                if found_key:
+                    val = parsed_plan[found_key]
+                    if isinstance(val, list):
+                        extracted_days.append({"day": day_idx, "stops": val})
+                    elif isinstance(val, dict):
+                        extracted_days.append({
+                            "day": day_idx,
+                            "title": val.get("title", f"Dia {day_idx}"),
+                            "theme": val.get("theme", "Exploração territorial"),
+                            "stops": val.get("stops", [])
+                        })
+            if len(extracted_days) == request.days:
+                parsed_plan["days"] = extracted_days
+
+        # Validação básica de esquema
+        if not isinstance(parsed_plan, dict) or "days" not in parsed_plan or not isinstance(parsed_plan["days"], list):
+            logger.warning("Estrutura inesperada no plano: %s", raw_content[:300])
+            raise HTTPException(
+                status_code=502,
+                detail="O plano gerado pelo modelo não contém a estrutura de dias esperada."
+            )
+
+        # Normalizar e verificar se os IDs pertencem aos candidatos
+        plan_days = parsed_plan.get("days", [])
+        normalized_days = []
+        for day_entry in plan_days:
+            raw_stops = day_entry.get("stops", [])
+            normalized_stops = []
+            for stop in raw_stops:
+                if isinstance(stop, str):
+                    stop_id = stop.strip()
+                    reason = f"Paragem sugerida para o dia {day_entry.get('day', 1)}."
+                elif isinstance(stop, dict):
+                    stop_id = str(stop.get("id") or stop.get("poiId") or "").strip()
+                    reason = str(stop.get("reason") or f"Paragem sugerida para o dia {day_entry.get('day', 1)}.")
+                else:
+                    continue
+
+                if not stop_id or stop_id not in valid_ids:
+                    logger.warning("Modelo gerou ID desconhecido: %s", stop_id)
+                    raise HTTPException(
+                        status_code=502,
+                        detail=f"O modelo gerou um identificador não autorizado ('{stop_id}')."
+                    )
+
+                normalized_stops.append({
+                    "id": stop_id,
+                    "reason": reason
+                })
+
+            normalized_days.append({
+                "day": day_entry.get("day", len(normalized_days) + 1),
+                "title": str(day_entry.get("title") or f"Dia {len(normalized_days) + 1}"),
+                "theme": str(day_entry.get("theme") or "Exploração territorial"),
+                "stops": normalized_stops
+            })
+
+        parsed_plan["days"] = normalized_days
+
+        return {
+            "status": "ok",
+            "model": data.get("model", CHAT_MODEL),
+            "plan": parsed_plan,
+            "metrics": inference_metrics
+        }
+
+    except HTTPException:
+        raise
+    except httpx.TimeoutException as exc:
+        logger.warning("Tempo limite de resposta do Ollama no planeador de itinerários (35s)")
+        raise HTTPException(
+            status_code=504,
+            detail="O modelo excedeu o tempo limite ao gerar a seleção do itinerário."
+        ) from exc
+    except httpx.HTTPStatusError as exc:
+        logger.exception("Erro de estado HTTP no Ollama durante o planeamento")
+        raise HTTPException(
+            status_code=502,
+            detail="O Ollama devolveu um erro no planeamento de itinerário."
+        ) from exc
+    except httpx.HTTPError as exc:
+        logger.exception("Erro de conexão ao Ollama no planeamento")
+        raise HTTPException(
+            status_code=503,
+            detail="Não foi possível contactar o Ollama para planear o itinerário."
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erro inesperado no planeador de itinerários")
+        raise HTTPException(
+            status_code=500,
+            detail="Falha ao gerar o plano de itinerário por IA."
+        ) from exc

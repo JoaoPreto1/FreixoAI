@@ -143,6 +143,9 @@ export const validateItineraryBody = (req, res, next) => {
   req.body.pace = pace || 'equilibrado';
   req.body.interest = interest || 'cultura';
   req.body.mobility = mobility || 'carro';
+  if (req.body.seed !== undefined && req.body.seed !== null) {
+    req.body.seed = req.body.seed;
+  }
 
   next();
 };

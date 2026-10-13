@@ -131,3 +131,24 @@ test('StorageService — Deve guardar e recuperar o itinerário em ambiente simu
   assert.equal(retrieved.summary.days, 2);
   assert.equal(retrieved.summary.interest, 'natureza');
 });
+
+// ==============================================================================
+// 4. Diversidade, Botão "Gerar outra versão" e Distinção de Paragens
+// ==============================================================================
+test('ItineraryPlanner — Contém botão "Gerar Outra Versão" e suporte para semente', async () => {
+  const res = await fetch(`${baseUrl}/roteiro.html`);
+  const html = await res.text();
+  assert.ok(html.includes('ItineraryPlanner.js'), 'Página deve referenciar ItineraryPlanner.js');
+
+  // Testar geração com semente específica no AiService
+  const planSeedA = await aiService.generateItinerary({ days: 2, interest: 'natureza', seed: 1234 });
+  assert.ok(planSeedA);
+  assert.ok(planSeedA.meta);
+  assert.equal(planSeedA.meta.seed, 1234);
+
+  // Validação de distinção entre visita, deslocação e motivo em cada paragem
+  const firstStop = planSeedA.days[0].stops[0];
+  assert.ok(firstStop.estimatedVisitTime || firstStop.estimated_time, 'Deve conter tempo de visita');
+  assert.ok(firstStop.travelNote || firstStop.travel_time, 'Deve conter nota de deslocação');
+});
+

@@ -139,6 +139,76 @@ export const ROUTES_DATA = [
     ]
   },
   {
+    id: "pr2-rota-carrascalinho",
+    slug: "pr2-rota-carrascalinho",
+    title: "PR2 FEC — Rota do Carrascalinho",
+    category: "Natureza & Miradouros",
+    duration: "4h30",
+    distance: "14.9 km",
+    distance_km: 14.9,
+    difficulty: "Moderado",
+    heroImage: "assets/images/penedo-durao.png",
+    description: "Percurso pedestre circular homologado no Parque Natural do Douro Internacional. Liga as aldeias de Lagoaça e Fornos, serpenteando por olivais e permitindo acesso ao Miradouro do Carrascalinho sobre a maior mancha europeia de lodões.",
+    geometry_status: "indisponivel",
+    geometry_source: "ICNF / Natural.pt / Município de Freixo de Espada à Cinta / FCMP",
+    geometry_consulted_at: "2026-10-13",
+    geometry_limitations: "Percurso homologado formal com marcações oficiais no terreno. Extensão de 14,9 km; requer preparação física moderada e água abundante.",
+    geojson: null,
+    stops: [
+      {
+        order: 1,
+        time: "09:00",
+        poiId: "miradouro-carrascalinho",
+        title: "Miradouro do Carrascalinho",
+        description: "Espectacular varanda sobre a garganta do Douro e a floresta de lodões.",
+        duration: "1h30"
+      },
+      {
+        order: 2,
+        time: "11:30",
+        poiId: "igreja-lagoaca",
+        title: "Igreja Matriz de Lagoaça",
+        description: "Aldeia de Lagoaça e o seu património comunitário.",
+        duration: "45 min"
+      }
+    ]
+  },
+  {
+    id: "pr5-rota-penedo-durao",
+    slug: "pr5-rota-penedo-durao",
+    title: "PR5 FEC — Rota do Penedo Durão",
+    category: "Natureza & Miradouros",
+    duration: "4h30",
+    distance: "14.1 km",
+    distance_km: 14.1,
+    difficulty: "Moderado",
+    heroImage: "assets/images/penedo-durao.png",
+    description: "Percurso pedestre circular homologado com início na aldeia de Poiares. Percorre caminhos rurais de amendoeiras e olivais ancestrais até culminar no emblemático Miradouro do Penedo Durão, célebre santuário de observação de aves de rapina.",
+    geometry_status: "indisponivel",
+    geometry_source: "ICNF / Natural.pt / Município de Freixo de Espada à Cinta / FCMP",
+    geometry_consulted_at: "2026-10-13",
+    geometry_limitations: "Percurso homologado circular a partir de Poiares. Requer calçado de caminhada; evitar nas horas de calor estival intenso.",
+    geojson: null,
+    stops: [
+      {
+        order: 1,
+        time: "09:00",
+        poiId: "igreja-poiares",
+        title: "Igreja Matriz de Poiares",
+        description: "Ponto de partida do trilho homologado no coração da aldeia de Poiares.",
+        duration: "30 min"
+      },
+      {
+        order: 2,
+        time: "11:00",
+        poiId: "penedo-durao",
+        title: "Miradouro do Penedo Durão",
+        description: "Cume das escarpas com vistas para o canhão e observação de grifos.",
+        duration: "2h00"
+      }
+    ]
+  },
+  {
     id: "rota-3-dias-completa",
     title: "Freixo Completo: Três Dias Inesquecíveis",
     category: "Grande Experiência",

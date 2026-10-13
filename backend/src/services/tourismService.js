@@ -1,11 +1,36 @@
 import { getSupabaseClient } from '../config/supabase.js';
 import { FREGUESIAS, PLACES, TRAILS, EVENTS } from '../data/verifiedLocalData.js';
 
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos de cache em memória
+
 class TourismService {
+  constructor() {
+    this._placesCache = new Map();
+    this._trailsCache = new Map();
+    this._eventsCache = new Map();
+    this._freguesiasCache = null;
+    this._freguesiasCacheTime = 0;
+  }
+
+  /**
+   * Limpa o cache em memória (útil para testes ou recarregamento forçado)
+   */
+  clearCache() {
+    this._placesCache.clear();
+    this._trailsCache.clear();
+    this._eventsCache.clear();
+    this._freguesiasCache = null;
+    this._freguesiasCacheTime = 0;
+  }
+
   /**
    * Obtém a lista de freguesias do concelho
    */
   async getFreguesias() {
+    if (this._freguesiasCache && (Date.now() - this._freguesiasCacheTime < CACHE_TTL_MS)) {
+      return this._freguesiasCache;
+    }
+
     const supabase = getSupabaseClient();
     if (supabase) {
       try {
@@ -15,32 +40,46 @@ class TourismService {
           .order('name', { ascending: true });
 
         if (!error && Array.isArray(data) && data.length > 0) {
-          return {
+          const res = {
             items: data,
             source: 'supabase_db'
           };
+          this._freguesiasCache = res;
+          this._freguesiasCacheTime = Date.now();
+          return res;
         }
       } catch (err) {
         // Tabela não criada ou Supabase inacessível — usar fallback local
       }
     }
 
-    return {
+    const fallbackRes = {
       items: [...FREGUESIAS],
       source: 'demonstracao_local'
     };
+    this._freguesiasCache = fallbackRes;
+    this._freguesiasCacheTime = Date.now();
+    return fallbackRes;
   }
 
   /**
    * Obtém a lista de pontos de interesse / locais com suporte para filtros
    */
   async getPlaces(filters = {}) {
+    const cacheKey = JSON.stringify(filters);
+    const cached = this._placesCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+      return cached.data;
+    }
+
     const { category, freguesia, search, includeDemo = true } = filters;
     const supabase = getSupabaseClient();
 
+    let finalResult = null;
+
     if (supabase) {
       try {
-        let query = supabase.from('places').select('*');
+        let query = supabase.from('places').select('*').order('id', { ascending: true });
 
         if (category && category !== 'all') {
           query = query.eq('category', category);
@@ -62,7 +101,7 @@ class TourismService {
               (p.short_description && p.short_description.toLowerCase().includes(q))
             );
           }
-          return {
+          finalResult = {
             items: results,
             source: 'supabase_db'
           };
@@ -72,31 +111,36 @@ class TourismService {
       }
     }
 
-    // Fallback local
-    let results = [...PLACES];
+    if (!finalResult) {
+      // Fallback local
+      let results = [...PLACES];
 
-    if (includeDemo === false || includeDemo === 'false') {
-      results = results.filter(p => !p.is_demo);
-    }
-    if (category && category !== 'all') {
-      results = results.filter(p => p.category === category);
-    }
-    if (freguesia && freguesia !== 'all') {
-      results = results.filter(p => p.freguesia_id === freguesia);
-    }
-    if (search && search.trim()) {
-      const q = search.toLowerCase().trim();
-      results = results.filter(p =>
-        (p.title && p.title.toLowerCase().includes(q)) ||
-        (p.short_description && p.short_description.toLowerCase().includes(q)) ||
-        (p.full_description && p.full_description.toLowerCase().includes(q))
-      );
+      if (includeDemo === false || includeDemo === 'false') {
+        results = results.filter(p => !p.is_demo);
+      }
+      if (category && category !== 'all') {
+        results = results.filter(p => p.category === category);
+      }
+      if (freguesia && freguesia !== 'all') {
+        results = results.filter(p => p.freguesia_id === freguesia);
+      }
+      if (search && search.trim()) {
+        const q = search.toLowerCase().trim();
+        results = results.filter(p =>
+          (p.title && p.title.toLowerCase().includes(q)) ||
+          (p.short_description && p.short_description.toLowerCase().includes(q)) ||
+          (p.full_description && p.full_description.toLowerCase().includes(q))
+        );
+      }
+
+      finalResult = {
+        items: results,
+        source: 'demonstracao_local'
+      };
     }
 
-    return {
-      items: results,
-      source: 'demonstracao_local'
-    };
+    this._placesCache.set(cacheKey, { timestamp: Date.now(), data: finalResult });
+    return finalResult;
   }
 
   /**
@@ -138,12 +182,20 @@ class TourismService {
    * Obtém percursos / rotas turísticas
    */
   async getTrails(filters = {}) {
+    const cacheKey = JSON.stringify(filters);
+    const cached = this._trailsCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+      return cached.data;
+    }
+
     const { difficulty, includeDemo = true } = filters;
     const supabase = getSupabaseClient();
 
+    let finalResult = null;
+
     if (supabase) {
       try {
-        let query = supabase.from('trails').select('*');
+        let query = supabase.from('trails').select('*').order('id', { ascending: true });
         if (difficulty) {
           query = query.ilike('difficulty', `%${difficulty}%`);
         }
@@ -164,7 +216,7 @@ class TourismService {
               geojson: (item.geojson !== undefined && item.geojson !== null) ? item.geojson : (local?.geojson || null)
             };
           });
-          return {
+          finalResult = {
             items: enriched,
             source: 'supabase_db'
           };
@@ -174,18 +226,23 @@ class TourismService {
       }
     }
 
-    let results = [...TRAILS];
-    if (includeDemo === false || includeDemo === 'false') {
-      results = results.filter(t => !t.is_demo);
-    }
-    if (difficulty) {
-      results = results.filter(t => t.difficulty.toLowerCase().includes(difficulty.toLowerCase()));
+    if (!finalResult) {
+      let results = [...TRAILS];
+      if (includeDemo === false || includeDemo === 'false') {
+        results = results.filter(t => !t.is_demo);
+      }
+      if (difficulty) {
+        results = results.filter(t => t.difficulty.toLowerCase().includes(difficulty.toLowerCase()));
+      }
+
+      finalResult = {
+        items: results,
+        source: 'demonstracao_local'
+      };
     }
 
-    return {
-      items: results,
-      source: 'demonstracao_local'
-    };
+    this._trailsCache.set(cacheKey, { timestamp: Date.now(), data: finalResult });
+    return finalResult;
   }
 
   /**

@@ -72,7 +72,7 @@ A **Torre do Galo** é uma das torres militares mais curiosas de Portugal, const
  * Gerador Dinâmico de Roteiros Inteligentes
  * Cria um plano dia-a-dia detalhado baseado nas escolhas do utilizador
  */
-export function generateSmartItinerary({ days = 2, interest = "cultura", pace = "equilibrado", mobility = "carro" }) {
+export function generateSmartItinerary({ days = 2, interest = "cultura", pace = "equilibrado", mobility = "carro", seed = null } = {}) {
   const daysCount = Math.max(1, Math.min(4, parseInt(days) || 2));
   
   const itineraries = [];
@@ -298,6 +298,13 @@ export function generateSmartItinerary({ days = 2, interest = "cultura", pace = 
       disclaimer: "Itinerário sugerido por algoritmo demonstrativo. Paragens, distâncias e horários são indicativos e devem ser validados junto do Posto de Turismo.",
       seasonTip: "Freixo goza de microclima mediterrânico: primaveras floridas e verões solarengos ideais para o rio."
     },
-    days: itineraries
+    days: itineraries,
+    meta: {
+      generation_method: 'algoritmo_territorial',
+      is_ai_enhanced: false,
+      seed: seed || 1,
+      source: 'demonstracao_algoritmica_offline',
+      timestamp: new Date().toISOString()
+    }
   };
 }

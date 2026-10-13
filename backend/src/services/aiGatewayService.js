@@ -80,6 +80,54 @@ class AiGatewayService {
       throw err;
     }
   }
+
+  /**
+   * Solicita ao microserviço FastAPI o planeamento estruturado do itinerário com IA local
+   */
+  async planItinerary({ days, pace, interest, mobility, candidates, seed, language = 'pt' }) {
+    if (!candidates || !Array.isArray(candidates) || candidates.length === 0) {
+      throw new Error('A lista de candidatos não pode estar vazia.');
+    }
+
+    try {
+      const response = await fetch(`${ENV.FASTAPI_URL}/itinerary/plan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          days,
+          pace,
+          interest,
+          mobility,
+          candidates,
+          seed,
+          language
+        }),
+        signal: AbortSignal.timeout(40000)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`O serviço FastAPI rejeitou o planeamento (HTTP ${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        model: data.model || 'qwen3:4b',
+        plan: data.plan,
+        metrics: data.metrics || null
+      };
+    } catch (err) {
+      if (err.name === 'TimeoutError') {
+        throw new Error(`Tempo limite excedido na resposta do planeador de IA (${ENV.FASTAPI_URL})`);
+      }
+      throw err;
+    }
+  }
 }
 
 export const aiGatewayService = new AiGatewayService();
+

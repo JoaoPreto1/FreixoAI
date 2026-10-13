@@ -247,27 +247,6 @@ class PoiService {
     return this.getTrails();
   }
 
-  /**
-   * Obtém percursos associados a um POI (por slug ou ID)
-   */
-  async getTrailsForPoi(poiIdOrSlug) {
-    const trails = await this.getTrails();
-    if (!poiIdOrSlug || !Array.isArray(trails)) return [];
-    const target = String(poiIdOrSlug).toLowerCase();
-    return trails.filter(t => {
-      const stops = Array.isArray(t.stops) ? t.stops : (Array.isArray(t.points_of_interest) ? t.points_of_interest : []);
-      return stops.some(s => {
-        if (!s) return false;
-        if (typeof s === 'string') {
-          const str = s.toLowerCase();
-          return str === target || str.includes(target) || target.includes(str);
-        }
-        const poiId = String(s.poiId || s.poi_id || s.id || s.slug || '').toLowerCase();
-        const title = String(s.title || '').toLowerCase();
-        return poiId === target || poiId.includes(target) || target.includes(poiId) || (title && title.includes(target));
-      });
-    });
-  }
 
   /**
    * Obtém um percurso específico por slug ou ID (GET /api/trails/:slug)

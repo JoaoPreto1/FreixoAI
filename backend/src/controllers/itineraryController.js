@@ -2,13 +2,14 @@ import { itineraryService } from '../services/itineraryService.js';
 
 export const generateItinerary = async (req, res, next) => {
   try {
-    const { days, pace, interest, mobility } = req.body;
+    const { days, pace, interest, mobility, seed } = req.body;
 
     const plan = await itineraryService.generateItinerary({
       days,
       pace,
       interest,
-      mobility
+      mobility,
+      seed
     });
 
     return res.status(200).json({

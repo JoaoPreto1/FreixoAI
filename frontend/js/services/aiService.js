@@ -6,25 +6,36 @@ class AiService {
   /**
    * Envia uma pergunta ao Assistente Freixo AI
    */
-  async sendMessage(prompt, conversationHistory = []) {
+  async sendMessage(prompt, conversationHistory = [], language = null) {
     if (!prompt || !prompt.trim()) {
       throw new Error("A pergunta não pode estar vazia.");
     }
 
     const cleanPrompt = prompt.trim();
+    let targetLang = language;
+    if (!targetLang) {
+      const lower = cleanPrompt.toLowerCase();
+      const esWords = ['¿', 'dónde', 'donde', 'qué', 'que tal', 'cuáles', 'cuales', 'miradores', 'buitres', 'sendero', 'playa', 'gracias', 'quiero', 'buenos'];
+      const enWords = ['where', 'what', 'how', 'when', 'which', 'viewpoint', 'viewpoints', 'trail', 'trails', 'hiking', 'church', 'castle', 'silk', 'visit', 'best', 'tell me'];
+      const esScore = esWords.filter(w => lower.includes(w)).length;
+      const enScore = enWords.filter(w => new RegExp('\\b' + w + '\\b', 'i').test(lower)).length;
+      if (enScore > esScore && enScore >= 1) targetLang = 'en';
+      else if (esScore > enScore && esScore >= 1) targetLang = 'es';
+      else targetLang = 'pt';
+    }
 
     try {
       const url = `${API_CONFIG.NODE_API.BASE_URL}${API_CONFIG.NODE_API.ENDPOINTS.CHAT}`;
       const payload = {
         question: cleanPrompt,
-        language: "pt",
+        language: targetLang,
         history: conversationHistory
       };
 
       const result = await apiService.request(url, {
         method: 'POST',
         body: JSON.stringify(payload)
-      }, 25000); // 25s para acomodar o tempo de inferência do modelo Ollama (qwen3:4b + bge-m3)
+      }, 65000); // 65s para acomodar com margem a inferência RAG
 
       if (result && (result.answer || result.reply)) {
         return {
@@ -107,7 +118,7 @@ Como te posso ajudar hoje?`,
       const result = await apiService.request(url, {
         method: 'POST',
         body: JSON.stringify(params)
-      }, 12000);
+      }, 60000);
 
       const planData = result?.data || result;
       if (planData && planData.days) {

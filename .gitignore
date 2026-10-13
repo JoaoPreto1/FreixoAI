@@ -27,7 +27,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Ficheiros do Sistema Operativo e IDEs
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+# Ficheiros Temporários e Scratch
+scratch/
+scratch_*.py
+
