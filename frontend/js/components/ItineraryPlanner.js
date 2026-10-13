@@ -202,7 +202,7 @@ export class ItineraryPlanner {
                 <p class="text-[11px] text-[#7E9283]">Consulta, recupera ou remove roteiros anteriores.</p>
               </div>
             </div>
-            <button id="close-saved-itins-modal-btn" class="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 text-xs text-[#7E9283] hover:text-[#182E22] flex items-center justify-center transition-colors">✕</button>
+            <button id="close-saved-itins-modal-btn" type="button" class="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 text-xs text-[#7E9283] hover:text-[#182E22] flex items-center justify-center transition-colors cursor-pointer" aria-label="Fechar janela de roteiros guardados">✕</button>
           </div>
           <div id="saved-itins-list" class="p-5 overflow-y-auto space-y-3 flex-grow">
           </div>
@@ -298,12 +298,23 @@ export class ItineraryPlanner {
     }
 
     if (closeSavedModalBtn) {
-      closeSavedModalBtn.addEventListener('click', () => this.closeSavedModal());
+      closeSavedModalBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.closeSavedModal();
+      });
     }
 
     if (savedModal) {
       savedModal.addEventListener('click', (e) => {
-        if (e.target === savedModal) this.closeSavedModal();
+        if (e.target === savedModal || e.target.closest('#close-saved-itins-modal-btn')) {
+          this.closeSavedModal();
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !savedModal.classList.contains('hidden')) {
+          this.closeSavedModal();
+        }
       });
     }
 
@@ -849,6 +860,19 @@ export class ItineraryPlanner {
         showToast('Roteiro removido dos guardados.', 'info');
       });
     });
+  }
+
+  openSavedModal() {
+    const modal = document.getElementById('saved-itins-modal');
+    if (!modal) return;
+    this.renderSavedList();
+    modal.classList.remove('hidden');
+  }
+
+  closeSavedModal() {
+    const modal = document.getElementById('saved-itins-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
   }
 
   loadSavedPlan(id) {

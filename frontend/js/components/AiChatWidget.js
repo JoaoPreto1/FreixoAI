@@ -112,14 +112,12 @@ Podes perguntar-me sobre a **arte da seda**, os **miradouros do Douro**, o **cir
             </div>
           </div>
 
-          <div class="flex items-center gap-1.5">
-            <button id="ai-clear-btn" class="p-1.5 text-xs text-[#DDD4C7] hover:text-[#FAF8F5] rounded hover:bg-white/10 transition-colors" title="Limpar conversa" aria-label="Limpar histórico de conversa">
+            <button id="ai-clear-btn" type="button" class="p-1.5 text-xs text-[#DDD4C7] hover:text-[#FAF8F5] rounded hover:bg-white/10 transition-colors cursor-pointer" title="Limpar conversa" aria-label="Limpar histórico de conversa">
               🗑️
             </button>
-            <button id="ai-close-btn" class="p-1.5 text-sm text-[#DDD4C7] hover:text-[#FAF8F5] rounded hover:bg-white/10 transition-colors" aria-label="Fechar janela de chat">
+            <button id="ai-close-btn" type="button" class="p-1.5 text-sm text-[#DDD4C7] hover:text-[#FAF8F5] rounded hover:bg-white/10 transition-colors cursor-pointer flex items-center justify-center w-7 h-7 active:scale-95" aria-label="Fechar janela de chat">
               ✕
             </button>
-          </div>
         </div>
 
         <div class="px-4 py-2.5 bg-[#F4EFEA] border-b border-[#182E22]/10 overflow-x-auto flex items-center gap-2 no-scrollbar text-[11px]" role="region" aria-label="Sugestões de perguntas">
@@ -181,7 +179,13 @@ Podes perguntar-me sobre a **arte da seda**, os **miradouros do Douro**, o **cir
     const chips = document.querySelectorAll('.ai-chip');
 
     if (bubble) bubble.addEventListener('click', () => this.toggleChat());
-    if (closeBtn) closeBtn.addEventListener('click', () => this.closeChat());
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.closeChat();
+      });
+    }
 
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {

@@ -46,8 +46,15 @@ export class GlobalSearchModal {
 
           <button type="button" 
                   id="global-search-clear" 
-                  class="hidden p-1 rounded-full text-xs text-[#7E9283] hover:text-[#182E22] hover:bg-black/5" 
+                  class="hidden p-1.5 rounded-full text-xs text-[#7E9283] hover:text-[#182E22] hover:bg-black/5 cursor-pointer" 
                   aria-label="Limpar termo de pesquisa">
+            ✕
+          </button>
+
+          <button type="button"
+                  id="global-search-close"
+                  class="p-1 rounded-full text-xs text-[#7E9283] hover:text-[#182E22] hover:bg-black/5 transition-colors cursor-pointer flex items-center justify-center w-7 h-7"
+                  aria-label="Fechar pesquisa global">
             ✕
           </button>
 
@@ -83,6 +90,7 @@ export class GlobalSearchModal {
     this.resultsEl = document.getElementById('global-search-results');
     this.spinnerEl = document.getElementById('global-search-spinner');
     this.clearBtn = document.getElementById('global-search-clear');
+    this.closeBtn = document.getElementById('global-search-close');
   }
 
   bindEvents() {
@@ -99,8 +107,18 @@ export class GlobalSearchModal {
       }
     });
 
+    if (this.closeBtn) {
+      this.closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.close();
+      });
+    }
+
     this.modalEl.addEventListener('click', (e) => {
-      if (e.target === this.modalEl) this.close();
+      if (e.target === this.modalEl || e.target.closest('#global-search-close')) {
+        this.close();
+      }
     });
 
     this.inputEl.addEventListener('input', () => {

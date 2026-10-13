@@ -10,7 +10,7 @@ export function openPoiModal(poi) {
   if (!modalOverlay) {
     modalOverlay = document.createElement('div');
     modalOverlay.id = 'poi-modal-overlay';
-    modalOverlay.className = 'fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop opacity-0 transition-opacity duration-300 pointer-events-none';
+    modalOverlay.className = 'fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop opacity-0 transition-opacity duration-300 pointer-events-none hidden';
     document.body.appendChild(modalOverlay);
   }
 
@@ -30,10 +30,11 @@ export function openPoiModal(poi) {
       
       <div class="relative h-64 sm:h-72 w-full bg-[#182E22] overflow-hidden flex-shrink-0">
         <img src="${poi.image}" alt="${poi.title}" class="w-full h-full object-cover opacity-90 transition-transform duration-700 hover:scale-105" />
-        <div class="absolute inset-0 bg-gradient-to-t from-[#122419] via-black/30 to-black/20"></div>
-
-        <button id="modal-close-btn" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors backdrop-blur-sm" aria-label="Fechar janela de detalhes">
-          ✕
+        <button id="modal-close-btn" 
+                type="button" 
+                class="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/85 transition-colors backdrop-blur-sm cursor-pointer shadow-lg active:scale-95" 
+                aria-label="Fechar janela de detalhes">
+          <span class="text-base font-bold select-none pointer-events-none">✕</span>
         </button>
 
         <div class="absolute top-4 left-4 flex flex-wrap items-center gap-2">
@@ -166,7 +167,7 @@ export function openPoiModal(poi) {
     </div>
   `;
 
-  modalOverlay.classList.remove('pointer-events-none');
+  modalOverlay.classList.remove('pointer-events-none', 'hidden');
   requestAnimationFrame(() => {
     modalOverlay.classList.remove('opacity-0');
     modalOverlay.classList.add('opacity-100');
@@ -182,19 +183,31 @@ export function openPoiModal(poi) {
       clearInterval(activeAudioInterval);
       activeAudioInterval = null;
     }
+    modalOverlay.classList.remove('opacity-100');
     modalOverlay.classList.add('opacity-0');
     const card = document.getElementById('poi-modal-card');
-    if (card) card.classList.add('scale-95');
+    if (card) {
+      card.classList.remove('scale-100');
+      card.classList.add('scale-95');
+    }
     setTimeout(() => {
-      modalOverlay.classList.add('pointer-events-none');
-    }, 300);
+      modalOverlay.classList.add('pointer-events-none', 'hidden');
+    }, 280);
   };
 
   const closeBtn = document.getElementById('modal-close-btn');
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeModal();
+    });
+  }
 
   modalOverlay.addEventListener('click', (e) => {
-    if (e.target === modalOverlay) closeModal();
+    if (e.target === modalOverlay || e.target.closest('#modal-close-btn')) {
+      closeModal();
+    }
   });
 
   const onKeyDown = (e) => {
